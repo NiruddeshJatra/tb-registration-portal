@@ -76,7 +76,13 @@ create table if not exists registrations (
   admin_comment text,
   status_changed_at timestamptz,
   created_at timestamptz not null default now(),
-  constraint registrations_event_txid_key unique (event_id, transaction_id)
+  constraint registrations_event_txid_key unique (event_id, transaction_id),
+  constraint chk_full_name check (full_name ~* '^[a-zA-Z\s\.''\u0980-\u09FF-]+$'),
+  constraint chk_email check (email ~* '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
+  constraint chk_phone_diff check (phone <> emergency_phone),
+  constraint chk_phone_format check (phone ~ '^01[3-9][0-9]{8}$'),
+  constraint chk_emergency_phone_format check (emergency_phone ~ '^01[3-9][0-9]{8}$'),
+  constraint chk_txid check (registration_type = 'complimentary' or transaction_id ~* '^[a-zA-Z0-9]{8,20}$')
 );
 
 -- Only self-submitted registrations must have a unique phone per event.
