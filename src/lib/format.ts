@@ -26,6 +26,20 @@ export function isValidEmail(input: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim())
 }
 
+// Validate full name: letters, spaces, periods, apostrophes, Bengali characters, hyphens
+export function isValidFullName(input: string): boolean {
+  // Allow Unicode Bengali range \u0980-\u09FF, Latin letters, spaces, periods, apostrophes, hyphens
+  const pattern = /^[a-zA-Z\s\.\'\-\u0980-\u09FF]+$/u;
+  return pattern.test(input.trim());
+}
+
+// Validate transaction ID: alphanumeric 8-20 chars, or allow any if registration type is complimentary (handled elsewhere)
+export function isValidTransactionId(input: string): boolean {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+  return /^[a-zA-Z0-9]{8,20}$/.test(trimmed);
+}
+
 export function calculateAge(dateOfBirth: string, asOfDate: string): number {
   const dob = new Date(dateOfBirth)
   const asOf = new Date(asOfDate)
