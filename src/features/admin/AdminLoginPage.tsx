@@ -32,6 +32,7 @@ export function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5 rounded-lg border border-border bg-card p-6">
         <div className="text-center">
+          <img src="/assets/triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" className="mx-auto mb-3 h-14 w-auto" />
           <h1 className="text-2xl text-foreground">Triathlon Bangladesh</h1>
           <p className="text-sm text-muted-foreground">Admin Login</p>
         </div>

@@ -11,19 +11,12 @@ import { Step2Personal } from './steps/Step2Personal'
 import { Step3Payment } from './steps/Step3Payment'
 import { Step4Review } from './steps/Step4Review'
 import { EMPTY_FORM, isFormDirty, matchCategory, type RegisterFormState } from './formState'
-import { isValidBdPhone, isValidEmail, normalizePhone, toTitleCase } from '@/lib/format'
+import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone, toTitleCase } from '@/lib/format'
+import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
+import { TRIATHLON_BANGLADESH_URL } from '@/lib/constants'
 import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/types'
 
 const TOTAL_STEPS = 4
-
-const ERROR_MESSAGES: Record<string, string> = {
-  dup_txid: 'এই Transaction ID দিয়ে আগে রেজিস্ট্রেশন হয়েছে।',
-  dup_phone: 'এই ফোন নম্বর দিয়ে আগে রেজিস্ট্রেশন হয়েছে।',
-  category_full: 'দুঃখিত, এই ক্যাটাগরির স্লট শেষ হয়ে গেছে।',
-  event_full: 'দুঃখিত, ইভেন্টের সব স্লট পূরণ হয়ে গেছে।',
-  bad_phone: 'সঠিক ফোন নম্বর দিন।',
-  no_category: 'দুঃখিত, আপনার জন্য কোনো উপযুক্ত ক্যাটাগরি নেই।',
-}
 
 type LoadState =
   | { status: 'loading' }
@@ -39,6 +32,29 @@ export function RegisterPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [result, setResult] = useState<RegisterParticipantResult & { ok: true } | null>(null)
+  const [showRestored, setShowRestored] = useState(false)
+
+  const draftKey = eventSlug ? `tb-reg-draft:${eventSlug}` : null
+
+  useEffect(() => {
+    if (!draftKey) return
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (raw) {
+        setForm(JSON.parse(raw) as RegisterFormState)
+        setShowRestored(true)
+      }
+    } catch {
+      // corrupt or inaccessible draft — ignore
+    }
+    // Restore only once per mount, keyed on the event slug.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey])
+
+  useEffect(() => {
+    if (!draftKey || !isFormDirty(form)) return
+    localStorage.setItem(draftKey, JSON.stringify(form))
+  }, [draftKey, form])
 
   useEffect(() => {
     let cancelled = false
@@ -105,14 +121,15 @@ export function RegisterPage() {
   const stepValid: Record<number, boolean> = {
     1: Boolean(form.gender && form.date_of_birth && category),
     2: Boolean(
-      form.full_name.trim() &&
+      isValidFullName(form.full_name) &&
         isValidBdPhone(form.phone) &&
         isValidBdPhone(form.emergency_phone) &&
+        !isSamePhone(form.phone, form.emergency_phone) &&
         isValidEmail(form.email) &&
         form.blood_group &&
         form.jersey_size,
     ),
-    3: Boolean(form.payment_method && isValidBdPhone(form.payment_sender) && form.transaction_id.trim()),
+    3: Boolean(form.payment_method && isValidBdPhone(form.payment_sender) && isValidTransactionId(form.transaction_id)),
     4: form.consent,
   }
 
@@ -122,6 +139,7 @@ export function RegisterPage() {
 
     // Honeypot tripped: silently fake-succeed without touching the backend.
     if (form.honeypot.trim() !== '') {
+      if (draftKey) localStorage.removeItem(draftKey)
       setResult({
         ok: true,
         ref_code: `${event.short_code}-000000`,
@@ -158,16 +176,30 @@ export function RegisterPage() {
 
     const res = data as RegisterParticipantResult
     if (res.ok) {
+      if (draftKey) localStorage.removeItem(draftKey)
       setResult(res)
     } else {
-      setSubmitError(ERROR_MESSAGES[res.error] ?? 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+      setSubmitError(REGISTER_ERROR_MESSAGES[res.error] ?? 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।')
     }
   }
 
   return (
     <div className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-lg space-y-6">
+        <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="flex justify-center">
+          <img src="/assets/triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" className="h-16 w-auto" />
+        </a>
         <RunBikeRunStrip />
+
+        {showRestored && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-accent bg-accent/10 p-3 text-sm text-foreground">
+            <span>আগের অসম্পূর্ণ ফর্ম ফিরিয়ে আনা হয়েছে</span>
+            <button type="button" onClick={() => setShowRestored(false)} className="text-muted-foreground hover:text-foreground">
+              ✕
+            </button>
+          </div>
+        )}
+
         <StepProgress step={step} total={TOTAL_STEPS} />
 
         <div key={step} className="animate-step-in">
@@ -178,7 +210,7 @@ export function RegisterPage() {
         </div>
 
         {submitError && (
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-center text-sm text-foreground">
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-center text-sm font-medium text-foreground">
             {submitError}
           </div>
         )}
@@ -209,6 +241,12 @@ export function RegisterPage() {
             </Button>
           )}
         </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="underline">
+            Triathlon Bangladesh — triathlonbangladesh.com
+          </a>
+        </p>
       </div>
     </div>
   )

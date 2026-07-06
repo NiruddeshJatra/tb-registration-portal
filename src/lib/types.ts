@@ -75,7 +75,8 @@ export interface RegistrationRow {
   comments: string | null
   payment_method: PaymentMethod | null
   payment_sender: string | null
-  transaction_id: string
+  transaction_id: string | null
+  amount_paid: number | null
   consent_given_at: string
   participant_role: ParticipantRole
   entry_source: EntrySource
@@ -97,6 +98,10 @@ export type RegisterParticipantError =
   | 'deadline_passed'
   | 'event_full'
   | 'bad_phone'
+  | 'same_phone'
+  | 'bad_email'
+  | 'bad_name'
+  | 'bad_txid'
   | 'no_category'
   | 'category_full'
   | 'dup_txid'

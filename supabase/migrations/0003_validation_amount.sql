@@ -1,146 +1,44 @@
--- Triathlon Bangladesh Registration Portal — schema.sql
--- Idempotent where practical. Run once in the Supabase SQL editor (or `supabase db push`).
--- After running: disable email signups in Auth settings, create admin users from the dashboard.
+-- 0003_validation_amount.sql
+-- Closes validation gaps (email/name/txid format, phone!=emergency_phone) and adds
+-- amount_paid so admins can record a fee override for discounted/complimentary entries.
+-- Idempotent: safe to run multiple times against the live DB. NOT auto-applied.
 
 -- ============================================================================
--- EXTENSIONS
+-- transaction_id becomes optional (complimentary entries may have none)
 -- ============================================================================
-create extension if not exists pgcrypto; -- gen_random_uuid()
+alter table registrations alter column transaction_id drop not null;
 
--- ============================================================================
--- TABLES
--- ============================================================================
-
-create table if not exists events (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  slug text not null unique,
-  short_code text not null unique, -- used as the ref_code prefix, e.g. 'CD26'
-  event_date date not null,
-  venue text not null,
-  registration_open boolean not null default false,
-  registration_deadline date,
-  max_total_slots int, -- null = unlimited; total cap across all categories combined
-  fee_note text,
-  payment_number text,
-  payment_methods text[] not null default '{}',
-  jersey_chart jsonb not null default '[]',
-  reg_counter int not null default 0, -- incremented atomically to build ref_code
-  created_at timestamptz not null default now()
-);
-
-create table if not exists categories (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references events(id) on delete cascade,
-  name text not null,
-  gender text not null check (gender in ('male', 'female')),
-  min_age int not null,
-  max_age int, -- null = no upper bound
-  fee int not null,
-  max_slots int, -- null = unlimited
-  display_order int not null default 0
-);
-
-create table if not exists registrations (
-  id uuid primary key default gen_random_uuid(),
-  ref_code text unique, -- assigned inside register_participant()
-  event_id uuid not null references events(id),
-  category_id uuid references categories(id), -- nullable: non-runner roles may have no category
-  full_name text not null,
-  phone text not null,
-  email text not null,
-  gender text not null check (gender in ('male', 'female')),
-  date_of_birth date not null,
-  blood_group text check (blood_group in ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')),
-  jersey_size text check (jersey_size in ('XS', 'S', 'M', 'L', 'XL', '2XL', '3XL')),
-  address text,
-  emergency_phone text not null,
-  comments text,
-  payment_method text check (payment_method in ('bKash', 'Nagad')),
-  payment_sender text,
-  transaction_id text,
-  amount_paid int,
-  consent_given_at timestamptz not null,
-  participant_role text not null default 'runner'
-    check (participant_role in ('runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer')),
-  entry_source text not null default 'self'
-    check (entry_source in ('self', 'admin_manual', 'group_import')),
-  registration_type text not null default 'paid'
-    check (registration_type in ('paid', 'discounted', 'complimentary')),
-  discount_reason text,
-  complimentary_reason text,
-  authorized_by text,
-  group_name text,
-  status text not null default 'pending'
-    check (status in ('pending', 'approved', 'rejected', 'cancelled')),
-  managed_by text,
-  admin_comment text,
-  status_changed_at timestamptz,
-  created_at timestamptz not null default now(),
-  constraint registrations_event_txid_key unique (event_id, transaction_id),
-  constraint chk_full_name check (full_name ~ '^[A-Za-z][A-Za-z .''-]{1,79}$'),
-  constraint chk_email check (email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$'),
-  constraint chk_phone_diff check (phone <> emergency_phone),
-  constraint chk_phone_format check (phone ~ '^01[3-9][0-9]{8}$'),
-  constraint chk_emergency_phone_format check (emergency_phone ~ '^01[3-9][0-9]{8}$'),
-  constraint chk_txid check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,12}$'),
-  constraint chk_txid_required check (registration_type = 'complimentary' or transaction_id is not null)
-);
-
--- Only self-submitted registrations must have a unique phone per event.
--- Admin bulk/group entries may legitimately share a contact phone.
-create unique index if not exists registrations_event_phone_self_key
-  on registrations (event_id, phone)
-  where entry_source = 'self';
-
-create index if not exists registrations_event_category_idx on registrations (event_id, category_id);
-create index if not exists registrations_status_idx on registrations (status);
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'chk_txid_required') then
+    alter table registrations add constraint chk_txid_required
+      check (registration_type = 'complimentary' or transaction_id is not null);
+  end if;
+end $$;
 
 -- ============================================================================
--- ROW LEVEL SECURITY
+-- amount_paid: null => category fee applies; admins set it for discounted entries
 -- ============================================================================
-
-alter table events enable row level security;
-alter table categories enable row level security;
-alter table registrations enable row level security;
-
-drop policy if exists events_select_all on events;
-create policy events_select_all on events for select using (true);
-drop policy if exists events_auth_all on events;
-create policy events_auth_all on events for all to authenticated using (true) with check (true);
-
-drop policy if exists categories_select_all on categories;
-create policy categories_select_all on categories for select using (true);
-drop policy if exists categories_auth_all on categories;
-create policy categories_auth_all on categories for all to authenticated using (true) with check (true);
-
--- registrations: anon gets NO policy at all (default-deny: no select/insert/update/delete).
--- All public writes go through register_participant() below, which is SECURITY DEFINER
--- and owned by a role that bypasses RLS (the default Supabase table owner).
-drop policy if exists registrations_auth_select on registrations;
-create policy registrations_auth_select on registrations for select to authenticated using (true);
-drop policy if exists registrations_auth_insert on registrations;
-create policy registrations_auth_insert on registrations for insert to authenticated with check (true);
-drop policy if exists registrations_auth_update on registrations;
-create policy registrations_auth_update on registrations for update to authenticated using (true) with check (true);
--- No delete policy for anyone: cancellation is a status change, not a row deletion (keeps the audit trail).
+alter table registrations add column if not exists amount_paid int;
 
 -- ============================================================================
--- register_participant(): the ONLY public write path into registrations
+-- tighten format checks (drop + re-add so re-running this file is safe)
 -- ============================================================================
--- Returns jsonb:
---   success -> {"ok": true, "ref_code", "category_name", "fee", "status"}
---   failure -> {"ok": false, "error": one of
---       'event_not_found' | 'registration_closed' | 'deadline_passed' | 'event_full' |
---       'bad_phone' | 'no_category' | 'category_full' | 'dup_txid' | 'dup_phone'}
---
--- Atomicity of the capacity guards: we take pg_advisory_xact_lock() keyed on
--- the event id (total slots) and separately on the category id (per-category
--- slots). This serializes concurrent calls for the SAME event/category — the
--- second caller blocks until the first commits/rolls back, so the "count
--- current registrations" + "insert" pair can never race and oversell either
--- cap. Locks are released automatically at the end of the transaction.
+alter table registrations drop constraint if exists chk_full_name;
+alter table registrations add constraint chk_full_name
+  check (full_name ~ '^[A-Za-z][A-Za-z .''-]{1,79}$');
 
+alter table registrations drop constraint if exists chk_email;
+alter table registrations add constraint chk_email
+  check (email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$');
+
+alter table registrations drop constraint if exists chk_txid;
+alter table registrations add constraint chk_txid
+  check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,12}$');
+
+-- ============================================================================
+-- register_participant(): add bad_email / bad_name / bad_txid / same_phone checks
+-- ============================================================================
 create or replace function register_participant(
   p_event_slug text,
   p_full_name text,
@@ -190,9 +88,6 @@ begin
   end if;
 
   -- event-wide capacity guard (atomic): advisory lock keyed on the event id
-  -- serializes concurrent registrations for this event, same technique as the
-  -- per-category guard below, so a total slot cap (e.g. 250 for Chattogram
-  -- Duathlon 2026) can't be oversold either.
   perform pg_advisory_xact_lock(hashtextextended(v_event.id::text, 1));
   if v_event.max_total_slots is not null then
     select count(*) into v_total_count
@@ -255,8 +150,7 @@ begin
     return jsonb_build_object('ok', false, 'error', 'no_category');
   end if;
 
-  -- 3. capacity guard (atomic): advisory lock keyed on category id serializes
-  -- concurrent registrations into the same category for the life of this transaction.
+  -- 3. capacity guard (atomic): advisory lock keyed on category id
   perform pg_advisory_xact_lock(hashtextextended(v_category.id::text, 0));
   if v_category.max_slots is not null then
     select count(*) into v_count
@@ -312,14 +206,10 @@ grant execute on function register_participant(
 ) to anon, authenticated;
 
 -- ============================================================================
--- admin_register_participant(): manual/group entry path for the admin dashboard.
--- Only authenticated users can execute this (no grant to anon). Unlike the
--- public RPC, it accepts an explicit category (nullable, for non-runner roles)
--- and skips the capacity/phone-dedupe guards — admins are trusted and can see
--- slot counts on the dashboard. It still uses the same atomic per-event
--- counter for ref_code and still guards against duplicate transaction IDs.
+-- admin_register_participant(): same new validations + p_amount_paid param
+-- (appended with a default, so CREATE OR REPLACE keeps this the same function
+-- rather than creating an ambiguous overload)
 -- ============================================================================
-
 create or replace function admin_register_participant(
   p_event_id uuid,
   p_category_id uuid,
@@ -389,7 +279,7 @@ begin
     return jsonb_build_object('ok', false, 'error', 'bad_name');
   end if;
 
-  -- transaction id: optional only for complimentary entries left blank; validated otherwise
+  -- transaction id: optional only when left blank on a complimentary entry
   if p_transaction_id is null or trim(p_transaction_id) = '' then
     v_transaction_id := null;
     if p_registration_type <> 'complimentary' then
@@ -437,57 +327,3 @@ grant execute on function admin_register_participant(
   uuid, uuid, text, text, text, text, date, text, text, text, text, text,
   text, text, text, text, text, text, text, text, text, text, int
 ) to authenticated;
-
--- ============================================================================
--- SEED DATA — Chattogram Duathlon 2026
--- ============================================================================
-
-insert into events (name, slug, short_code, event_date, venue, registration_open, max_total_slots, payment_number, payment_methods, fee_note, jersey_chart)
-values (
-  'Chattogram Duathlon 2026',
-  'chattogram-duathlon-2026',
-  'CD26',
-  '2026-11-13',
-  'City Corporation Stadium, Bakolia, Bastuhara Khetchar (Bakolia Outer 2nd Link Road), Chattogram',
-  true,
-  250,
-  '01785750821',
-  array['bKash', 'Nagad'],
-  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash অথবা Nagad এজেন্টে ক্যাশ আউট করুন, তারপর Transaction ID টি ফর্মে দিন।',
-  '[
-    {"size": "XS", "chest": 34, "length": 24},
-    {"size": "S", "chest": 36, "length": 25},
-    {"size": "M", "chest": 38, "length": 26},
-    {"size": "L", "chest": 40, "length": 27},
-    {"size": "XL", "chest": 42, "length": 28},
-    {"size": "2XL", "chest": 44, "length": 29},
-    {"size": "3XL", "chest": 46, "length": 30}
-  ]'::jsonb
-)
-on conflict (slug) do update set
-  venue = excluded.venue,
-  max_total_slots = excluded.max_total_slots,
-  payment_number = excluded.payment_number,
-  payment_methods = excluded.payment_methods,
-  fee_note = excluded.fee_note,
-  jersey_chart = excluded.jersey_chart;
-
-insert into categories (event_id, name, gender, min_age, max_age, fee, max_slots, display_order)
-select id, c.name, c.gender, c.min_age, c.max_age, 3500, null, c.display_order
-from events e
-cross join (values
-  ('Male General', 'male', 18, 39, 1),
-  ('Female General', 'female', 18, 39, 2),
-  ('Male Masters', 'male', 40, null, 3),
-  ('Female Masters', 'female', 40, null, 4)
-) as c(name, gender, min_age, max_age, display_order)
-where e.slug = 'chattogram-duathlon-2026'
-  and not exists (
-    select 1 from categories cat where cat.event_id = e.id and cat.name = c.name
-  );
-
--- keep fee/slots current if this script is re-run after categories already exist
-update categories cat
-set fee = 3500, max_slots = null
-from events e
-where cat.event_id = e.id and e.slug = 'chattogram-duathlon-2026';

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { JerseyChartTable } from '@/components/brand/JerseyChartTable'
 import type { JerseyChartRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
-import { isValidBdPhone, isValidEmail, toTitleCase } from '@/lib/format'
+import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, toTitleCase } from '@/lib/format'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
 const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'] as const
@@ -17,9 +17,11 @@ interface Props {
 }
 
 export function Step2Personal({ jerseyChart, form, setField }: Props) {
+  const nameTouched = form.full_name.length > 0
   const phoneTouched = form.phone.length > 0
   const emergencyTouched = form.emergency_phone.length > 0
   const emailTouched = form.email.length > 0
+  const samePhone = phoneTouched && emergencyTouched && isSamePhone(form.phone, form.emergency_phone)
 
   return (
     <div className="space-y-6">
@@ -33,6 +35,9 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           placeholder="Md. Rahim Uddin"
         />
         {form.full_name && <p className="text-sm text-muted-foreground">দেখাবে: {toTitleCase(form.full_name)}</p>}
+        {nameTouched && !isValidFullName(form.full_name) && (
+          <p className="text-sm text-destructive">নামে শুধু ইংরেজি অক্ষর ব্যবহার করুন</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -65,6 +70,9 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
         {emergencyTouched && !isValidBdPhone(form.emergency_phone) && (
           <p className="text-sm text-destructive">সঠিক ১১ ডিজিটের নম্বর দিন</p>
         )}
+        {emergencyTouched && isValidBdPhone(form.emergency_phone) && samePhone && (
+          <p className="text-sm text-destructive">Emergency নম্বর নিজের নম্বর থেকে আলাদা হতে হবে</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -77,7 +85,7 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           className="h-11"
           placeholder="you@example.com"
         />
-        {emailTouched && !isValidEmail(form.email) && <p className="text-sm text-destructive">সঠিক ইমেইল দিন</p>}
+        {emailTouched && !isValidEmail(form.email) && <p className="text-sm text-destructive">সঠিক ইমেইল ঠিকানা দিন</p>}
       </div>
 
       <div className="space-y-2">

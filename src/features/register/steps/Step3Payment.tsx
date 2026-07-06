@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
-import { isValidBdPhone, formatTaka } from '@/lib/format'
+import { isValidBdPhone, isValidTransactionId, formatTaka } from '@/lib/format'
 
 interface Props {
   event: EventRow
@@ -15,6 +15,7 @@ interface Props {
 
 export function Step3Payment({ event, category, form, setField }: Props) {
   const senderTouched = form.payment_sender.length > 0
+  const txidTouched = form.transaction_id.length > 0
 
   return (
     <div className="space-y-6">
@@ -74,6 +75,9 @@ export function Step3Payment({ event, category, form, setField }: Props) {
           className="h-11 uppercase"
           placeholder="e.g. 9AB3CD4EF5"
         />
+        {txidTouched && !isValidTransactionId(form.transaction_id) && (
+          <p className="text-sm text-destructive">সঠিক Transaction ID দিন (৮–১২ অক্ষর)</p>
+        )}
       </div>
 
       <div className="space-y-2">

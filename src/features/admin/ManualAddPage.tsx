@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { matchCategory } from '@/features/register/formState'
-import { normalizePhone } from '@/lib/format'
+import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone } from '@/lib/format'
+import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod } from '@/lib/types'
 
 const ROLES: ParticipantRole[] = ['runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer']
@@ -42,6 +43,7 @@ export function ManualAddPage() {
   const [complimentaryReason, setComplimentaryReason] = useState('')
   const [authorizedBy, setAuthorizedBy] = useState('')
   const [groupName, setGroupName] = useState('')
+  const [amountPaid, setAmountPaid] = useState<number | ''>('')
 
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -62,18 +64,36 @@ export function ManualAddPage() {
 
   const autoCategory =
     gender && dob && selectedEvent ? matchCategory(categories, gender, dob, selectedEvent.event_date) : null
+  const resolvedCategoryId = categoryChoice === AUTO ? autoCategory?.id ?? null : categoryChoice === NA ? null : categoryChoice
+  const resolvedCategory = categories.find((c) => c.id === resolvedCategoryId) ?? null
+
+  function validate(): string | null {
+    if (!isValidFullName(fullName)) return REGISTER_ERROR_MESSAGES.bad_name
+    if (!isValidBdPhone(phone) || !isValidBdPhone(emergencyPhone)) return REGISTER_ERROR_MESSAGES.bad_phone
+    if (isSamePhone(phone, emergencyPhone)) return REGISTER_ERROR_MESSAGES.same_phone
+    if (!isValidEmail(email)) return REGISTER_ERROR_MESSAGES.bad_email
+    const txidRequired = !(registrationType === 'complimentary' && transactionId.trim() === '')
+    if (txidRequired && !isValidTransactionId(transactionId)) return REGISTER_ERROR_MESSAGES.bad_txid
+    if (registrationType === 'discounted' && amountPaid === '') return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য Amount Paid দিন।'
+    return null
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!selectedEventId) return
     setMessage(null)
-    setSubmitting(true)
 
-    const categoryId = categoryChoice === AUTO ? autoCategory?.id ?? null : categoryChoice === NA ? null : categoryChoice
+    const validationError = validate()
+    if (validationError) {
+      setMessage({ type: 'error', text: validationError })
+      return
+    }
+
+    setSubmitting(true)
 
     const { data, error } = await supabase.rpc('admin_register_participant', {
       p_event_id: selectedEventId,
-      p_category_id: categoryId,
+      p_category_id: resolvedCategoryId,
       p_full_name: fullName,
       p_phone: normalizePhone(phone),
       p_email: email,
@@ -94,6 +114,7 @@ export function ManualAddPage() {
       p_complimentary_reason: registrationType === 'complimentary' ? complimentaryReason || null : null,
       p_authorized_by: authorizedBy || null,
       p_group_name: groupName || null,
+      p_amount_paid: registrationType === 'complimentary' ? null : amountPaid === '' ? null : amountPaid,
     })
 
     setSubmitting(false)
@@ -111,8 +132,9 @@ export function ManualAddPage() {
       setEmail('')
       setTransactionId('')
       setComments('')
+      setAmountPaid('')
     } else {
-      setMessage({ type: 'error', text: res.error === 'dup_txid' ? 'এই Transaction ID দিয়ে আগে রেজিস্ট্রেশন হয়েছে।' : 'একটি সমস্যা হয়েছে।' })
+      setMessage({ type: 'error', text: (res.error && REGISTER_ERROR_MESSAGES[res.error]) ?? 'একটি সমস্যা হয়েছে।' })
     }
   }
 
@@ -184,7 +206,15 @@ export function ManualAddPage() {
 
       <div className="space-y-2">
         <Label>Category</Label>
-        <Select value={categoryChoice} onValueChange={(v) => setCategoryChoice(v ?? AUTO)}>
+        <Select
+          value={categoryChoice}
+          onValueChange={(v) => setCategoryChoice(v ?? AUTO)}
+          items={[
+            { value: AUTO, label: `Auto-detect from age/gender${autoCategory ? ` (${autoCategory.name})` : ''}` },
+            { value: NA, label: 'N/A (non-runner)' },
+            ...categories.map((c) => ({ value: c.id, label: c.name })),
+          ]}
+        >
           <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value={AUTO}>Auto-detect from age/gender {autoCategory ? `(${autoCategory.name})` : ''}</SelectItem>
@@ -236,15 +266,37 @@ export function ManualAddPage() {
       </div>
 
       {registrationType === 'discounted' && (
-        <div className="space-y-2">
-          <Label>Discount Reason</Label>
-          <Input value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Discount Reason</Label>
+            <Input value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Amount Paid (৳)</Label>
+            <Input
+              type="number"
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(e.target.value === '' ? '' : Number(e.target.value))}
+              required
+            />
+          </div>
         </div>
       )}
       {registrationType === 'complimentary' && (
         <div className="space-y-2">
           <Label>Complimentary Reason</Label>
           <Input value={complimentaryReason} onChange={(e) => setComplimentaryReason(e.target.value)} />
+        </div>
+      )}
+      {registrationType === 'paid' && (
+        <div className="space-y-2">
+          <Label>Amount Paid (৳, optional — defaults to category fee)</Label>
+          <Input
+            type="number"
+            placeholder={resolvedCategory ? String(resolvedCategory.fee) : 'category fee'}
+            value={amountPaid}
+            onChange={(e) => setAmountPaid(e.target.value === '' ? '' : Number(e.target.value))}
+          />
         </div>
       )}
 

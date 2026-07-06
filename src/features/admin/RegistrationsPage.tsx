@@ -104,7 +104,11 @@ export function RegistrationsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v ?? ALL)}>
+        <Select
+          value={categoryFilter}
+          onValueChange={(v) => setCategoryFilter(v ?? ALL)}
+          items={[{ value: ALL, label: 'All Categories' }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
+        >
           <SelectTrigger className="h-9 w-40"><SelectValue placeholder="Category" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Categories</SelectItem>
@@ -113,7 +117,14 @@ export function RegistrationsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v ?? ALL)}>
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => setStatusFilter(v ?? ALL)}
+          items={[
+            { value: ALL, label: 'All Status' },
+            ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s })),
+          ]}
+        >
           <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Status</SelectItem>
@@ -122,7 +133,14 @@ export function RegistrationsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v ?? ALL)}>
+        <Select
+          value={roleFilter}
+          onValueChange={(v) => setRoleFilter(v ?? ALL)}
+          items={[
+            { value: ALL, label: 'All Roles' },
+            ...['runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer'].map((r) => ({ value: r, label: r })),
+          ]}
+        >
           <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Role" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Roles</SelectItem>
@@ -131,7 +149,14 @@ export function RegistrationsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v ?? ALL)}>
+        <Select
+          value={sourceFilter}
+          onValueChange={(v) => setSourceFilter(v ?? ALL)}
+          items={[
+            { value: ALL, label: 'All Sources' },
+            ...['self', 'admin_manual', 'group_import'].map((s) => ({ value: s, label: s })),
+          ]}
+        >
           <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Source" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Sources</SelectItem>
@@ -140,7 +165,14 @@ export function RegistrationsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? ALL)}>
+        <Select
+          value={typeFilter}
+          onValueChange={(v) => setTypeFilter(v ?? ALL)}
+          items={[
+            { value: ALL, label: 'All Types' },
+            ...['paid', 'discounted', 'complimentary'].map((t) => ({ value: t, label: t })),
+          ]}
+        >
           <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Types</SelectItem>
@@ -149,7 +181,11 @@ export function RegistrationsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={sizeFilter} onValueChange={(v) => setSizeFilter(v ?? ALL)}>
+        <Select
+          value={sizeFilter}
+          onValueChange={(v) => setSizeFilter(v ?? ALL)}
+          items={[{ value: ALL, label: 'All Sizes' }, ...['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((s) => ({ value: s, label: s }))]}
+        >
           <SelectTrigger className="h-9 w-28"><SelectValue placeholder="Size" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All Sizes</SelectItem>
@@ -183,7 +219,16 @@ export function RegistrationsPage() {
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">No registrations found.</TableCell>
+                <TableCell colSpan={10} className="py-10 text-center text-muted-foreground">
+                  {count === 0 ? (
+                    <div className="space-y-1">
+                      <p>এখনও কোনো registration নেই</p>
+                      <p className="text-sm">No registrations yet for this event.</p>
+                    </div>
+                  ) : (
+                    'No registrations match these filters.'
+                  )}
+                </TableCell>
               </TableRow>
             ) : (
               rows.map((r) => (

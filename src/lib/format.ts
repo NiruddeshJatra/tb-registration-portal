@@ -23,21 +23,24 @@ export function isValidBdPhone(input: string): boolean {
 }
 
 export function isValidEmail(input: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim())
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(input.trim())
 }
 
-// Validate full name: letters, spaces, periods, apostrophes, Bengali characters, hyphens
+// Validate full name (English only) after Title-Case normalization, mirrors chk_full_name in schema.sql
 export function isValidFullName(input: string): boolean {
-  // Allow Unicode Bengali range \u0980-\u09FF, Latin letters, spaces, periods, apostrophes, hyphens
-  const pattern = /^[a-zA-Z\s\.\'\-\u0980-\u09FF]+$/u;
-  return pattern.test(input.trim());
+  return /^[A-Za-z][A-Za-z .'-]{1,79}$/.test(toTitleCase(input));
 }
 
-// Validate transaction ID: alphanumeric 8-20 chars, or allow any if registration type is complimentary (handled elsewhere)
+// Validate transaction ID: trim + uppercase, then alphanumeric 8-12 chars, mirrors chk_txid in schema.sql
 export function isValidTransactionId(input: string): boolean {
-  const trimmed = input.trim();
-  if (!trimmed) return false;
-  return /^[a-zA-Z0-9]{8,20}$/.test(trimmed);
+  return /^[A-Z0-9]{8,12}$/.test(input.trim().toUpperCase());
+}
+
+// Emergency phone must differ from the main phone, compared post-normalization
+export function isSamePhone(phone: string, emergencyPhone: string): boolean {
+  const a = normalizePhone(phone)
+  const b = normalizePhone(emergencyPhone)
+  return a !== '' && a === b
 }
 
 export function calculateAge(dateOfBirth: string, asOfDate: string): number {
