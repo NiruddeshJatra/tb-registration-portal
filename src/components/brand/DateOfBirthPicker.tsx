@@ -67,7 +67,7 @@ export function DateOfBirthPicker({ id, value, onChange, max }: Props) {
             value={value || undefined}
             maxDate={max}
             fromYear={1950}
-            toYear={2012}
+            toYear={max ? new Date(max).getFullYear() : new Date().getFullYear()}
             onSelect={(iso) => {
               onChange(iso)
               setOpen(false)

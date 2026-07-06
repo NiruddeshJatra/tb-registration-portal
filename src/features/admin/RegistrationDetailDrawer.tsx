@@ -13,14 +13,8 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthContext'
 import { formatTaka } from '@/lib/format'
+import { STATUS_CHIP_CLASS } from '@/lib/statusChip'
 import type { RegistrationRow, RegistrationStatus } from '@/lib/types'
-
-const STATUS_CHIP_CLASS: Record<RegistrationStatus, string> = {
-  pending: 'status-chip status-chip-pending',
-  approved: 'status-chip status-chip-approved',
-  rejected: 'status-chip status-chip-rejected',
-  cancelled: 'status-chip status-chip-cancelled',
-}
 
 interface Props {
   registration: (RegistrationRow & { categories?: { name: string; fee: number } | null }) | null

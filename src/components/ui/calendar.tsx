@@ -53,6 +53,8 @@ export function Calendar({ value, onSelect, fromYear = 1950, toYear = new Date()
     let y = viewYear
     if (m < 0) { m = 11; y -= 1 }
     if (m > 11) { m = 0; y += 1 }
+    if (y < fromYear) { y = fromYear; m = 0 }
+    if (y > toYear) { y = toYear; m = 11 }
     setViewYear(y)
     setViewMonth(m)
   }

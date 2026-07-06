@@ -12,6 +12,10 @@ export function CountUp({ value, durationMs = 900, format }: Props) {
   const [display, setDisplay] = useState(value)
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      setDisplay(value)
+      return
+    }
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     if (prefersReduced) {
       setDisplay(value)
