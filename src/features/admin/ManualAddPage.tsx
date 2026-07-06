@@ -67,6 +67,13 @@ export function ManualAddPage() {
   const resolvedCategoryId = categoryChoice === AUTO ? autoCategory?.id ?? null : categoryChoice === NA ? null : categoryChoice
   const resolvedCategory = categories.find((c) => c.id === resolvedCategoryId) ?? null
 
+  function parseAmount(raw: string): number | '' {
+    const trimmed = raw.trim()
+    if (trimmed === '') return ''
+    const n = Number(trimmed)
+    return Number.isFinite(n) ? n : ''
+  }
+
   function validate(): string | null {
     if (!isValidFullName(fullName)) return REGISTER_ERROR_MESSAGES.bad_name
     if (!isValidBdPhone(phone) || !isValidBdPhone(emergencyPhone)) return REGISTER_ERROR_MESSAGES.bad_phone
@@ -74,7 +81,10 @@ export function ManualAddPage() {
     if (!isValidEmail(email)) return REGISTER_ERROR_MESSAGES.bad_email
     const txidRequired = !(registrationType === 'complimentary' && transactionId.trim() === '')
     if (txidRequired && !isValidTransactionId(transactionId)) return REGISTER_ERROR_MESSAGES.bad_txid
-    if (registrationType === 'discounted' && amountPaid === '') return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য Amount Paid দিন।'
+    if (registrationType === 'discounted' && (amountPaid === '' || amountPaid <= 0)) {
+      return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য সঠিক Amount Paid দিন।'
+    }
+    if (amountPaid !== '' && amountPaid < 0) return 'Amount Paid ঋণাত্মক হতে পারবে না।'
     return null
   }
 
@@ -275,8 +285,10 @@ export function ManualAddPage() {
             <Label>Amount Paid (৳)</Label>
             <Input
               type="number"
+              min={0}
+              step={1}
               value={amountPaid}
-              onChange={(e) => setAmountPaid(e.target.value === '' ? '' : Number(e.target.value))}
+              onChange={(e) => setAmountPaid(parseAmount(e.target.value))}
               required
             />
           </div>
@@ -293,9 +305,11 @@ export function ManualAddPage() {
           <Label>Amount Paid (৳, optional — defaults to category fee)</Label>
           <Input
             type="number"
+            min={0}
+            step={1}
             placeholder={resolvedCategory ? String(resolvedCategory.fee) : 'category fee'}
             value={amountPaid}
-            onChange={(e) => setAmountPaid(e.target.value === '' ? '' : Number(e.target.value))}
+            onChange={(e) => setAmountPaid(parseAmount(e.target.value))}
           />
         </div>
       )}

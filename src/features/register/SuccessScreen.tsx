@@ -14,9 +14,24 @@ export function SuccessScreen({ refCode, name, categoryName, fee }: Props) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(refCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(refCode)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = refCode
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard unavailable — the ref code is already visible on screen
+    }
   }
 
   return (

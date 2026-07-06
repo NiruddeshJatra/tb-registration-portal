@@ -53,8 +53,21 @@ export function RegisterPage() {
 
   useEffect(() => {
     if (!draftKey || !isFormDirty(form)) return
-    localStorage.setItem(draftKey, JSON.stringify(form))
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(form))
+    } catch {
+      // storage unavailable/full — draft persistence is best-effort
+    }
   }, [draftKey, form])
+
+  function clearDraft() {
+    if (!draftKey) return
+    try {
+      localStorage.removeItem(draftKey)
+    } catch {
+      // storage unavailable — nothing to clean up
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -139,7 +152,7 @@ export function RegisterPage() {
 
     // Honeypot tripped: silently fake-succeed without touching the backend.
     if (form.honeypot.trim() !== '') {
-      if (draftKey) localStorage.removeItem(draftKey)
+      clearDraft()
       setResult({
         ok: true,
         ref_code: `${event.short_code}-000000`,
@@ -176,7 +189,7 @@ export function RegisterPage() {
 
     const res = data as RegisterParticipantResult
     if (res.ok) {
-      if (draftKey) localStorage.removeItem(draftKey)
+      clearDraft()
       setResult(res)
     } else {
       setSubmitError(REGISTER_ERROR_MESSAGES[res.error] ?? 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।')
