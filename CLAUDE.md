@@ -6,12 +6,14 @@ Reusable event-registration portal for Triathlon Bangladesh. v1: Chattogram Duat
 
 ```
 supabase/schema.sql          # tables, RLS, register_participant() + admin_register_participant() RPCs, seed data — source of truth
+supabase/migrations/         # incremental, idempotent SQL for the already-provisioned live DB (applied manually, not by this repo)
 src/
   lib/
     supabase.ts               # Supabase client singleton (reads VITE_SUPABASE_URL/ANON_KEY)
     types.ts                  # DB row types + RPC result/error union types
-    format.ts                 # phone/name/email validation — mirrors the SQL functions, keep in sync manually
-    constants.ts               # FACEBOOK_PAGE_URL and other hand-filled placeholders
+    format.ts                 # phone/name/email/txid validation — mirrors the SQL functions, keep in sync manually
+    errorMessages.ts           # Bangla text for every RegisterParticipantError code, shared across public + admin forms
+    constants.ts               # FACEBOOK_PAGE_URL, TRIATHLON_BANGLADESH_URL and other hand-filled placeholders
     xlsxExport.ts              # SheetJS wrapper for admin Excel exports
   features/
     register/                 # public 4-step registration wizard (/register/:eventSlug)
@@ -39,6 +41,7 @@ src/
 - **Two atomic capacity guards**, both `pg_advisory_xact_lock`-based: one keyed on the event id (`events.max_total_slots`, e.g. 250 for Chattogram Duathlon 2026), one keyed on the category id (`categories.max_slots`, currently unused/null for all seeded categories but wired up). Don't replace these with a plain `SELECT count(*)` check — that reintroduces the oversell race.
 - **Phone/name normalization is duplicated by necessity**: `src/lib/format.ts` (client-side live UI feedback) and the SQL functions (server-side source of truth, since the RPC is the only write path). If you change one, change the other.
 - **Theme is permanently dark** — `src/index.css` sets brand colors directly on `:root` (no `.dark` class, no light mode). Don't reintroduce shadcn's light/dark toggle scaffolding.
-- **shadcn is configured with the `base` (base-ui) library, not Radix.** `Select`/`RadioGroup` etc.'s `onValueChange` can receive `null` — always coalesce (`v ?? fallback`) rather than passing state setters directly.
+- **shadcn is configured with the `base` (base-ui) library, not Radix.** `Select`/`RadioGroup` etc.'s `onValueChange` can receive `null` — always coalesce (`v ?? fallback`) rather than passing state setters directly. Also unlike Radix, base-ui's `<Select.Value>` does NOT read the label off the mounted `<SelectItem>` — it needs an explicit `items={[{value, label}, ...]}` prop on the `<Select>` root, or the trigger displays the raw value (e.g. a UUID or an "__all__" sentinel) instead of the item's text. Required wherever the value isn't already human-readable (ids, filter sentinels).
 - No `react-hook-form`/`zod` — forms are plain `useState` + the validators in `format.ts`, per the locked "no extra UI/form libs" project scope.
-- `FACEBOOK_PAGE_URL` in `src/lib/constants.ts` is the only intentionally-hardcoded external link; update it there, not inline.
+- `FACEBOOK_PAGE_URL` and `TRIATHLON_BANGLADESH_URL` in `src/lib/constants.ts` are the only intentionally-hardcoded external links; update them there, not inline.
+- `src/lib/errorMessages.ts` holds the Bangla translations for every `RegisterParticipantError` code returned by both RPCs — shared by the public wizard and the admin manual-add form. Add new error codes there, not as inline maps.

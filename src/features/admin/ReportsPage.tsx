@@ -102,7 +102,15 @@ export function ReportsPage() {
           <CardTitle>Jersey Report</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
-          <Select value={jerseyRole} onValueChange={(v) => setJerseyRole(v as typeof jerseyRole)}>
+          <Select
+            value={jerseyRole}
+            onValueChange={(v) => setJerseyRole(v as typeof jerseyRole)}
+            items={[
+              { value: 'all', label: 'All Participants' },
+              { value: 'runner', label: 'Runners Only' },
+              { value: 'crew', label: 'Crew Only' },
+            ]}
+          >
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Participants</SelectItem>
@@ -133,7 +141,14 @@ export function ReportsPage() {
           <CardTitle>General Export</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
-          <Select value={generalStatus} onValueChange={(v) => setGeneralStatus(v ?? ALL)}>
+          <Select
+            value={generalStatus}
+            onValueChange={(v) => setGeneralStatus(v ?? ALL)}
+            items={[
+              { value: ALL, label: 'All Status' },
+              ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s })),
+            ]}
+          >
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>All Status</SelectItem>

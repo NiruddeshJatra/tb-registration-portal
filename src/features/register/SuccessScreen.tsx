@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { GoldRing } from '@/components/brand/GoldRing'
 import { formatTaka } from '@/lib/format'
 import { FACEBOOK_PAGE_URL } from '@/lib/constants'
@@ -10,11 +11,26 @@ interface Props {
 }
 
 export function SuccessScreen({ refCode, name, categoryName, fee }: Props) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(refCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="mx-auto max-w-md space-y-6 px-4 py-10 text-center">
       <GoldRing>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Reference Code</p>
         <p className="font-heading text-3xl text-gold">{refCode}</p>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="mt-2 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+        >
+          {copied ? '✓ Copied' : 'Copy'}
+        </button>
       </GoldRing>
 
       <div className="space-y-1">

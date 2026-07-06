@@ -4,7 +4,8 @@ import { useEvents } from './useEvents'
 import { EventSelector } from './EventSelector'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleLineChart } from '@/components/brand/SimpleLineChart'
-import type { CategoryRow, RegistrationStatus } from '@/lib/types'
+import { formatTaka } from '@/lib/format'
+import type { CategoryRow, RegistrationStatus, RegistrationType } from '@/lib/types'
 
 interface StatsRow {
   category_id: string | null
@@ -12,9 +13,12 @@ interface StatsRow {
   status: RegistrationStatus
   payment_method: string | null
   created_at: string
+  amount_paid: number | null
+  registration_type: RegistrationType
 }
 
 const STATUSES: RegistrationStatus[] = ['pending', 'approved', 'rejected', 'cancelled']
+const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'] as const
 
 export function DashboardPage() {
   const { events, selectedEventId, setSelectedEventId, selectedEvent, loading: eventsLoading } = useEvents()
@@ -30,7 +34,7 @@ export function DashboardPage() {
       const [{ data: regs }, { data: cats }] = await Promise.all([
         supabase
           .from('registrations')
-          .select('category_id, jersey_size, status, payment_method, created_at')
+          .select('category_id, jersey_size, status, payment_method, created_at, amount_paid, registration_type')
           .eq('event_id', selectedEventId),
         supabase.from('categories').select('*').eq('event_id', selectedEventId).order('display_order'),
       ])
@@ -51,13 +55,34 @@ export function DashboardPage() {
   const byStatus = STATUSES.map((s) => ({ status: s, count: rows.filter((r) => r.status === s).length }))
   const total = rows.length
 
-  const byCategory = categories.map((c) => ({
-    name: c.name,
-    count: rows.filter((r) => r.category_id === c.id).length,
-  }))
+  const feeFor = (categoryId: string | null) => categories.find((c) => c.id === categoryId)?.fee ?? 0
+  const revenueOf = (r: StatsRow) => r.amount_paid ?? feeFor(r.category_id)
+  const isBillable = (r: StatsRow) => r.registration_type !== 'complimentary'
 
-  const jerseySizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
+  const verifiedRevenue = rows
+    .filter((r) => r.status === 'approved' && isBillable(r))
+    .reduce((sum, r) => sum + revenueOf(r), 0)
+  const pendingRevenue = rows
+    .filter((r) => r.status === 'pending' && isBillable(r))
+    .reduce((sum, r) => sum + revenueOf(r), 0)
+
+  const activeRows = rows.filter((r) => r.status === 'pending' || r.status === 'approved')
+
+  const byCategory = categories.map((c) => {
+    const catRows = activeRows.filter((r) => r.category_id === c.id)
+    return {
+      name: c.name,
+      count: catRows.length,
+      revenue: catRows.filter((r) => r.status === 'approved' && isBillable(r)).reduce((sum, r) => sum + revenueOf(r), 0),
+    }
+  })
+
+  const jerseySizes = JERSEY_SIZES
   const bySize = jerseySizes.map((s) => ({ size: s, count: rows.filter((r) => r.jersey_size === s).length }))
+  const jerseyMatrix = categories.map((c) => ({
+    name: c.name,
+    sizes: jerseySizes.map((s) => activeRows.filter((r) => r.category_id === c.id && r.jersey_size === s).length),
+  }))
 
   const byPayment = ['bKash', 'Nagad'].map((m) => ({ method: m, count: rows.filter((r) => r.payment_method === m).length }))
 
@@ -79,6 +104,11 @@ export function DashboardPage() {
 
       {loading ? (
         <p className="text-muted-foreground">Loading stats...</p>
+      ) : total === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-10 text-center text-muted-foreground">
+          <p className="text-lg">এখনও কোনো registration নেই</p>
+          <p className="text-sm">No registrations yet for this event.</p>
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -101,6 +131,21 @@ export function DashboardPage() {
             ))}
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Verified Revenue</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">{formatTaka(verifiedRevenue)}</CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground">Pending Revenue</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">{formatTaka(pendingRevenue)}</CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Registrations Over Time (cumulative)</CardTitle>
@@ -119,7 +164,9 @@ export function DashboardPage() {
                 {byCategory.map((c) => (
                   <div key={c.name} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{c.name}</span>
-                    <span className="font-medium text-foreground">{c.count}</span>
+                    <span className="font-medium text-foreground">
+                      {c.count} &middot; <span className="tabular-nums">{formatTaka(c.revenue)}</span>
+                    </span>
                   </div>
                 ))}
               </CardContent>
@@ -153,6 +200,38 @@ export function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Category &times; Jersey Size (T-shirt order preview)</CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="py-1 text-left font-medium text-muted-foreground">Category</th>
+                    {jerseySizes.map((s) => (
+                      <th key={s} className="px-2 py-1 text-right font-medium text-muted-foreground">{s}</th>
+                    ))}
+                    <th className="px-2 py-1 text-right font-medium text-muted-foreground">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {jerseyMatrix.map((row) => (
+                    <tr key={row.name} className="border-b border-border last:border-0">
+                      <td className="py-1 text-foreground">{row.name}</td>
+                      {row.sizes.map((count, i) => (
+                        <td key={jerseySizes[i]} className="px-2 py-1 text-right tabular-nums text-foreground">{count}</td>
+                      ))}
+                      <td className="px-2 py-1 text-right font-medium tabular-nums text-foreground">
+                        {row.sizes.reduce((a, b) => a + b, 0)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

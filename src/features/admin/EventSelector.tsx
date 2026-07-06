@@ -10,7 +10,11 @@ interface Props {
 export function EventSelector({ events, selectedEventId, onChange }: Props) {
   if (events.length === 0) return null
   return (
-    <Select value={selectedEventId} onValueChange={(v) => onChange(v ?? '')}>
+    <Select
+      value={selectedEventId}
+      onValueChange={(v) => onChange(v ?? '')}
+      items={events.map((e) => ({ value: e.id, label: e.name }))}
+    >
       <SelectTrigger className="h-10 w-full sm:w-72">
         <SelectValue placeholder="Select event" />
       </SelectTrigger>
