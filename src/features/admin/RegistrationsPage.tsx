@@ -9,14 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { BrandLoader } from '@/components/brand/BrandLoader'
 import { cn } from '@/lib/utils'
-import type { CategoryRow, RegistrationRow, RegistrationStatus } from '@/lib/types'
-
-const STATUS_CHIP_CLASS: Record<RegistrationStatus, string> = {
-  pending: 'status-chip status-chip-pending',
-  approved: 'status-chip status-chip-approved',
-  rejected: 'status-chip status-chip-rejected',
-  cancelled: 'status-chip status-chip-cancelled',
-}
+import { STATUS_CHIP_CLASS } from '@/lib/statusChip'
+import type { CategoryRow, RegistrationRow } from '@/lib/types'
 
 const PAGE_SIZE = 50
 const ALL = '__all__'
