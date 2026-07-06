@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import { isValidBdPhone, isValidTransactionId, formatTaka } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 interface Props {
   event: EventRow
@@ -16,6 +17,8 @@ interface Props {
 export function Step3Payment({ event, category, form, setField }: Props) {
   const senderTouched = form.payment_sender.length > 0
   const txidTouched = form.transaction_id.length > 0
+  const senderInvalid = senderTouched && !isValidBdPhone(form.payment_sender)
+  const txidInvalid = txidTouched && !isValidTransactionId(form.transaction_id)
 
   return (
     <div className="space-y-6">
@@ -58,7 +61,7 @@ export function Step3Payment({ event, category, form, setField }: Props) {
           inputMode="numeric"
           value={form.payment_sender}
           onChange={(e) => setField('payment_sender', e.target.value)}
-          className="h-11"
+          className={cn('h-11', senderInvalid && 'animate-shake border-destructive')}
           placeholder="01XXXXXXXXX"
         />
         {senderTouched && !isValidBdPhone(form.payment_sender) && (
@@ -72,7 +75,7 @@ export function Step3Payment({ event, category, form, setField }: Props) {
           id="transaction_id"
           value={form.transaction_id}
           onChange={(e) => setField('transaction_id', e.target.value.toUpperCase())}
-          className="h-11 uppercase"
+          className={cn('h-11 uppercase', txidInvalid && 'animate-shake border-destructive')}
           placeholder="e.g. 9AB3CD4EF5"
         />
         {txidTouched && !isValidTransactionId(form.transaction_id) && (

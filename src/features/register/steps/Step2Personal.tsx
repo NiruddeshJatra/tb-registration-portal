@@ -6,6 +6,7 @@ import { JerseyChartTable } from '@/components/brand/JerseyChartTable'
 import type { JerseyChartRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, toTitleCase } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
 const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'] as const
@@ -22,6 +23,10 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
   const emergencyTouched = form.emergency_phone.length > 0
   const emailTouched = form.email.length > 0
   const samePhone = phoneTouched && emergencyTouched && isSamePhone(form.phone, form.emergency_phone)
+  const nameInvalid = nameTouched && !isValidFullName(form.full_name)
+  const phoneInvalid = phoneTouched && !isValidBdPhone(form.phone)
+  const emergencyInvalid = emergencyTouched && (!isValidBdPhone(form.emergency_phone) || samePhone)
+  const emailInvalid = emailTouched && !isValidEmail(form.email)
 
   return (
     <div className="space-y-6">
@@ -31,7 +36,7 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           id="full_name"
           value={form.full_name}
           onChange={(e) => setField('full_name', e.target.value)}
-          className="h-11"
+          className={cn('h-11', nameInvalid && 'animate-shake border-destructive')}
           placeholder="Md. Rahim Uddin"
         />
         {form.full_name && <p className="text-sm text-muted-foreground">দেখাবে: {toTitleCase(form.full_name)}</p>}
@@ -48,7 +53,7 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           inputMode="numeric"
           value={form.phone}
           onChange={(e) => setField('phone', e.target.value)}
-          className="h-11"
+          className={cn('h-11', phoneInvalid && 'animate-shake border-destructive')}
           placeholder="01XXXXXXXXX"
         />
         {phoneTouched && !isValidBdPhone(form.phone) && (
@@ -64,7 +69,7 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           inputMode="numeric"
           value={form.emergency_phone}
           onChange={(e) => setField('emergency_phone', e.target.value)}
-          className="h-11"
+          className={cn('h-11', emergencyInvalid && 'animate-shake border-destructive')}
           placeholder="01XXXXXXXXX"
         />
         {emergencyTouched && !isValidBdPhone(form.emergency_phone) && (
@@ -82,7 +87,7 @@ export function Step2Personal({ jerseyChart, form, setField }: Props) {
           type="email"
           value={form.email}
           onChange={(e) => setField('email', e.target.value)}
-          className="h-11"
+          className={cn('h-11', emailInvalid && 'animate-shake border-destructive')}
           placeholder="you@example.com"
         />
         {emailTouched && !isValidEmail(form.email) && <p className="text-sm text-destructive">সঠিক ইমেইল ঠিকানা দিন</p>}

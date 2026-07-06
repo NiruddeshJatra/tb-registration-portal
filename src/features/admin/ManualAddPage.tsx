@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthContext'
 import { useEvents } from './useEvents'
 import { EventSelector } from './EventSelector'
 import { Input } from '@/components/ui/input'
+import { DateOfBirthPicker } from '@/components/brand/DateOfBirthPicker'
+import { BrandLoader } from '@/components/brand/BrandLoader'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -11,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { matchCategory } from '@/features/register/formState'
 import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone } from '@/lib/format'
 import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
+import { cn } from '@/lib/utils'
 import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod } from '@/lib/types'
 
 const ROLES: ParticipantRole[] = ['runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer']
@@ -19,6 +23,7 @@ const NA = '__na__'
 
 export function ManualAddPage() {
   const { session } = useAuth()
+  const navigate = useNavigate()
   const { events, selectedEventId, setSelectedEventId, selectedEvent } = useEvents()
   const [categories, setCategories] = useState<CategoryRow[]>([])
   const [categoryChoice, setCategoryChoice] = useState<string>(AUTO)
@@ -74,12 +79,39 @@ export function ManualAddPage() {
     return Number.isFinite(n) ? n : ''
   }
 
+  // live, per-field validation — mirrors the public registration wizard
+  const nameTouched = fullName.length > 0
+  const phoneTouched = phone.length > 0
+  const emergencyTouched = emergencyPhone.length > 0
+  const emailTouched = email.length > 0
+  const txidTouched = transactionId.length > 0
+  const txidRequired = !(registrationType === 'complimentary' && transactionId.trim() === '')
+
+  const nameInvalid = nameTouched && !isValidFullName(fullName)
+  const phoneInvalid = phoneTouched && !isValidBdPhone(phone)
+  const samePhone = phoneTouched && emergencyTouched && isSamePhone(phone, emergencyPhone)
+  const emergencyInvalid = emergencyTouched && (!isValidBdPhone(emergencyPhone) || samePhone)
+  const emailInvalid = emailTouched && !isValidEmail(email)
+  const txidInvalid = txidTouched && txidRequired && !isValidTransactionId(transactionId)
+  const amountInvalid = amountPaid !== '' && amountPaid < 0
+
+  const isFormValid =
+    isValidFullName(fullName) &&
+    isValidBdPhone(phone) &&
+    isValidBdPhone(emergencyPhone) &&
+    !isSamePhone(phone, emergencyPhone) &&
+    isValidEmail(email) &&
+    Boolean(gender) &&
+    Boolean(dob) &&
+    (!txidRequired || isValidTransactionId(transactionId)) &&
+    !amountInvalid &&
+    (registrationType !== 'discounted' || (amountPaid !== '' && amountPaid > 0))
+
   function validate(): string | null {
     if (!isValidFullName(fullName)) return REGISTER_ERROR_MESSAGES.bad_name
     if (!isValidBdPhone(phone) || !isValidBdPhone(emergencyPhone)) return REGISTER_ERROR_MESSAGES.bad_phone
     if (isSamePhone(phone, emergencyPhone)) return REGISTER_ERROR_MESSAGES.same_phone
     if (!isValidEmail(email)) return REGISTER_ERROR_MESSAGES.bad_email
-    const txidRequired = !(registrationType === 'complimentary' && transactionId.trim() === '')
     if (txidRequired && !isValidTransactionId(transactionId)) return REGISTER_ERROR_MESSAGES.bad_txid
     if (registrationType === 'discounted' && (amountPaid === '' || amountPaid <= 0)) {
       return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য সঠিক Amount Paid দিন।'
@@ -135,14 +167,7 @@ export function ManualAddPage() {
     }
     const res = data as { ok: boolean; ref_code?: string; error?: string }
     if (res.ok) {
-      setMessage({ type: 'success', text: `Added: ${res.ref_code}` })
-      setFullName('')
-      setPhone('')
-      setEmergencyPhone('')
-      setEmail('')
-      setTransactionId('')
-      setComments('')
-      setAmountPaid('')
+      navigate('/admin/registrations')
     } else {
       setMessage({ type: 'error', text: (res.error && REGISTER_ERROR_MESSAGES[res.error]) ?? 'একটি সমস্যা হয়েছে।' })
     }
@@ -152,24 +177,57 @@ export function ManualAddPage() {
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-5">
-      <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      <div className="admin-page-header">
+        <h1>Add Entry</h1>
+        <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Full Name</Label>
-          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          <Input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className={cn(nameInvalid && 'animate-shake border-destructive')}
+            required
+          />
+          {nameInvalid && <p className="text-sm text-destructive">নামে শুধু ইংরেজি অক্ষর ব্যবহার করুন</p>}
         </div>
         <div className="space-y-2">
           <Label>Phone</Label>
-          <Input value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          <Input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className={cn(phoneInvalid && 'animate-shake border-destructive')}
+            required
+          />
+          {phoneInvalid && <p className="text-sm text-destructive">সঠিক ১১ ডিজিটের নম্বর দিন</p>}
         </div>
         <div className="space-y-2">
           <Label>Emergency Phone</Label>
-          <Input value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} required />
+          <Input
+            value={emergencyPhone}
+            onChange={(e) => setEmergencyPhone(e.target.value)}
+            className={cn(emergencyInvalid && 'animate-shake border-destructive')}
+            required
+          />
+          {emergencyTouched && !isValidBdPhone(emergencyPhone) && (
+            <p className="text-sm text-destructive">সঠিক ১১ ডিজিটের নম্বর দিন</p>
+          )}
+          {emergencyTouched && isValidBdPhone(emergencyPhone) && samePhone && (
+            <p className="text-sm text-destructive">Emergency নম্বর নিজের নম্বর থেকে আলাদা হতে হবে</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Email</Label>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={cn(emailInvalid && 'animate-shake border-destructive')}
+            required
+          />
+          {emailInvalid && <p className="text-sm text-destructive">সঠিক ইমেইল ঠিকানা দিন</p>}
         </div>
         <div className="space-y-2">
           <Label>Gender</Label>
@@ -183,7 +241,7 @@ export function ManualAddPage() {
         </div>
         <div className="space-y-2">
           <Label>Date of Birth</Label>
-          <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+          <DateOfBirthPicker value={dob} onChange={setDob} max={new Date().toISOString().slice(0, 10)} />
         </div>
         <div className="space-y-2">
           <Label>Blood Group</Label>
@@ -289,8 +347,12 @@ export function ManualAddPage() {
               step={1}
               value={amountPaid}
               onChange={(e) => setAmountPaid(parseAmount(e.target.value))}
+              className={cn(amountPaid !== '' && amountPaid <= 0 && 'animate-shake border-destructive')}
               required
             />
+            {amountPaid !== '' && amountPaid <= 0 && (
+              <p className="text-sm text-destructive">ছাড়কৃত রেজিস্ট্রেশনের জন্য সঠিক Amount Paid দিন।</p>
+            )}
           </div>
         </div>
       )}
@@ -310,7 +372,9 @@ export function ManualAddPage() {
             placeholder={resolvedCategory ? String(resolvedCategory.fee) : 'category fee'}
             value={amountPaid}
             onChange={(e) => setAmountPaid(parseAmount(e.target.value))}
+            className={cn(amountInvalid && 'animate-shake border-destructive')}
           />
+          {amountInvalid && <p className="text-sm text-destructive">Amount Paid ঋণাত্মক হতে পারবে না।</p>}
         </div>
       )}
 
@@ -340,8 +404,10 @@ export function ManualAddPage() {
             value={transactionId}
             onChange={(e) => setTransactionId(e.target.value.toUpperCase())}
             placeholder={registrationType === 'complimentary' ? 'e.g. COMP-<name>' : 'e.g. 9AB3CD4EF5'}
-            required
+            className={cn(txidInvalid && 'animate-shake border-destructive')}
+            required={txidRequired}
           />
+          {txidInvalid && <p className="text-sm text-destructive">সঠিক Transaction ID দিন (৮–১২ অক্ষর)</p>}
         </div>
       </div>
 
@@ -354,8 +420,8 @@ export function ManualAddPage() {
         <p className={message.type === 'success' ? 'text-accent' : 'text-destructive'}>{message.text}</p>
       )}
 
-      <Button type="submit" disabled={submitting} className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
-        {submitting ? 'Saving...' : 'Add Entry'}
+      <Button type="submit" disabled={submitting || !isFormValid} className="btn-sheen h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
+        {submitting ? <BrandLoader inline label="Saving..." /> : 'Add Entry'}
       </Button>
     </form>
   )

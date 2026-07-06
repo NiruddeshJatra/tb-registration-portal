@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { BrandLoader } from '@/components/brand/BrandLoader'
 
 export function DefaultEventRedirect() {
   const [slug, setSlug] = useState<string | null | undefined>(undefined)
@@ -25,8 +26,8 @@ export function DefaultEventRedirect() {
 
   if (slug === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-        লোড হচ্ছে...
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <BrandLoader />
       </div>
     )
   }

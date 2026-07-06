@@ -86,7 +86,7 @@
     color-scheme: dark;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
   h1, h2, h3, h4 {
     @apply font-heading uppercase tracking-wide;
@@ -126,3 +126,229 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================================
+   BACKGROUND SYSTEM — layered atmosphere behind every page (public + admin)
+   ============================================================================ */
+body {
+  background:
+    radial-gradient(80vw 60vh at 85% -10%, rgba(20, 102, 63, .32), transparent 60%),
+    radial-gradient(60vw 50vh at -10% 30%, rgba(11, 61, 46, .40), transparent 60%),
+    linear-gradient(180deg, #0a1812 0%, #08140E 30%, #060f0a 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 1px grid, ~90px cells */
+body::before {
+  background-image:
+    linear-gradient(rgba(46, 158, 84, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 158, 84, .06) 1px, transparent 1px);
+  background-size: 90px 90px;
+}
+
+/* faint grain, same SVG-turbulence technique as the main site */
+body::after {
+  opacity: .04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================================
+   GLASSMORPHISM — wizard card + its inputs (scoped; admin stays utilitarian)
+   ============================================================================ */
+.wizard-shell {
+  background: rgba(255, 255, 255, .05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 175, 55, .16);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .6);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .wizard-shell {
+    background: #0E1F16;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+.wizard-shell [data-slot="input"],
+.wizard-shell [data-slot="textarea"],
+.wizard-shell [data-slot="select-trigger"] {
+  background: rgba(0, 0, 0, .25);
+  border-color: rgba(46, 158, 84, .25);
+  caret-color: var(--gold);
+  transition: box-shadow 120ms ease-in, border-color 120ms ease-in;
+}
+
+.wizard-shell [data-slot="input"]:focus-visible,
+.wizard-shell [data-slot="textarea"]:focus-visible,
+.wizard-shell [data-slot="select-trigger"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(46, 158, 84, .25);
+  border-color: var(--bright-green);
+}
+
+/* ============================================================================
+   DESKTOP SPLIT LAYOUT — poster/branding panel beside the wizard
+   ============================================================================ */
+.reg-poster-panel {
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center 35%;
+}
+
+.reg-poster-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(8, 20, 14, .55), rgba(8, 20, 14, .92));
+}
+
+/* ============================================================================
+   MICRO-ANIMATIONS (all gated by prefers-reduced-motion above)
+   ============================================================================ */
+@keyframes spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+.animate-spin-reverse {
+  animation: spin-reverse 0.8s linear infinite;
+}
+
+@keyframes field-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-field-rise {
+  opacity: 0;
+  animation: field-rise 250ms ease-out forwards;
+}
+
+@keyframes step-in-forward {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes step-in-back {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-step-in-forward {
+  animation: step-in-forward 200ms ease-out;
+}
+.animate-step-in-back {
+  animation: step-in-back 200ms ease-out;
+}
+
+/* stagger the fields inside each step (the step root's direct children) */
+.animate-step-in-forward > * > *,
+.animate-step-in-back > * > * {
+  opacity: 0;
+  animation: field-rise 250ms ease-out forwards;
+}
+.animate-step-in-forward > * > *:nth-child(1), .animate-step-in-back > * > *:nth-child(1) { animation-delay: 0ms; }
+.animate-step-in-forward > * > *:nth-child(2), .animate-step-in-back > * > *:nth-child(2) { animation-delay: 60ms; }
+.animate-step-in-forward > * > *:nth-child(3), .animate-step-in-back > * > *:nth-child(3) { animation-delay: 120ms; }
+.animate-step-in-forward > * > *:nth-child(4), .animate-step-in-back > * > *:nth-child(4) { animation-delay: 180ms; }
+.animate-step-in-forward > * > *:nth-child(5), .animate-step-in-back > * > *:nth-child(5) { animation-delay: 240ms; }
+.animate-step-in-forward > * > *:nth-child(6), .animate-step-in-back > * > *:nth-child(6) { animation-delay: 300ms; }
+.animate-step-in-forward > * > *:nth-child(7), .animate-step-in-back > * > *:nth-child(7) { animation-delay: 360ms; }
+.animate-step-in-forward > * > *:nth-child(n+8), .animate-step-in-back > * > *:nth-child(n+8) { animation-delay: 420ms; }
+
+@keyframes field-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: field-shake 200ms ease-in-out;
+}
+
+@keyframes gold-sheen {
+  from { background-position: -150% 0; }
+  to { background-position: 250% 0; }
+}
+.btn-sheen {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, .35) 50%, transparent 60%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+}
+.btn-sheen:hover {
+  animation: gold-sheen 900ms ease-in-out;
+}
+
+@keyframes detail-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-detail-reveal {
+  opacity: 0;
+  animation: detail-reveal 300ms ease-out forwards;
+}
+
+/* ============================================================================
+   ADMIN — page header pattern + tables
+   ============================================================================ */
+.admin-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-page-header h1 {
+  position: relative;
+  font-size: 1.25rem;
+  padding-bottom: 10px;
+}
+.admin-page-header h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--gold);
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, .02);
+}
+.admin-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-elev, var(--card));
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: capitalize;
+}
+.status-chip-pending { background: rgba(212, 175, 55, .16); color: var(--gold); }
+.status-chip-approved { background: rgba(46, 158, 84, .18); color: var(--bright-green); }
+.status-chip-rejected { background: rgba(226, 59, 59, .18); color: var(--ride-red); }
+.status-chip-cancelled { background: rgba(255, 255, 255, .08); color: var(--muted-foreground); }

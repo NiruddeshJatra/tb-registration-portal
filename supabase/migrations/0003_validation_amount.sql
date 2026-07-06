@@ -22,19 +22,24 @@ end $$;
 alter table registrations add column if not exists amount_paid int;
 
 -- ============================================================================
--- tighten format checks (drop + re-add so re-running this file is safe)
+-- tighten format checks (drop + re-add so re-running this file is safe).
+-- Added NOT VALID: enforced on every new insert/update from here on, but
+-- skips retroactively checking rows that predate this rule (e.g. early
+-- test data with a short transaction_id) so the migration can't fail or
+-- silently reject existing registrations. Run `validate constraint` later
+-- once any legacy rows are manually corrected, if desired.
 -- ============================================================================
 alter table registrations drop constraint if exists chk_full_name;
 alter table registrations add constraint chk_full_name
-  check (full_name ~ '^[A-Za-z][A-Za-z .''-]{1,79}$');
+  check (full_name ~ '^[A-Za-z][A-Za-z .''-]{1,79}$') not valid;
 
 alter table registrations drop constraint if exists chk_email;
 alter table registrations add constraint chk_email
-  check (email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$');
+  check (email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$') not valid;
 
 alter table registrations drop constraint if exists chk_txid;
 alter table registrations add constraint chk_txid
-  check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,12}$');
+  check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,12}$') not valid;
 
 -- ============================================================================
 -- register_participant(): add bad_email / bad_name / bad_txid / same_phone checks
@@ -206,10 +211,18 @@ grant execute on function register_participant(
 ) to anon, authenticated;
 
 -- ============================================================================
--- admin_register_participant(): same new validations + p_amount_paid param
--- (appended with a default, so CREATE OR REPLACE keeps this the same function
--- rather than creating an ambiguous overload)
+-- admin_register_participant(): same new validations + p_amount_paid param.
+-- Postgres identifies functions by name + input argument list, so adding a
+-- parameter (even with a default) does NOT let CREATE OR REPLACE collapse
+-- onto the old 22-arg function — it creates a second overload instead. Drop
+-- the old signature explicitly first so this migration is actually idempotent
+-- and doesn't leave an orphaned overload behind.
 -- ============================================================================
+drop function if exists admin_register_participant(
+  uuid, uuid, text, text, text, text, date, text, text, text, text, text,
+  text, text, text, text, text, text, text, text, text, text
+);
+
 create or replace function admin_register_participant(
   p_event_id uuid,
   p_category_id uuid,

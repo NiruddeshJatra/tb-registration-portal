@@ -48,25 +48,38 @@ export function SuccessScreen({ refCode, name, categoryName, fee }: Props) {
         </button>
       </GoldRing>
 
-      <div className="space-y-1">
+      <div className="animate-detail-reveal space-y-1" style={{ animationDelay: '900ms' }}>
         <p className="text-lg font-medium text-foreground">{name}</p>
         <p className="text-sm text-muted-foreground">
           {categoryName} &middot; {formatTaka(fee)}
         </p>
       </div>
 
-      <div className="rounded-lg border border-accent bg-accent/10 p-4 text-sm text-foreground">
+      <div
+        className="animate-detail-reveal rounded-lg border border-accent bg-accent/10 p-4 text-sm text-foreground"
+        style={{ animationDelay: '1050ms' }}
+      >
         আপনার রেজিস্ট্রেশন পেন্ডিং আছে — Transaction verify হলে confirm হবে।
       </div>
 
-      <p className="text-sm text-muted-foreground">এই স্ক্রিনের স্ক্রিনশট রেখে দিন।</p>
+      <p className="animate-detail-reveal text-sm text-muted-foreground" style={{ animationDelay: '1200ms' }}>
+        এই স্ক্রিনের স্ক্রিনশট রেখে দিন।
+      </p>
 
       {FACEBOOK_PAGE_URL ? (
-        <a href={FACEBOOK_PAGE_URL} target="_blank" rel="noreferrer" className="inline-block text-sm text-accent underline">
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="animate-detail-reveal inline-block text-sm text-accent underline"
+          style={{ animationDelay: '1350ms' }}
+        >
           Triathlon Bangladesh — Facebook Page
         </a>
       ) : (
-        <p className="text-sm text-muted-foreground">Triathlon Bangladesh Facebook Page (link coming soon)</p>
+        <p className="animate-detail-reveal text-sm text-muted-foreground" style={{ animationDelay: '1350ms' }}>
+          Triathlon Bangladesh Facebook Page (link coming soon)
+        </p>
       )}
     </div>
   )

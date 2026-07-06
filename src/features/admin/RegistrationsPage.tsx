@@ -5,10 +5,18 @@ import { EventSelector } from './EventSelector'
 import { RegistrationDetailDrawer } from './RegistrationDetailDrawer'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { CategoryRow, RegistrationRow } from '@/lib/types'
+import { BrandLoader } from '@/components/brand/BrandLoader'
+import { cn } from '@/lib/utils'
+import type { CategoryRow, RegistrationRow, RegistrationStatus } from '@/lib/types'
+
+const STATUS_CHIP_CLASS: Record<RegistrationStatus, string> = {
+  pending: 'status-chip status-chip-pending',
+  approved: 'status-chip status-chip-approved',
+  rejected: 'status-chip status-chip-rejected',
+  cancelled: 'status-chip status-chip-cancelled',
+}
 
 const PAGE_SIZE = 50
 const ALL = '__all__'
@@ -86,22 +94,24 @@ export function RegistrationsPage() {
     setReloadKey((k) => k + 1)
   }
 
-  if (eventsLoading) return <p className="text-muted-foreground">Loading...</p>
+  if (eventsLoading) return <BrandLoader />
   if (events.length === 0) return <p className="text-muted-foreground">No events configured yet.</p>
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="admin-page-header">
+        <h1>Registrations</h1>
         <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
-        <Input
-          placeholder="Search name, phone, TxID, ref code..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-10 w-full sm:w-64"
-        />
       </div>
+
+      <Input
+        placeholder="Search name, phone, TxID, ref code..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="h-10 w-full sm:w-64"
+      />
 
       <div className="flex flex-wrap gap-2">
         <Select
@@ -196,7 +206,7 @@ export function RegistrationsPage() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="admin-table max-h-[70vh] overflow-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -215,7 +225,9 @@ export function RegistrationsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">Loading...</TableCell>
+                <TableCell colSpan={10} className="py-6 text-center">
+                  <BrandLoader inline />
+                </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
@@ -241,9 +253,7 @@ export function RegistrationsPage() {
                   <TableCell className="capitalize">{r.participant_role}</TableCell>
                   <TableCell className="capitalize">{r.registration_type}</TableCell>
                   <TableCell>
-                    <Badge variant={r.status === 'approved' ? 'default' : 'secondary'} className="capitalize">
-                      {r.status}
-                    </Badge>
+                    <span className={cn(STATUS_CHIP_CLASS[r.status])}>{r.status}</span>
                   </TableCell>
                   <TableCell>{r.transaction_id}</TableCell>
                   <TableCell>{new Date(r.created_at).toLocaleDateString()}</TableCell>
@@ -255,7 +265,7 @@ export function RegistrationsPage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm tabular-nums text-muted-foreground">
           {count} total &middot; Page {page + 1} of {totalPages}
         </p>
         <div className="flex gap-2">

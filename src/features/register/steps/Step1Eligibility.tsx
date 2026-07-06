@@ -1,6 +1,6 @@
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Input } from '@/components/ui/input'
+import { DateOfBirthPicker } from '@/components/brand/DateOfBirthPicker'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import { matchCategory } from '../formState'
@@ -48,14 +48,7 @@ export function Step1Eligibility({ event, categories, form, setField }: Props) {
 
       <div className="space-y-2">
         <Label htmlFor="dob">Date of Birth / জন্ম তারিখ</Label>
-        <Input
-          id="dob"
-          type="date"
-          max={today}
-          value={form.date_of_birth}
-          onChange={(e) => setField('date_of_birth', e.target.value)}
-          className="h-11"
-        />
+        <DateOfBirthPicker id="dob" value={form.date_of_birth} onChange={(iso) => setField('date_of_birth', iso)} max={today} />
       </div>
 
       {category && (
