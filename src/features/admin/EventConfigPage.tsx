@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { BrandLoader } from '@/components/brand/BrandLoader'
 import type { CategoryRow, Gender } from '@/lib/types'
 
 const emptyDraft = { name: '', gender: 'male' as Gender, min_age: 18, max_age: '' as number | '', fee: 0, max_slots: '' as number | '', display_order: 0 }
@@ -94,8 +95,12 @@ export function EventConfigPage() {
 
   return (
     <div className="space-y-6">
-      <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      <div className="admin-page-header">
+        <h1>Event Config</h1>
+        <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      </div>
 
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
       <Card>
         <CardHeader>
           <CardTitle>Event Settings</CardTitle>
@@ -126,8 +131,8 @@ export function EventConfigPage() {
             <Label>Fee Note</Label>
             <Textarea value={feeNote} onChange={(e) => setFeeNote(e.target.value)} rows={3} />
           </div>
-          <Button onClick={saveEvent} disabled={savingEvent}>
-            {savingEvent ? 'Saving...' : 'Save Event Settings'}
+          <Button onClick={saveEvent} disabled={savingEvent} className="btn-sheen">
+            {savingEvent ? <BrandLoader inline label="Saving..." /> : 'Save Event Settings'}
           </Button>
         </CardContent>
       </Card>
@@ -230,12 +235,13 @@ export function EventConfigPage() {
                 onChange={(e) => setNewCategory({ ...newCategory, max_slots: e.target.value === '' ? '' : Number(e.target.value) })}
               />
             </div>
-            <Button size="sm" onClick={addCategory} disabled={savingCategory}>
-              Add
+            <Button size="sm" onClick={addCategory} disabled={savingCategory} className="btn-sheen">
+              {savingCategory ? <BrandLoader inline label="Adding..." /> : 'Add'}
             </Button>
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

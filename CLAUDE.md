@@ -17,21 +17,23 @@ src/
     xlsxExport.ts              # SheetJS wrapper for admin Excel exports
   features/
     register/                 # public 4-step registration wizard (/register/:eventSlug)
-      RegisterPage.tsx         # data fetch + wizard state + RPC submit + success/error/closed screens
+      RegisterPage.tsx         # data fetch + wizard state + RPC submit + success/error/closed screens; desktop split layout (poster panel + wizard-shell glass card)
       formState.ts             # form shape + client-side category matching (matchCategory)
       steps/Step1..4*.tsx       # one component per wizard step
     admin/                     # admin dashboard (/admin/*), guarded by AuthContext session
       AuthContext.tsx           # Supabase Auth session provider
       AdminLayout.tsx           # nav + auth guard (redirects to /admin/login if no session)
-      DashboardPage.tsx         # stats (status counts, per-category, per-size, over-time, payment split)
+      DashboardPage.tsx         # stats (status counts, revenue, per-category, per-size, over-time, payment split), CountUp on all figures
       RegistrationsPage.tsx     # searchable/filterable table + pagination, opens RegistrationDetailDrawer
-      ManualAddPage.tsx         # admin manual/group entry, calls admin_register_participant() RPC
+      ManualAddPage.tsx         # admin manual/group entry, calls admin_register_participant() RPC; live per-field validation mirrors the public wizard; navigates to /admin/registrations on success
       EventConfigPage.tsx       # event settings (open/deadline/max_total_slots/payment) + category CRUD
       ReportsPage.tsx           # jersey pivot / timing-partner / general Excel exports
       useEvents.ts              # shared event-list + selected-event hook used across admin pages
   components/
     ui/                        # shadcn-generated primitives (base-ui backed) — don't hand-edit, re-run shadcn CLI to update
-    brand/                     # hand-built brand pieces: StepProgress, RunBikeRunStrip, JerseyChartTable, GoldRing, SimpleLineChart
+      calendar.tsx               # EXCEPTION: hand-rolled month/year grid, NOT shadcn-generated — no react-day-picker dep. Don't run shadcn CLI on this one, it'll pull that dependency back in.
+      popover.tsx                # thin @base-ui/react/popover wrapper, same pattern as dialog.tsx/select.tsx
+    brand/                     # hand-built brand pieces: StepProgress, RunBikeRunStrip, JerseyChartTable, GoldRing, SimpleLineChart, BrandLoader, CountUp, DateOfBirthPicker
 ```
 
 ## Key Conventions
@@ -45,3 +47,6 @@ src/
 - No `react-hook-form`/`zod` — forms are plain `useState` + the validators in `format.ts`, per the locked "no extra UI/form libs" project scope.
 - `FACEBOOK_PAGE_URL` and `TRIATHLON_BANGLADESH_URL` in `src/lib/constants.ts` are the only intentionally-hardcoded external links; update them there, not inline.
 - `src/lib/errorMessages.ts` holds the Bangla translations for every `RegisterParticipantError` code returned by both RPCs — shared by the public wizard and the admin manual-add form. Add new error codes there, not as inline maps.
+- **`CREATE OR REPLACE FUNCTION` does NOT let you add a new parameter to an existing RPC in place** — Postgres identifies a function by name + input argument types, so adding one (even with a default) creates a second overload alongside the old signature instead of replacing it. `admin_register_participant`'s `p_amount_paid` param hit this live: had to `drop function` the old 22-arg signature explicitly. Any future RPC signature change needs the same explicit drop-old-signature step in its migration.
+- **Design system lives in `src/index.css`**: the layered background (`body::before`/`::after` grid + grain, `#root` at `z-index:1`) is global; the glassmorphism/blur treatment is scoped to `.wizard-shell` (public wizard only — admin stays flat/utilitarian per its own density-over-decoration goal). Reuse `.wizard-shell`, `.btn-sheen`, `.status-chip-*`, `.admin-page-header`, and the `animate-*` keyframes already defined there rather than inventing new ad hoc animation classes.
+- `supabase/migrations/0003_validation_amount.sql` has been applied to the live DB (amount_paid column, transaction_id nullable, tightened format checks as `NOT VALID`, new RPC signatures). Future migrations still follow the same "written here, applied manually" convention — don't assume a new migration file is live until confirmed.

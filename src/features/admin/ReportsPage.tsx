@@ -6,6 +6,8 @@ import { EventSelector } from './EventSelector'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BrandLoader } from '@/components/brand/BrandLoader'
+import { Shirt, Timer, FileSpreadsheet } from 'lucide-react'
 import type { CategoryRow } from '@/lib/types'
 
 const ALL = '__all__'
@@ -95,73 +97,83 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      <div className="admin-page-header">
+        <h1>Reports</h1>
+        <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Jersey Report</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-end gap-3">
-          <Select
-            value={jerseyRole}
-            onValueChange={(v) => setJerseyRole(v as typeof jerseyRole)}
-            items={[
-              { value: 'all', label: 'All Participants' },
-              { value: 'runner', label: 'Runners Only' },
-              { value: 'crew', label: 'Crew Only' },
-            ]}
-          >
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Participants</SelectItem>
-              <SelectItem value="runner">Runners Only</SelectItem>
-              <SelectItem value="crew">Crew Only</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={exportJerseyReport} disabled={busy === 'jersey'}>
-            {busy === 'jersey' ? 'Generating...' : 'Download Excel'}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <Shirt className="size-4 text-gold" />
+            <CardTitle>Jersey Report</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">Category &times; size pivot for the T-shirt order.</p>
+            <Select
+              value={jerseyRole}
+              onValueChange={(v) => setJerseyRole(v as typeof jerseyRole)}
+              items={[
+                { value: 'all', label: 'All Participants' },
+                { value: 'runner', label: 'Runners Only' },
+                { value: 'crew', label: 'Crew Only' },
+              ]}
+            >
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Participants</SelectItem>
+                <SelectItem value="runner">Runners Only</SelectItem>
+                <SelectItem value="crew">Crew Only</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={exportJerseyReport} disabled={busy === 'jersey'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
+              {busy === 'jersey' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
+            </Button>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Timing Partner Export</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-3 text-sm text-muted-foreground">Approved registrations only.</p>
-          <Button onClick={exportTimingPartnerReport} disabled={busy === 'timing'}>
-            {busy === 'timing' ? 'Generating...' : 'Download Excel'}
-          </Button>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <Timer className="size-4 text-gold" />
+            <CardTitle>Timing Partner Export</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">Approved registrations only.</p>
+            <Button onClick={exportTimingPartnerReport} disabled={busy === 'timing'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
+              {busy === 'timing' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
+            </Button>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>General Export</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-end gap-3">
-          <Select
-            value={generalStatus}
-            onValueChange={(v) => setGeneralStatus(v ?? ALL)}
-            items={[
-              { value: ALL, label: 'All Status' },
-              ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s })),
-            ]}
-          >
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All Status</SelectItem>
-              {['pending', 'approved', 'rejected', 'cancelled'].map((s) => (
-                <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={exportGeneralReport} disabled={busy === 'general'}>
-            {busy === 'general' ? 'Generating...' : 'Download Excel'}
-          </Button>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 space-y-0">
+            <FileSpreadsheet className="size-4 text-gold" />
+            <CardTitle>General Export</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">Full registration list, optionally filtered by status.</p>
+            <Select
+              value={generalStatus}
+              onValueChange={(v) => setGeneralStatus(v ?? ALL)}
+              items={[
+                { value: ALL, label: 'All Status' },
+                ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s })),
+              ]}
+            >
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All Status</SelectItem>
+                {['pending', 'approved', 'rejected', 'cancelled'].map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={exportGeneralReport} disabled={busy === 'general'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
+              {busy === 'general' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

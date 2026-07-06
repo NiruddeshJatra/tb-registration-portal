@@ -2,6 +2,7 @@ import { Navigate, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
+import { BrandLoader } from '@/components/brand/BrandLoader'
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', end: true },
@@ -15,7 +16,11 @@ export function AdminLayout() {
   const { session, loading } = useAuth()
 
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">Loading...</div>
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <BrandLoader />
+      </div>
+    )
   }
   if (!session) {
     return <Navigate to="/admin/login" replace />

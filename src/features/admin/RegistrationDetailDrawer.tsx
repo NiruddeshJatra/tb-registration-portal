@@ -10,11 +10,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthContext'
 import { formatTaka } from '@/lib/format'
 import type { RegistrationRow, RegistrationStatus } from '@/lib/types'
+
+const STATUS_CHIP_CLASS: Record<RegistrationStatus, string> = {
+  pending: 'status-chip status-chip-pending',
+  approved: 'status-chip status-chip-approved',
+  rejected: 'status-chip status-chip-rejected',
+  cancelled: 'status-chip status-chip-cancelled',
+}
 
 interface Props {
   registration: (RegistrationRow & { categories?: { name: string; fee: number } | null }) | null
@@ -29,7 +35,7 @@ function Field({ label, value }: { label: string; value: string | number | null 
   return (
     <div className="flex justify-between gap-4 border-b border-border py-2 text-sm last:border-0">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium text-foreground">{value}</span>
+      <span className="text-right font-medium tabular-nums text-foreground">{value}</span>
     </div>
   )
 }
@@ -73,9 +79,7 @@ export function RegistrationDetailDrawer({ registration, onClose, onUpdated }: P
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               {registration.ref_code ?? 'N/A'}
-              <Badge variant={registration.status === 'approved' ? 'default' : 'secondary'} className="capitalize">
-                {registration.status}
-              </Badge>
+              <span className={STATUS_CHIP_CLASS[registration.status]}>{registration.status}</span>
             </SheetTitle>
           </SheetHeader>
 

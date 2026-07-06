@@ -4,6 +4,8 @@ import { useEvents } from './useEvents'
 import { EventSelector } from './EventSelector'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SimpleLineChart } from '@/components/brand/SimpleLineChart'
+import { BrandLoader } from '@/components/brand/BrandLoader'
+import { CountUp } from '@/components/brand/CountUp'
 import { formatTaka } from '@/lib/format'
 import type { CategoryRow, RegistrationStatus, RegistrationType } from '@/lib/types'
 
@@ -49,7 +51,7 @@ export function DashboardPage() {
     }
   }, [selectedEventId])
 
-  if (eventsLoading) return <p className="text-muted-foreground">Loading...</p>
+  if (eventsLoading) return <BrandLoader />
   if (events.length === 0) return <p className="text-muted-foreground">No events configured yet.</p>
 
   const byStatus = STATUSES.map((s) => ({ status: s, count: rows.filter((r) => r.status === s).length }))
@@ -100,10 +102,13 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      <div className="admin-page-header">
+        <h1>Dashboard</h1>
+        <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
+      </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Loading stats...</p>
+        <BrandLoader />
       ) : total === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border p-10 text-center text-muted-foreground">
           <p className="text-lg">এখনও কোনো registration নেই</p>
@@ -117,7 +122,7 @@ export function DashboardPage() {
                 <CardTitle className="text-sm text-muted-foreground">Total</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-semibold text-foreground">
-                {total}
+                <CountUp value={total} />
                 {selectedEvent?.max_total_slots ? <span className="text-sm text-muted-foreground"> / {selectedEvent.max_total_slots}</span> : null}
               </CardContent>
             </Card>
@@ -126,7 +131,9 @@ export function DashboardPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm capitalize text-muted-foreground">{s.status}</CardTitle>
                 </CardHeader>
-                <CardContent className="text-2xl font-semibold text-foreground">{s.count}</CardContent>
+                <CardContent className="text-2xl font-semibold text-foreground">
+                  <CountUp value={s.count} />
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -136,13 +143,17 @@ export function DashboardPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Verified Revenue</CardTitle>
               </CardHeader>
-              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">{formatTaka(verifiedRevenue)}</CardContent>
+              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">
+                <CountUp value={verifiedRevenue} format={formatTaka} />
+              </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">Pending Revenue</CardTitle>
               </CardHeader>
-              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">{formatTaka(pendingRevenue)}</CardContent>
+              <CardContent className="text-2xl font-semibold tabular-nums text-foreground">
+                <CountUp value={pendingRevenue} format={formatTaka} />
+              </CardContent>
             </Card>
           </div>
 
