@@ -56,7 +56,7 @@ create table if not exists registrations (
   address text,
   emergency_phone text not null,
   comments text,
-  payment_method text check (payment_method in ('bKash', 'Nagad')),
+  payment_method text check (payment_method in ('bKash', 'Nagad', 'Rocket', 'Upay')),
   payment_sender text,
   transaction_id text,
   amount_paid int,
@@ -83,7 +83,7 @@ create table if not exists registrations (
   constraint chk_phone_diff check (phone <> emergency_phone),
   constraint chk_phone_format check (phone ~ '^01[3-9][0-9]{8}$'),
   constraint chk_emergency_phone_format check (emergency_phone ~ '^01[3-9][0-9]{8}$'),
-  constraint chk_txid check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,12}$'),
+  constraint chk_txid check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,15}$'),
   constraint chk_txid_required check (registration_type = 'complimentary' or transaction_id is not null)
 );
 
@@ -237,7 +237,7 @@ begin
   end if;
 
   v_transaction_id := upper(trim(p_transaction_id));
-  if v_transaction_id !~ '^[A-Z0-9]{8,12}$' then
+  if v_transaction_id !~ '^[A-Z0-9]{8,15}$' then
     return jsonb_build_object('ok', false, 'error', 'bad_txid');
   end if;
 
@@ -397,8 +397,21 @@ begin
     end if;
   else
     v_transaction_id := upper(trim(p_transaction_id));
-    if v_transaction_id !~ '^[A-Z0-9]{8,12}$' then
+    if v_transaction_id !~ '^[A-Z0-9]{8,15}$' then
       return jsonb_build_object('ok', false, 'error', 'bad_txid');
+    end if;
+  end if;
+
+  -- Friendly duplicate-phone guard for single manual adds. Group imports
+  -- (entry_source = 'group_import') may legitimately share a contact phone.
+  if p_entry_source is distinct from 'group_import' then
+    if exists (
+      select 1 from registrations
+       where event_id = p_event_id
+         and phone = v_phone
+         and entry_source is distinct from 'group_import'
+    ) then
+      return jsonb_build_object('ok', false, 'error', 'dup_phone');
     end if;
   end if;
 
@@ -439,6 +452,32 @@ grant execute on function admin_register_participant(
 ) to authenticated;
 
 -- ============================================================================
+-- public_event_slots(): read-only slot telemetry for the public registration
+-- rail. anon has no direct read on `registrations`, so this SECURITY DEFINER
+-- function exposes only two aggregate numbers: approved count + the cap.
+-- ============================================================================
+create or replace function public_event_slots(p_event_slug text)
+returns jsonb
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select jsonb_build_object(
+    'claimed', (
+      select count(*)
+        from registrations r
+        join events e on e.id = r.event_id
+       where e.slug = p_event_slug
+         and r.status = 'approved'
+    ),
+    'cap', (select max_total_slots from events where slug = p_event_slug)
+  );
+$$;
+
+grant execute on function public_event_slots(text) to anon, authenticated;
+
+-- ============================================================================
 -- SEED DATA — Chattogram Duathlon 2026
 -- ============================================================================
 
@@ -448,12 +487,12 @@ values (
   'chattogram-duathlon-2026',
   'CD26',
   '2026-11-13',
-  'City Corporation Stadium, Bakolia, Bastuhara Khetchar (Bakolia Outer 2nd Link Road), Chattogram',
+  'বাকলিয়া স্টেডিয়াম, নোমান কলেজ রোড, চট্টগ্রাম',
   true,
   250,
   '01785750821',
-  array['bKash', 'Nagad'],
-  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash অথবা Nagad এজেন্টে ক্যাশ আউট করুন, তারপর Transaction ID টি ফর্মে দিন।',
+  array['bKash', 'Nagad', 'Rocket', 'Upay'],
+  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Send Money করুন, তারপর Transaction ID টি ফর্মে দিন।',
   '[
     {"size": "XS", "chest": 34, "length": 24},
     {"size": "S", "chest": 36, "length": 25},

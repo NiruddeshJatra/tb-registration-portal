@@ -10,7 +10,7 @@ export const REGISTER_ERROR_MESSAGES: Record<string, string> = {
   same_phone: 'Emergency নম্বর নিজের নম্বর থেকে আলাদা হতে হবে।',
   bad_email: 'সঠিক ইমেইল ঠিকানা দিন।',
   bad_name: 'নামে শুধু ইংরেজি অক্ষর ব্যবহার করুন।',
-  bad_txid: 'সঠিক Transaction ID দিন (৮–১২ অক্ষর)।',
+  bad_txid: 'সঠিক Transaction ID দিন (৮–১৫ অক্ষর)।',
   no_category: 'দুঃখিত, আপনার জন্য কোনো উপযুক্ত ক্যাটাগরি নেই।',
   category_full: 'দুঃখিত, এই ক্যাটাগরির স্লট শেষ হয়ে গেছে।',
   dup_txid: 'এই Transaction ID দিয়ে আগে রেজিস্ট্রেশন হয়েছে।',

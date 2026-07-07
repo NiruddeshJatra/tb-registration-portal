@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #F1EFE6; }
+  </style>
+</helmet>
+
+<div data-screen-label="Design Spec" style="max-width: 880px; margin: 0 auto; padding: 56px 32px 96px; font-family: Inter, sans-serif; color: #15180E; line-height: 1.6;">
+
+  <p style="margin: 0; font: 600 11px 'IBM Plex Mono'; letter-spacing: 0.14em; text-transform: uppercase; color: #5A5F4A;">TB Registration Portal · Design Spec · v1 · Jul 2026</p>
+  <h1 style="margin: 10px 0 0; font: 700 46px Oswald; text-transform: uppercase; line-height: 1.05; letter-spacing: 0.01em;">Start Line <span style="color: #5A7A00;">/</span> Night Ops</h1>
+  <p style="margin: 14px 0 0; font-size: 15px; max-width: 620px;">Two surfaces, one system. The public wizard is a <strong>race bib</strong>: warm paper, hard ink, electric chartreuse, condensed numerals. The admin is a <strong>night timing board</strong>: the same chartreuse as telemetry on near-black ink. Implementable directly against Tailwind v4 + shadcn/ui.</p>
+
+  <!-- ═══ 1. TOKENS ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">1 · Tokens</h2>
+  <p style="margin: 12px 0 16px; font-size: 14px;">Drop-in replacement for the <code style="font: 500 12.5px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">:root</code> block in <code style="font: 500 12.5px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">src/index.css</code>. Public pages use the light set; wrap <code style="font: 500 12.5px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">/admin</code> in <code style="font: 500 12.5px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">.dark</code>.</p>
+  <pre style="margin: 0; background: #15180E; color: #EDEFE4; padding: 22px 24px; overflow-x: auto; font: 400 12px/1.75 'IBM Plex Mono';">/* ── PUBLIC · "Start Line" (light) ── */
+:root {
+  --background: #F1EFE6;      /* warm paper */
+  --foreground: #15180E;      /* ink */
+  --card: #FBFAF5;            /* bib white */
+  --card-foreground: #15180E;
+  --primary: #15180E;         /* ink buttons… */
+  --primary-foreground: #C6F53F;  /* …chartreuse text */
+  --secondary: #C6F53F;       /* chartreuse fills (submit, category) */
+  --secondary-foreground: #15180E;
+  --muted: #E7E4D8;
+  --muted-foreground: #5A5F4A;
+  --accent: #C6F53F;          /* THE pop. Never as long text on paper */
+  --accent-ink: #5A7A00;      /* chartreuse-as-text, AA on paper */
+  --destructive: #C7361F;
+  --border: rgba(21,24,14,.30);   /* idle input border */
+  --border-strong: #15180E;       /* cards, selected, focused */
+  --input: #FFFFFF;
+  --ring: #C6F53F;
+  --radius: 0;                /* sharp. bib corners are cut, not rounded */
+  --warn: #B77E10;            /* pending stamp */
+}
+
+/* ── ADMIN · "Night Ops" (dark) ── */
+.dark {
+  --background: #0B0D08;
+  --foreground: #EDEFE4;
+  --card: #14170F;
+  --card-2: #1B1F13;          /* zebra / skeleton highlight */
+  --border: #262B1B;
+  --border-strong: #363D28;
+  --muted-foreground: #9BA18A;
+  --faint: #7C8272;           /* metadata, timestamps */
+  --disabled: #4A4F3D;
+  --accent: #C6F53F;          /* telemetry: numbers, active, approved */
+  --status-pending: #E8B931;
+  --status-approved: #C6F53F;
+  --status-rejected: #E24E3B;
+  --status-cancelled: #7C8272;
+}
+
+/* fonts (all already in package.json except Plex Mono) */
+--font-heading: 'Oswald', 'Noto Sans Bengali', sans-serif;
+--font-sans: 'Inter', 'Noto Sans Bengali', sans-serif;
+--font-mono: 'IBM Plex Mono', monospace;  /* npm i @fontsource/ibm-plex-mono */</pre>
+
+  <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px;">
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; background: #F1EFE6;"></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">#F1EFE6 paper</p></div>
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; background: #FBFAF5;"></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">#FBFAF5 bib</p></div>
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; background: #15180E;"></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">#15180E ink</p></div>
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; background: #C6F53F;"></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">#C6F53F chartreuse</p></div>
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; background: #0B0D08;"></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">#0B0D08 night</p></div>
+    <div style="width: 130px; border: 1.5px solid #15180E;"><div style="height: 56px; display: flex;"><div style="flex: 1; background: #E8B931;"></div><div style="flex: 1; background: #E24E3B;"></div><div style="flex: 1; background: #B77E10;"></div></div><p style="margin: 0; padding: 6px 10px; font: 500 10px 'IBM Plex Mono'; border-top: 1.5px solid #15180E;">status set</p></div>
+  </div>
+
+  <!-- ═══ 2. TYPE ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">2 · Type system</h2>
+  <div style="margin-top: 16px; border: 1.5px solid #15180E;">
+    <div style="display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid rgba(21,24,14,.2);">
+      <p style="margin: 0; padding: 14px 16px; font: 500 11px 'IBM Plex Mono'; color: #5A5F4A;">DISPLAY<br>Oswald 600–700<br>uppercase, tight</p>
+      <p style="margin: 0; padding: 10px 16px; font: 700 40px Oswald; text-transform: uppercase; letter-spacing: 0.01em;">Duathlon 2026</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid rgba(21,24,14,.2);">
+      <p style="margin: 0; padding: 14px 16px; font: 500 11px 'IBM Plex Mono'; color: #5A5F4A;">SECTION LABEL<br>Oswald 600 · 10–12px<br>tracking .2–.3em</p>
+      <p style="margin: 0; padding: 18px 16px; font: 600 12px Oswald; letter-spacing: 0.26em; text-transform: uppercase;">Segment 02 — Personal</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid rgba(21,24,14,.2);">
+      <p style="margin: 0; padding: 14px 16px; font: 500 11px 'IBM Plex Mono'; color: #5A5F4A;">BODY / BENGALI<br>Inter 400 + Noto Sans<br>Bengali 400 · 13–15px</p>
+      <p style="margin: 0; padding: 16px; font: 400 14px 'Noto Sans Bengali';">Send Money করে নিচের তথ্য দিন। Reference-এ আপনার নাম লিখুন। <span style="font-family: Inter;">English and Bengali share the line without a seam.</span></p>
+    </div>
+    <div style="display: grid; grid-template-columns: 200px 1fr;">
+      <p style="margin: 0; padding: 14px 16px; font: 500 11px 'IBM Plex Mono'; color: #5A5F4A;">DATA<br>IBM Plex Mono 500<br>ref codes, ৳, phones</p>
+      <p style="margin: 0; padding: 16px; font: 500 18px 'IBM Plex Mono';">CD26-000141 · ৳3,500 · 01712345678</p>
+    </div>
+  </div>
+  <p style="margin: 14px 0 0; font-size: 13.5px; color: #5A5F4A;"><strong style="color: #15180E;">Rules.</strong> Oswald never sets Bengali — Noto Sans Bengali is the fallback in the heading stack, so mixed headings degrade gracefully. Every number a user compares (fees, counts, phones, TxIDs) is Plex Mono with <code style="font: 500 12px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">tabular-nums</code>. Minimum body 13px; Bengali helper/error 12.5px at 1.7 line-height.</p>
+
+  <!-- ═══ 3. COMPONENTS ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">3 · Component patterns</h2>
+  <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 14px;">
+    <sc-for list="{{ components }}" as="c" hint-placeholder-count="8">
+      <div style="border: 1.5px solid #15180E; background: #FBFAF5;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 12px 18px; border-bottom: 1px solid rgba(21,24,14,.2);">
+          <p style="margin: 0; font: 600 13px Oswald; letter-spacing: 0.12em; text-transform: uppercase;">{{ c.name }}</p>
+          <p style="margin: 0; font: 400 10px 'IBM Plex Mono'; color: #5A5F4A;">{{ c.shadcn }}</p>
+        </div>
+        <p style="margin: 0; padding: 12px 18px 16px; font-size: 13.5px; color: #33381F;">{{ c.spec }}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- ═══ 4. ANIMATION ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">4 · Animation notes</h2>
+  <p style="margin: 12px 0 0; font-size: 13.5px;">Everything is plain CSS (no libraries, per project scope). All gated behind <code style="font: 500 12px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">prefers-reduced-motion</code> exactly as today.</p>
+  <div style="margin-top: 14px; border: 1.5px solid #15180E;">
+    <sc-for list="{{ animations }}" as="a" hint-placeholder-count="7">
+      <div style="display: grid; grid-template-columns: 190px 110px 1fr; gap: 12px; padding: 12px 18px; border-bottom: 1px solid rgba(21,24,14,.15); align-items: baseline;">
+        <p style="margin: 0; font: 600 12px 'IBM Plex Mono';">{{ a.name }}</p>
+        <p style="margin: 0; font: 400 11px 'IBM Plex Mono'; color: #5A7A00;">{{ a.timing }}</p>
+        <p style="margin: 0; font-size: 13px; color: #33381F;">{{ a.desc }}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- ═══ 5. STATES ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">5 · Loading &amp; empty states</h2>
+  <div style="margin-top: 16px; border: 1.5px solid #15180E;">
+    <sc-for list="{{ states }}" as="st" hint-placeholder-count="6">
+      <div style="display: grid; grid-template-columns: 210px 1fr; gap: 12px; padding: 12px 18px; border-bottom: 1px solid rgba(21,24,14,.15); align-items: baseline;">
+        <p style="margin: 0; font: 600 11px Oswald; letter-spacing: 0.14em; text-transform: uppercase;">{{ st.surface }}</p>
+        <p style="margin: 0; font-size: 13px; color: #33381F;">{{ st.spec }}</p>
+      </div>
+    </sc-for>
+  </div>
+  <p style="margin: 14px 0 0; font-size: 13.5px; color: #5A5F4A;">Live examples: both states are toggleable on the admin mock via its Tweaks panel (<code style="font: 500 12px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">dataState</code>), and the wizard's loading/closed screens via <code style="font: 500 12px 'IBM Plex Mono'; background: rgba(21,24,14,.07); padding: 1px 5px;">screen</code>.</p>
+
+  <!-- ═══ 6. ACCESSIBILITY ═══ -->
+  <h2 style="margin: 52px 0 4px; font: 600 24px Oswald; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #15180E; padding-bottom: 8px;">6 · Accessibility ledger</h2>
+  <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+    <sc-for list="{{ a11y }}" as="item" hint-placeholder-count="6">
+      <div style="display: flex; gap: 12px; align-items: baseline;">
+        <span style="font: 600 11px 'IBM Plex Mono'; color: #5A7A00; flex-shrink: 0;">▸</span>
+        <p style="margin: 0; font-size: 13.5px;">{{ item }}</p>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top: 56px; height: 6px; background: repeating-linear-gradient(90deg, #C6F53F 0 14px, #15180E 14px 28px);"></div>
+  <p style="margin: 14px 0 0; font: 400 11px 'IBM Plex Mono'; color: #5A5F4A;">END OF SPEC · MOCKS: REGISTER — START LINE · ADMIN — NIGHT OPS · BASELINES INCLUDED FOR COMPARISON</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      components: [
+        { name: 'Buttons', shadcn: 'button.tsx · variant map', spec: 'Primary (next): ink fill, chartreuse text, Oswald 600 uppercase tracking .16em, h-56px (h-14), radius 0, hard shadow 4px 4px 0 ink; hover translate(-1px,-1px). Submit variant inverts: chartreuse fill, ink text. Secondary (back): 1.5px ink outline, transparent. Disabled: ink 12% fill, ink 45% text, no shadow. Admin buttons drop the shadow, h-42px, chartreuse fill or chartreuse outline.' },
+        { name: 'Inputs', shadcn: 'input.tsx / textarea.tsx', spec: 'White fill, 1.5px border. Idle: ink 30%. Valid+touched: ink 100%. Error: #C7361F + shake. Focus: border ink + 3px ring rgba(198,245,63,.55). Height 50–52px public (touch), 38–40px admin. Radius 0 everywhere. Phone/TxID/date inputs set font-mono. Labels: Oswald 600 11px tracking .22em uppercase, Bengali gloss inline in muted 11px Noto.' },
+        { name: 'Choice tiles', shadcn: 'replaces radio-group + select for ≤8 options', spec: 'Gender, payment method, blood group, jersey size are tap-tile grids, not dropdowns (⅔ of users are on mobile). Tile: min-h 44–52px, 1.5px border ink-30 on white; selected: border ink + chartreuse fill. Grid: 2-col for binary, 8-col (blood) / 7-col (jersey) collapsing to 4-col under 400px.' },
+        { name: 'Route progress', shadcn: 'replaces StepProgress.tsx', spec: 'Single SVG line, segment boundaries proportional to the race: RUN 10K (29%), BIKE 40K (43%), RUN 5K (24%), finish gantry glyph at the end. Filled stroke = ink; position dot = chartreuse with ink ring, 1.6s pulse. Segment labels Oswald 8.5px tracking; Bengali step counter (ধাপ ২/৪) right-aligned above. Transition: .45s cubic-bezier(.65,0,.35,1).' },
+        { name: 'The bib (success + review)', shadcn: 'new component, replaces GoldRing.tsx', spec: 'Bib card = 1.5px ink border, chartreuse header strip (event + date + 10K—40K—5K), punch-holes top corners, ref code Oswald 600 52px centered over a dashed tear line, details grid, PENDING stamp (2.5px #B77E10 border, rotate -4°), chartreuse/ink caution-stripe footer. Step 4 renders the same bib marked DRAFT — review IS the bib. Ring spirit kept: border draws itself via pathLength/dashoffset over 1.2s.' },
+        { name: 'Status chips', shadcn: 'badge.tsx · statusChip.ts', spec: 'Admin: 1px colored border + 8% tint fill + colored mono 9px uppercase text, square corners. pending #E8B931 · approved #C6F53F · rejected #E24E3B · cancelled #9BA18A. Pending rows also get a 2px left rule in amber — scannable without reading.' },
+        { name: 'Admin table', shadcn: 'table.tsx', spec: 'Row 44px, border-b card-2, ref codes chartreuse mono, hover rgba(198,245,63,.05), selected row keeps 6% tint while drawer is open. Headers: Oswald 9px tracking .22em muted. Filters: search (300px) + status segmented control (chartreuse active) + dropdowns; live count “n of 140” right-aligned.' },
+        { name: 'Detail drawer', shadcn: 'sheet.tsx', spec: 'min(460px,100vw), bg #101308, slide-in .22s. Sticky header: ref code 24px chartreuse mono + chip + name. Body groups fields into Athlete / Race / Payment bordered lists. Footer: 2×2 status buttons (active = colored border + dot), audit line in mono 10px. Reject/cancel open a confirm dialog with a 3px red top rule.' },
+      ],
+      animations: [
+        { name: 'sl-step-fwd / back', timing: '260ms ease-out', desc: 'Wizard card slides 28px from the travel direction. Replaces current step-in; no per-field stagger — one purposeful move.' },
+        { name: 'route-progress', timing: '450ms cubic', desc: 'Dot + fill advance along the route line on step change. This is the hero transition; everything else defers to it.' },
+        { name: 'sl-rise', timing: '300ms ease-out', desc: 'Category result, size chart, success text blocks. 8–10px rise + fade. Sequenced on success screen at 0/.1/.15s.' },
+        { name: 'bib-draw', timing: '1.2s ease-out .5s', desc: 'Success bib border draws (pathLength 100 → dashoffset 0). The gold-ring moment, reinterpreted.' },
+        { name: 'stamp', timing: '450ms ease-out 1.5s', desc: 'PENDING stamp scales 1.35→1 with -4° rotation after the border finishes. One-shot, never loops.' },
+        { name: 'sl-shake', timing: '220ms ease-in-out', desc: 'Invalid field on touch — 3px horizontal, one cycle. Same as current behavior.' },
+        { name: 'shimmer / dash', timing: '1.4s / .5s linear ∞', desc: 'Admin skeletons sweep a card-2 highlight; loaders are a dashed chartreuse route line marching. Only infinite animations in the system.' },
+      ],
+      states: [
+        { surface: 'Wizard · loading', spec: 'Dashed route line marching (sl-dash) + “লোড হচ্ছে…”. No spinner circles anywhere in the new system.' },
+        { surface: 'Wizard · closed / not found', spec: 'Bib-style card, amber REGISTRATION CLOSED label, Bengali reason, caution-stripe footer. Same component both cases, message swaps.' },
+        { surface: 'Wizard · submit pending', spec: 'Submit button text → “সাবমিট হচ্ছে…” with marching dash line inside the button; button locks, form inert.' },
+        { surface: 'Dashboard · loading', spec: 'Grid-shaped shimmer skeletons matching final card geometry + “FETCHING REGISTRATIONS…” mono line. No layout jump on arrival.' },
+        { surface: 'Dashboard · empty', spec: 'Dashed border panel, route-line glyph, “Start list is empty”, Bengali nudge, and the share URL in chartreuse mono — an action, not an apology.' },
+        { surface: 'Table · empty (filters)', spec: 'Distinguishes zero-data (“Start list is empty”) from zero-matches (“No matches” + Clear filters button). Both in the mock via Tweaks.' },
+      ],
+      a11y: [
+        'Contrast: ink on paper 14.9:1; ink on chartreuse 11.4:1; chartreuse text on night 12.7:1; muted #5A5F4A on paper 5.5:1; amber/red pass at their sizes. Chartreuse is never text on paper — use --accent-ink #5A7A00 (4.6:1) there.',
+        'Touch: every interactive element ≥44px on the public wizard; tiles 44–52px; nav buttons 56px.',
+        'Keyboard: tiles are real <button>s in a radiogroup pattern (roving tab-index in implementation); focus ring 3px chartreuse; drawer traps focus, Esc closes, confirm dialog is a focus-trapped alertdialog.',
+        'prefers-reduced-motion collapses all animation to ≤1ms — bib appears drawn, stamp appears placed, progress jumps.',
+        'Status never relies on color alone: chips carry text, pending rows get the left rule, stamp is worded.',
+        'Bengali: error text is lang="bn" for screen readers; mixed lines keep English glyphs in Inter via font fallback order.',
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

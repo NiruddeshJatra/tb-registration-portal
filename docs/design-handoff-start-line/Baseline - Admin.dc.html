@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #111512; }
+  </style>
+</helmet>
+
+<section style="display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; padding: 48px; font-family: Inter, 'Noto Sans Bengali', sans-serif;">
+
+  <!-- ============ 1a: DASHBOARD (1280) ============ -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1a" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1a</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Admin Dashboard (1280)</span></div>
+    <div data-screen-label="Baseline Dashboard" style="width: 1280px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto; color: #edf3ee;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c3327; padding: 12px 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="triathlon-bd-shield-white.png" alt="" style="height: 32px; width: auto;">
+          <div>
+            <p style="margin: 0; font: 400 18px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Triathlon Bangladesh</p>
+            <p style="margin: 0; font-size: 12px; color: #9fb3a6;">admin@triathlonbangladesh.com</p>
+          </div>
+        </div>
+        <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; color: #edf3ee;">Sign Out</button>
+      </div>
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #1c3327; background: #0e1f16; padding: 0 8px;">
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid #2e9e54; color: #edf3ee;">Dashboard</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Registrations</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Add Entry</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Event Config</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Reports</span>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <h1 style="margin: 0; position: relative; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 10px;">Dashboard<span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #d4af37;"></span></h1>
+          <div style="width: 288px; height: 40px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">Chattogram Duathlon 2026 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+          <sc-for list="{{ statCards }}" as="c" hint-placeholder-count="5">
+            <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 8px;">
+              <p style="margin: 0; font-size: 14px; color: #9fb3a6; text-transform: capitalize;">{{ c.label }}</p>
+              <p style="margin: 0; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums;">{{ c.value }}<span style="font-size: 14px; color: #9fb3a6;">{{ c.suffix }}</span></p>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #9fb3a6;">Verified Revenue</p>
+            <p style="margin: 0; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums;">৳336,000</p>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #9fb3a6;">Pending Revenue</p>
+            <p style="margin: 0; font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums;">৳133,000</p>
+          </div>
+        </div>
+        <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px;">
+          <p style="margin: 0 0 16px; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Registrations Over Time (cumulative)</p>
+          <svg viewBox="0 0 600 160" style="width: 100%;">
+            <line x1="24" y1="136" x2="576" y2="136" stroke="#1c3327" stroke-width="1"></line>
+            <path d="M24,132 L93,126 L162,118 L231,104 L300,92 L369,74 L438,58 L507,40 L576,28" fill="none" stroke="#2e9e54" stroke-width="2"></path>
+            <circle cx="24" cy="132" r="2.5" fill="#2e9e54"></circle><circle cx="93" cy="126" r="2.5" fill="#2e9e54"></circle><circle cx="162" cy="118" r="2.5" fill="#2e9e54"></circle><circle cx="231" cy="104" r="2.5" fill="#2e9e54"></circle><circle cx="300" cy="92" r="2.5" fill="#2e9e54"></circle><circle cx="369" cy="74" r="2.5" fill="#2e9e54"></circle><circle cx="438" cy="58" r="2.5" fill="#2e9e54"></circle><circle cx="507" cy="40" r="2.5" fill="#2e9e54"></circle><circle cx="576" cy="28" r="2.5" fill="#2e9e54"></circle>
+            <text x="24" y="154" font-size="9" fill="#9fb3a6" text-anchor="start">06-08</text>
+            <text x="576" y="154" font-size="9" fill="#9fb3a6" text-anchor="end">07-05</text>
+          </svg>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="margin: 0 0 8px; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">By Category</p>
+            <sc-for list="{{ byCategory }}" as="c" hint-placeholder-count="4">
+              <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                <span style="color: #9fb3a6;">{{ c.name }}</span>
+                <span style="font-weight: 500;">{{ c.count }} · <span style="font-variant-numeric: tabular-nums;">{{ c.revenue }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="margin: 0 0 8px; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">By Jersey Size</p>
+            <sc-for list="{{ bySize }}" as="s" hint-placeholder-count="7">
+              <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                <span style="color: #9fb3a6;">{{ s.size }}</span>
+                <span style="font-weight: 500;">{{ s.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="margin: 0 0 8px; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Payment Method</p>
+            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #9fb3a6;">bKash</span><span style="font-weight: 500;">102</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #9fb3a6;">Nagad</span><span style="font-weight: 500;">38</span></div>
+          </div>
+        </div>
+        <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px;">
+          <p style="margin: 0 0 16px; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Category × Jersey Size (T-shirt order preview)</p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+              <tr style="border-bottom: 1px solid #1c3327;">
+                <th style="padding: 4px 0; text-align: left; font-weight: 500; color: #9fb3a6;">Category</th>
+                <th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">XS</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">S</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">M</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">L</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">XL</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">2XL</th><th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">3XL</th>
+                <th style="padding: 4px 8px; text-align: right; font-weight: 500; color: #9fb3a6;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ jerseyMatrix }}" as="row" hint-placeholder-count="4">
+                <tr style="border-bottom: 1px solid #1c3327;">
+                  <td style="padding: 4px 0;">{{ row.name }}</td>
+                  <td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s0 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s1 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s2 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s3 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s4 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s5 }}</td><td style="padding: 4px 8px; text-align: right; font-variant-numeric: tabular-nums;">{{ row.s6 }}</td>
+                  <td style="padding: 4px 8px; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">{{ row.total }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1b: REGISTRATIONS + DRAWER (1280) ============ -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1b" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1b</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Registrations table + detail drawer (1280)</span></div>
+    <div data-screen-label="Baseline Registrations" style="position: relative; width: 1280px; overflow: hidden; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto; color: #edf3ee;">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1c3327; padding: 12px 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="triathlon-bd-shield-white.png" alt="" style="height: 32px; width: auto;">
+          <div>
+            <p style="margin: 0; font: 400 18px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Triathlon Bangladesh</p>
+            <p style="margin: 0; font-size: 12px; color: #9fb3a6;">admin@triathlonbangladesh.com</p>
+          </div>
+        </div>
+        <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; color: #edf3ee;">Sign Out</button>
+      </div>
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #1c3327; background: #0e1f16; padding: 0 8px;">
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Dashboard</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid #2e9e54; color: #edf3ee;">Registrations</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Add Entry</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Event Config</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid transparent; color: #9fb3a6;">Reports</span>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <h1 style="margin: 0; position: relative; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 10px;">Registrations<span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #d4af37;"></span></h1>
+          <div style="width: 288px; height: 40px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">Chattogram Duathlon 2026 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="width: 256px; height: 40px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; color: #9fb3a6; box-sizing: border-box;">Search name, phone, TxID, ref code...</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="6">
+            <div style="height: 36px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; gap: 16px; padding: 0 12px; font-size: 13px; box-sizing: border-box;">{{ f }} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+          </sc-for>
+        </div>
+        <div style="border: 1px solid #1c3327; border-radius: 10px; overflow: hidden;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="background: #0e1f16; color: #9fb3a6;">
+                <th style="padding: 10px 12px; text-align: left; font-weight: 500;">Ref Code</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Name</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Phone</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Category</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Jersey</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Role</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Type</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Status</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">TxID</th><th style="padding: 10px 12px; text-align: left; font-weight: 500;">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="8">
+                <tr style="{{ r.rowStyle }}">
+                  <td style="padding: 8px 12px; font-weight: 500;">{{ r.ref }}</td>
+                  <td style="padding: 8px 12px;">{{ r.name }}</td>
+                  <td style="padding: 8px 12px;">{{ r.phone }}</td>
+                  <td style="padding: 8px 12px;">{{ r.cat }}</td>
+                  <td style="padding: 8px 12px;">{{ r.jersey }}</td>
+                  <td style="padding: 8px 12px; text-transform: capitalize;">{{ r.role }}</td>
+                  <td style="padding: 8px 12px; text-transform: capitalize;">{{ r.type }}</td>
+                  <td style="padding: 8px 12px;"><span style="{{ r.chipStyle }}">{{ r.status }}</span></td>
+                  <td style="padding: 8px 12px;">{{ r.txid }}</td>
+                  <td style="padding: 8px 12px;">{{ r.created }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <p style="margin: 0; font-size: 14px; color: #9fb3a6; font-variant-numeric: tabular-nums;">140 total · Page 1 of 3</p>
+          <div style="display: flex; gap: 8px;">
+            <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; color: #9fb3a6; opacity: 0.5;">Previous</button>
+            <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; color: #edf3ee;">Next</button>
+          </div>
+        </div>
+      </div>
+      <!-- drawer overlay -->
+      <div style="position: absolute; inset: 0; background: rgba(0,0,0,.5);"></div>
+      <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 448px; background: #0e1f16; border-left: 1px solid #1c3327; box-shadow: -20px 0 60px rgba(0,0,0,.5); padding: 16px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <p style="margin: 0; font-size: 16px; font-weight: 600;">CD26-000037</p>
+          <span style="display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: capitalize; background: rgba(212,175,55,.16); color: #d4af37;">pending</span>
+          <span style="margin-left: auto; color: #9fb3a6;">✕</span>
+        </div>
+        <div style="border: 1px solid #1c3327; border-radius: 10px; padding: 0 12px;">
+          <sc-for list="{{ drawerFields }}" as="f" hint-placeholder-count="10">
+            <div style="display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #1c3327; padding: 8px 0; font-size: 13px;">
+              <span style="color: #9fb3a6;">{{ f.label }}</span>
+              <span style="text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">{{ f.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 13px; color: #9fb3a6;">Admin Comment</label>
+          <div style="min-height: 60px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #9fb3a6; box-sizing: border-box;">Optional note...</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <p style="margin: 0; font-size: 13px; color: #9fb3a6;">Change Status</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button style="all: unset; height: 32px; padding: 0 12px; background: #d4af37; color: #08140e; border-radius: 8px; font-size: 13px; text-transform: capitalize; opacity: 0.5;">pending</button>
+            <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; text-transform: capitalize;">approved</button>
+            <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; text-transform: capitalize;">rejected</button>
+            <button style="all: unset; height: 32px; padding: 0 12px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; font-size: 13px; text-transform: capitalize;">cancelled</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1c: EVENT CONFIG (1280) ============ -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1c" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1c</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Event Config (1280)</span></div>
+    <div data-screen-label="Baseline Event Config" style="width: 1280px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto; color: #edf3ee;">
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #1c3327; background: #0e1f16; padding: 0 8px;">
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Dashboard</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Registrations</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Add Entry</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid #2e9e54; color: #edf3ee;">Event Config</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Reports</span>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <h1 style="margin: 0; position: relative; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 10px;">Event Config<span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #d4af37;"></span></h1>
+          <div style="width: 288px; height: 40px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">Chattogram Duathlon 2026 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+            <p style="margin: 0; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Event Settings</p>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;"><span style="width: 16px; height: 16px; border-radius: 4px; background: #d4af37; display: inline-flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#08140e" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg></span>Registration Open</label>
+            <div style="display: flex; flex-direction: column; gap: 8px;"><label style="font-size: 14px; font-weight: 500;">Registration Deadline</label><div style="height: 36px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">2026-11-10</div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;"><label style="font-size: 14px; font-weight: 500;">Max Total Slots (across all categories)</label><div style="height: 36px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">250</div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;"><label style="font-size: 14px; font-weight: 500;">Payment Number</label><div style="height: 36px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">01700-000000</div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;"><label style="font-size: 14px; font-weight: 500;">Fee Note</label><div style="min-height: 72px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: 'Noto Sans Bengali', Inter, sans-serif; box-sizing: border-box;">bKash/Nagad Send Money করে নিচের তথ্য দিন। Reference-এ আপনার নাম লিখুন।</div></div>
+            <button style="all: unset; align-self: flex-start; height: 36px; padding: 0 16px; background: #d4af37; color: #08140e; border-radius: 8px; font-size: 14px; font-weight: 500;">Save Event Settings</button>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+            <p style="margin: 0; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Categories</p>
+            <sc-for list="{{ configCategories }}" as="c" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 8px; border: 1px solid #1c3327; border-radius: 10px; padding: 12px; align-items: end;">
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Name</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; box-sizing: border-box; white-space: nowrap; overflow: hidden;">{{ c.name }}</div></div>
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Gender</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; box-sizing: border-box;">{{ c.gender }}</div></div>
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Min Age</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; box-sizing: border-box;">{{ c.minAge }}</div></div>
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Max Age</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: #9fb3a6; box-sizing: border-box;">{{ c.maxAge }}</div></div>
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Fee</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; box-sizing: border-box;">3500</div></div>
+                <div style="display: flex; flex-direction: column; gap: 4px;"><label style="font-size: 11px; color: #9fb3a6;">Max Slots</label><div style="height: 32px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 6px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: #9fb3a6; box-sizing: border-box;">unlimited</div></div>
+                <button style="all: unset; height: 32px; padding: 0 12px; background: #e23b3b; color: #edf3ee; border-radius: 6px; font-size: 12px;">Delete</button>
+              </div>
+            </sc-for>
+            <div style="border: 1px dashed #1c3327; border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 12px; color: #9fb3a6;">New category row (name / gender / ages / fee / slots)…</span>
+              <button style="all: unset; height: 32px; padding: 0 16px; background: #d4af37; color: #08140e; border-radius: 6px; font-size: 12px; font-weight: 500;">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1d: REPORTS (1280) ============ -->
+  <div id="1d" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1d" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1d</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Reports (1280)</span></div>
+    <div data-screen-label="Baseline Reports" style="width: 1280px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto; color: #edf3ee;">
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #1c3327; background: #0e1f16; padding: 0 8px;">
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Dashboard</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Registrations</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Add Entry</span>
+        <span style="padding: 8px 12px; font-size: 14px; color: #9fb3a6;">Event Config</span>
+        <span style="padding: 8px 12px; font-size: 14px; border-bottom: 2px solid #2e9e54; color: #edf3ee;">Reports</span>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <h1 style="margin: 0; position: relative; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 10px;">Reports<span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #d4af37;"></span></h1>
+          <div style="width: 288px; height: 40px; border: 1px solid rgba(46,158,84,.25); background: #16281e; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">Chattogram Duathlon 2026 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+              <p style="margin: 0; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Jersey Report</p>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: #9fb3a6;">Category × size pivot for the T-shirt order.</p>
+            <div style="height: 36px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">All Participants <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+            <button style="all: unset; height: 36px; background: #d4af37; color: #08140e; border-radius: 8px; font-size: 14px; font-weight: 500; text-align: center;">Download Excel</button>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><line x1="10" y1="2" x2="14" y2="2"></line><line x1="12" y1="14" x2="15" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg>
+              <p style="margin: 0; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Timing Partner Export</p>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: #9fb3a6;">Approved registrations only.</p>
+            <button style="all: unset; height: 36px; background: #d4af37; color: #08140e; border-radius: 8px; font-size: 14px; font-weight: 500; text-align: center; margin-top: auto;">Download Excel</button>
+          </div>
+          <div style="background: #0e1f16; border: 1px solid #1c3327; border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              <p style="margin: 0; font: 400 16px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">General Export</p>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: #9fb3a6;">Full registration list, optionally filtered by status.</p>
+            <div style="height: 36px; background: #16281e; border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">All Status <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+            <button style="all: unset; height: 36px; background: #d4af37; color: #08140e; border-radius: 8px; font-size: 14px; font-weight: 500; text-align: center;">Download Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const chip = (status) => {
+      const map = {
+        pending: 'background: rgba(212,175,55,.16); color: #d4af37;',
+        approved: 'background: rgba(46,158,84,.18); color: #2e9e54;',
+        rejected: 'background: rgba(226,59,59,.18); color: #e23b3b;',
+        cancelled: 'background: rgba(255,255,255,.08); color: #9fb3a6;',
+      };
+      return 'display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 10px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: capitalize; ' + map[status];
+    };
+    const regs = [
+      ['CD26-000140', 'Tanvir Ahmed', '01712345678', 'Male General', 'M', 'runner', 'paid', 'pending', '9AB3CD4EF5', '05/07/2026'],
+      ['CD26-000139', 'Nusrat Jahan', '01898765432', 'Female General', 'S', 'runner', 'paid', 'pending', '8XY2ZW1QP0', '05/07/2026'],
+      ['CD26-000138', 'Md. Kamal Hossain', '01911223344', 'Male Master', 'L', 'runner', 'paid', 'approved', '7GH6JK5LM4', '04/07/2026'],
+      ['CD26-000137', 'Sabrina Akter', '01755667788', 'Female General', 'M', 'runner', 'paid', 'pending', '6QR8ST9UV2', '04/07/2026'],
+      ['CD26-000136', 'Rafiq Islam', '01633445566', 'Male General', 'XL', 'runner', 'discounted', 'approved', '5CD3EF7GH1', '04/07/2026'],
+      ['CD26-000135', 'Arif Chowdhury', '01344556677', 'Male General', 'M', 'pacer', 'complimentary', 'approved', 'COMP-ARIF', '03/07/2026'],
+      ['CD26-000134', 'Farhana Rahman', '01822334455', 'Female Master', 'S', 'runner', 'paid', 'rejected', '4JK2LM8NP6', '03/07/2026'],
+      ['CD26-000133', 'Shakil Mahmud', '01566778899', 'Male General', 'L', 'runner', 'paid', 'approved', '3QW5ER9TY7', '02/07/2026'],
+      ['CD26-000132', 'Jannatul Ferdous', '01977889900', 'Female General', 'M', 'runner', 'paid', 'cancelled', '2UI4OP6AS8', '02/07/2026'],
+      ['CD26-000131', 'Imran Khan', '01388990011', 'Male Master', '2XL', 'runner', 'paid', 'approved', '1DF7GH3JK5', '01/07/2026'],
+    ];
+    return {
+      statCards: [
+        { label: 'Total', value: '140', suffix: ' / 250' },
+        { label: 'pending', value: '38', suffix: '' },
+        { label: 'approved', value: '96', suffix: '' },
+        { label: 'rejected', value: '4', suffix: '' },
+        { label: 'cancelled', value: '2', suffix: '' },
+      ],
+      byCategory: [
+        { name: 'Male General', count: 82, revenue: '৳199,500' },
+        { name: 'Male Master', count: 24, revenue: '৳59,500' },
+        { name: 'Female General', count: 21, revenue: '৳56,000' },
+        { name: 'Female Master', count: 7, revenue: '৳21,000' },
+      ],
+      bySize: [
+        { size: 'XS', count: 4 }, { size: 'S', count: 19 }, { size: 'M', count: 52 },
+        { size: 'L', count: 38 }, { size: 'XL', count: 19 }, { size: '2XL', count: 6 }, { size: '3XL', count: 2 },
+      ],
+      jerseyMatrix: [
+        { name: 'Male General', s0: 1, s1: 8, s2: 33, s3: 25, s4: 12, s5: 3, s6: 0, total: 82 },
+        { name: 'Male Master', s0: 0, s1: 2, s2: 7, s3: 8, s4: 4, s5: 2, s6: 1, total: 24 },
+        { name: 'Female General', s0: 2, s1: 7, s2: 9, s3: 3, s4: 0, s5: 0, s6: 0, total: 21 },
+        { name: 'Female Master', s0: 1, s1: 2, s2: 3, s3: 1, s4: 0, s5: 0, s6: 0, total: 7 },
+      ],
+      filters: ['All Categories', 'All Status', 'All Roles', 'All Sources', 'All Types', 'All Sizes'],
+      tableRows: regs.map((r, i) => ({
+        ref: r[0], name: r[1], phone: r[2], cat: r[3], jersey: r[4], role: r[5], type: r[6],
+        status: r[7], txid: r[8], created: r[9],
+        chipStyle: chip(r[7]),
+        rowStyle: 'cursor: pointer; border-bottom: 1px solid #1c3327;' + (i % 2 === 1 ? ' background: rgba(255,255,255,.02);' : ''),
+      })),
+      drawerFields: [
+        { label: 'Name', value: 'Sabrina Akter' },
+        { label: 'Phone', value: '01755667788' },
+        { label: 'Emergency Phone', value: '01644556677' },
+        { label: 'Email', value: 'sabrina@example.com' },
+        { label: 'Gender', value: 'female' },
+        { label: 'DOB', value: '1998-04-22' },
+        { label: 'Blood Group', value: 'B+' },
+        { label: 'Jersey Size', value: 'M' },
+        { label: 'Category', value: 'Female General' },
+        { label: 'Role', value: 'runner' },
+        { label: 'Entry Source', value: 'self' },
+        { label: 'Registration Type', value: 'paid' },
+        { label: 'Payment Method', value: 'bKash' },
+        { label: 'Payment Sender', value: '01755667788' },
+        { label: 'Transaction ID', value: '6QR8ST9UV2' },
+        { label: 'Created At', value: '2026-07-04 14:22' },
+        { label: 'Fee', value: '৳3,500' },
+      ],
+      configCategories: [
+        { name: 'Male General', gender: 'Male', minAge: 18, maxAge: 39 },
+        { name: 'Male Master (40+)', gender: 'Male', minAge: 40, maxAge: 'none' },
+        { name: 'Female General', gender: 'Female', minAge: 18, maxAge: 39 },
+        { name: 'Female Master (40+)', gender: 'Female', minAge: 40, maxAge: 'none' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

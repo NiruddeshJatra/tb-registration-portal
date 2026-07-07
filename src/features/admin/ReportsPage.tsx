@@ -3,11 +3,9 @@ import { supabase } from '@/lib/supabase'
 import { downloadExcel } from '@/lib/xlsxExport'
 import { useEvents } from './useEvents'
 import { EventSelector } from './EventSelector'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BrandLoader } from '@/components/brand/BrandLoader'
-import { Shirt, Timer, FileSpreadsheet } from 'lucide-react'
+import { DashLoader } from '@/components/brand/DashLoader'
+import { cn } from '@/lib/utils'
 import type { CategoryRow } from '@/lib/types'
 
 const ALL = '__all__'
@@ -32,9 +30,7 @@ export function ReportsPage() {
     const categories = (cats ?? []) as CategoryRow[]
     const rows = categories.map((c) => {
       const row: Record<string, unknown> = { Category: c.name }
-      for (const size of JERSEY_SIZES) {
-        row[size] = (regs ?? []).filter((r) => r.category_id === c.id && r.jersey_size === size).length
-      }
+      for (const size of JERSEY_SIZES) row[size] = (regs ?? []).filter((r) => r.category_id === c.id && r.jersey_size === size).length
       row.Total = (regs ?? []).filter((r) => r.category_id === c.id).length
       return row
     })
@@ -45,7 +41,6 @@ export function ReportsPage() {
       row.Total = noCategory.length
       rows.push(row)
     }
-
     downloadExcel(`jersey-report-${selectedEvent?.slug ?? 'event'}.xlsx`, 'Jersey Report', rows)
     setBusy(null)
   }
@@ -57,7 +52,6 @@ export function ReportsPage() {
       .select('ref_code, full_name, gender, date_of_birth, phone, categories(name)')
       .eq('event_id', selectedEventId)
       .eq('status', 'approved')
-
     const rows = (data ?? []).map((r) => ({
       'Ref Code': r.ref_code,
       Name: r.full_name,
@@ -78,7 +72,6 @@ export function ReportsPage() {
       .eq('event_id', selectedEventId)
     if (generalStatus !== ALL) query = query.eq('status', generalStatus)
     const { data } = await query.order('created_at', { ascending: false })
-
     const rows = (data ?? []).map((r) => ({
       'Ref Code': r.ref_code,
       Name: r.full_name,
@@ -95,85 +88,77 @@ export function ReportsPage() {
     setBusy(null)
   }
 
+  const cards = [
+    {
+      num: '01',
+      title: 'Jersey Report',
+      desc: 'Category × size pivot for the T-shirt order.',
+      onClick: exportJerseyReport,
+      key: 'jersey',
+      filter: (
+        <Select value={jerseyRole} onValueChange={(v) => setJerseyRole((v ?? 'all') as typeof jerseyRole)} items={[{ value: 'all', label: 'All participants' }, { value: 'runner', label: 'Runners only' }, { value: 'crew', label: 'Crew only' }]}>
+          <SelectTrigger className="h-[38px] w-full"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All participants</SelectItem><SelectItem value="runner">Runners only</SelectItem><SelectItem value="crew">Crew only</SelectItem></SelectContent>
+        </Select>
+      ),
+    },
+    {
+      num: '02',
+      title: 'Timing Partner Export',
+      desc: 'Approved registrations only — ref, name, gender, DOB, category, phone.',
+      onClick: exportTimingPartnerReport,
+      key: 'timing',
+      filter: null,
+    },
+    {
+      num: '03',
+      title: 'General Export',
+      desc: 'Full registration list, optionally filtered by status.',
+      onClick: exportGeneralReport,
+      key: 'general',
+      filter: (
+        <Select value={generalStatus} onValueChange={(v) => setGeneralStatus(v ?? ALL)} items={[{ value: ALL, label: 'All status' }, ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s }))]}>
+          <SelectTrigger className="h-[38px] w-full"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value={ALL}>All status</SelectItem>{['pending', 'approved', 'rejected', 'cancelled'].map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}</SelectContent>
+        </Select>
+      ),
+    },
+  ]
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <div className="admin-page-header">
-        <h1>Reports</h1>
+        <div>
+          <h1>Exports</h1>
+          <p className="mt-1.5 text-[12.5px] text-muted-foreground">Excel downloads, generated client-side from the live table.</p>
+        </div>
         <EventSelector events={events} selectedEventId={selectedEventId} onChange={setSelectedEventId} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <Shirt className="size-4 text-gold" />
-            <CardTitle>Jersey Report</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">Category &times; size pivot for the T-shirt order.</p>
-            <Select
-              value={jerseyRole}
-              onValueChange={(v) => setJerseyRole(v as typeof jerseyRole)}
-              items={[
-                { value: 'all', label: 'All Participants' },
-                { value: 'runner', label: 'Runners Only' },
-                { value: 'crew', label: 'Crew Only' },
-              ]}
-            >
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Participants</SelectItem>
-                <SelectItem value="runner">Runners Only</SelectItem>
-                <SelectItem value="crew">Crew Only</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={exportJerseyReport} disabled={busy === 'jersey'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
-              {busy === 'jersey' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <Timer className="size-4 text-gold" />
-            <CardTitle>Timing Partner Export</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">Approved registrations only.</p>
-            <Button onClick={exportTimingPartnerReport} disabled={busy === 'timing'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
-              {busy === 'timing' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 space-y-0">
-            <FileSpreadsheet className="size-4 text-gold" />
-            <CardTitle>General Export</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">Full registration list, optionally filtered by status.</p>
-            <Select
-              value={generalStatus}
-              onValueChange={(v) => setGeneralStatus(v ?? ALL)}
-              items={[
-                { value: ALL, label: 'All Status' },
-                ...['pending', 'approved', 'rejected', 'cancelled'].map((s) => ({ value: s, label: s })),
-              ]}
-            >
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL}>All Status</SelectItem>
-                {['pending', 'approved', 'rejected', 'cancelled'].map((s) => (
-                  <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={exportGeneralReport} disabled={busy === 'general'} className="btn-sheen bg-primary text-primary-foreground hover:bg-primary/90">
-              {busy === 'general' ? <BrandLoader inline label="Generating..." /> : 'Download Excel'}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
+        {cards.map((c) => (
+          <div key={c.key} className="flex flex-col border border-border bg-card">
+            <div className="flex items-baseline justify-between px-5 pt-4">
+              <p className="font-mono text-[26px] font-semibold text-accent">{c.num}</p>
+              <p className="font-mono text-[9.5px] text-faint">.XLSX</p>
+            </div>
+            <div className="flex flex-1 flex-col gap-2.5 px-5 pt-2 pb-4">
+              <p className="font-heading text-[15px] font-semibold tracking-[0.08em] uppercase">{c.title}</p>
+              <p className="text-[12px] leading-[1.6] text-muted-foreground">{c.desc}</p>
+              {c.filter && <div className="mt-auto">{c.filter}</div>}
+              <button
+                type="button"
+                onClick={c.onClick}
+                disabled={busy === c.key}
+                className={cn('flex h-[42px] items-center justify-center gap-2 border border-accent font-heading text-[11px] font-semibold tracking-[0.2em] text-accent uppercase transition-colors hover:bg-accent/[0.08] disabled:opacity-50', !c.filter && 'mt-auto')}
+              >
+                {busy === c.key ? <DashLoader inline label="জেনারেট হচ্ছে…" /> : '↓ Download Excel'}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
+

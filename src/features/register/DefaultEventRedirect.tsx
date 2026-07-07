@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { BrandLoader } from '@/components/brand/BrandLoader'
+import { DashLoader } from '@/components/brand/DashLoader'
 
 export function DefaultEventRedirect() {
   const [slug, setSlug] = useState<string | null | undefined>(undefined)
@@ -26,16 +26,16 @@ export function DefaultEventRedirect() {
 
   if (slug === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <BrandLoader />
+      <div className="sl-paper flex min-h-screen items-center justify-center">
+        <DashLoader label="লোড হচ্ছে…" />
       </div>
     )
   }
 
   if (slug === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center text-foreground">
-        <p>এই মুহূর্তে কোনো ইভেন্ট নেই। / No event is currently configured.</p>
+      <div className="sl-paper flex min-h-screen items-center justify-center px-6 text-center text-foreground">
+        <p lang="bn">এই মুহূর্তে কোনো ইভেন্ট নেই। / No event is currently configured.</p>
       </div>
     )
   }

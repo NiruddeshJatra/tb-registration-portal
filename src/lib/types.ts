@@ -4,7 +4,7 @@ export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
 
 export type JerseySize = 'XS' | 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL'
 
-export type PaymentMethod = 'bKash' | 'Nagad'
+export type PaymentMethod = 'bKash' | 'Nagad' | 'Rocket' | 'Upay'
 
 export type ParticipantRole =
   | 'runner'

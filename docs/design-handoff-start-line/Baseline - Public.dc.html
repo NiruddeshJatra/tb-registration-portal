@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #111512; }
+  </style>
+</helmet>
+
+<section style="display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; padding: 48px; font-family: Inter, 'Noto Sans Bengali', sans-serif;">
+
+  <!-- ============ 1a: WIZARD STEP 1 (mobile 360) ============ -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1a" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1a</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Wizard Step 1 — Eligibility (360)</span></div>
+    <div data-screen-label="Baseline Step 1" style="width: 360px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee;">
+      <!-- poster panel -->
+      <div style="position: relative; height: 192px; background-image: url('poster.jpg'); background-size: cover; background-position: center 35%; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(160deg, rgba(8,20,14,.55), rgba(8,20,14,.92));"></div>
+        <img src="triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" style="position: relative; z-index: 1; height: 40px; width: auto; align-self: flex-start;">
+        <div style="position: relative; z-index: 1;">
+          <h2 style="margin: 0; font: 400 18px Oswald; text-transform: uppercase; letter-spacing: 0.1em;">Chattogram Duathlon 2026</h2>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #9fb3a6;">13 November 2026 · City Corporation Stadium, Bakolia</p>
+          <span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #2e9e54; text-decoration: underline; text-underline-offset: 2px;">triathlonbangladesh.com ↗</span>
+        </div>
+      </div>
+      <div style="padding: 24px 16px; display: flex; flex-direction: column; gap: 24px;">
+        <!-- run-bike-run strip -->
+        <svg viewBox="0 0 200 32" style="height: 24px; width: auto; margin: 0 auto; display: block;">
+          <line x1="20" y1="16" x2="180" y2="16" stroke="#1c3327" stroke-width="2" stroke-dasharray="3 4"></line>
+          <g stroke="#2e9e54" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="16" cy="6" r="3" fill="#2e9e54" stroke="none"></circle><path d="M16 10 L14 18 L8 22 M16 10 L20 16 L26 14 M14 18 L20 24"></path></g>
+          <g stroke="#e23b3b" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="92" cy="22" r="6"></circle><circle cx="112" cy="22" r="6"></circle><path d="M92 22 L100 8 L112 22 M100 8 L104 8 M92 22 L106 22"></path></g>
+          <g stroke="#2e9e54" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="184" cy="6" r="3" fill="#2e9e54" stroke="none"></circle><path d="M184 10 L182 18 L176 22 M184 10 L188 16 L194 14 M182 18 L188 24"></path></g>
+        </svg>
+        <!-- step progress -->
+        <div>
+          <div style="display: flex; gap: 6px;">
+            <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+            <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+            <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+            <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+          </div>
+          <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #9fb3a6;">ধাপ 1/4 · Event</p>
+        </div>
+        <!-- wizard shell -->
+        <div style="background: rgba(255,255,255,.05); backdrop-filter: blur(14px); border: 1px solid rgba(212,175,55,.16); border-radius: 20px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); padding: 20px; display: flex; flex-direction: column; gap: 24px;">
+          <div style="border: 1px solid #1c3327; background: #0e1f16; border-radius: 10px; padding: 16px; text-align: center;">
+            <h2 style="margin: 0; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Chattogram Duathlon 2026</h2>
+            <p style="margin: 4px 0 0; font-size: 14px; color: #9fb3a6;">13 November 2026 · City Corporation Stadium, Bakolia</p>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 14px; font-weight: 500;">Gender / লিঙ্গ</label>
+            <div style="display: flex; gap: 16px;">
+              <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #2e9e54; background: rgba(46,158,84,.1); border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #2e9e54; display: inline-flex; align-items: center; justify-content: center;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #2e9e54;"></span></span>Male</label>
+              <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #1c3327; border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #1c3327;"></span>Female</label>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 14px; font-weight: 500;">Date of Birth / জন্ম তারিখ</label>
+            <div style="display: flex; gap: 8px;">
+              <div style="flex: 1; height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">15/03/1995</div>
+              <div style="width: 44px; height: 44px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#edf3ee" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+            </div>
+          </div>
+          <div style="border: 1px solid #2e9e54; background: rgba(46,158,84,.1); border-radius: 10px; padding: 16px; text-align: center;">
+            <p style="margin: 0; font-size: 16px;">আপনার ক্যাটাগরি: <span style="font-weight: 600;">Male General</span> — ৳3,500 টাকা</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button style="all: unset; flex: 1; height: 48px; background: #d4af37; color: #08140e; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center; cursor: pointer;">পরবর্তী</button>
+        </div>
+        <p style="margin: 0; text-align: center; font-size: 12px; color: #9fb3a6; text-decoration: underline;">Triathlon Bangladesh — triathlonbangladesh.com</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1b: WIZARD STEP 2 (mobile 360) ============ -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1b" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1b</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Wizard Step 2 — Personal (360)</span></div>
+    <div data-screen-label="Baseline Step 2" style="width: 360px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px;">
+      <div>
+        <div style="display: flex; gap: 6px;">
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+        </div>
+        <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #9fb3a6;">ধাপ 2/4 · Personal</p>
+      </div>
+      <div style="background: rgba(255,255,255,.05); backdrop-filter: blur(14px); border: 1px solid rgba(212,175,55,.16); border-radius: 20px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); padding: 20px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Full Name (English) / পূর্ণ নাম</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">md. rahim uddin</div>
+          <p style="margin: 0; font-size: 14px; color: #9fb3a6;">দেখাবে: Md. Rahim Uddin</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Phone / ফোন নম্বর</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid #e23b3b; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">0171234</div>
+          <p style="margin: 0; font-size: 14px; color: #e23b3b;">সঠিক ১১ ডিজিটের নম্বর দিন</p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Emergency Phone / জরুরি যোগাযোগ নম্বর</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">01898765432</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Email</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; color: #9fb3a6; box-sizing: border-box;">you@example.com</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Blood Group / রক্তের গ্রুপ</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">O+ <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Address / ঠিকানা</label>
+          <div style="min-height: 64px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; padding: 8px 12px; font-size: 14px; box-sizing: border-box;">Bakolia, Chattogram</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label style="font-size: 14px; font-weight: 500;">Jersey Size / জার্সির মাপ</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 14px; box-sizing: border-box;">M <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9fb3a6" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+          <div style="border: 1px solid #1c3327; border-radius: 10px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <thead><tr style="background: #142a1f; color: #9fb3a6;"><th style="padding: 8px 12px; text-align: left; font-weight: 500;">Size</th><th style="padding: 8px 12px; text-align: left; font-weight: 500;">Chest (in)</th><th style="padding: 8px 12px; text-align: left; font-weight: 500;">Length (in)</th></tr></thead>
+              <tbody>
+                <tr style="border-top: 1px solid #1c3327;"><td style="padding: 8px 12px; font-weight: 500;">S</td><td style="padding: 8px 12px; color: #9fb3a6;">36</td><td style="padding: 8px 12px; color: #9fb3a6;">26</td></tr>
+                <tr style="border-top: 1px solid #1c3327;"><td style="padding: 8px 12px; font-weight: 500;">M</td><td style="padding: 8px 12px; color: #9fb3a6;">38</td><td style="padding: 8px 12px; color: #9fb3a6;">27</td></tr>
+                <tr style="border-top: 1px solid #1c3327;"><td style="padding: 8px 12px; font-weight: 500;">L</td><td style="padding: 8px 12px; color: #9fb3a6;">40</td><td style="padding: 8px 12px; color: #9fb3a6;">28</td></tr>
+                <tr style="border-top: 1px solid #1c3327;"><td style="padding: 8px 12px; font-weight: 500;">XL</td><td style="padding: 8px 12px; color: #9fb3a6;">42</td><td style="padding: 8px 12px; color: #9fb3a6;">29</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin: 0; background: #142a1f; border-radius: 8px; padding: 12px; font-size: 14px; color: #9fb3a6; font-family: 'Noto Sans Bengali', Inter, sans-serif;">প্রো জার্সি সাধারণ টি-শার্টের মতো ঢিলা নয় — চার্টের মাপ অনুযায়ী গায়ে ফিট হবে। মাপ দেখে সাইজ নির্বাচন করুন।<br>Pro jerseys fit true to the chart measurements — they are NOT loose like regular T-shirts.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button style="all: unset; flex: 1; height: 48px; border: 1px solid #16281e; background: #08140e; color: #edf3ee; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center;">পূর্ববর্তী</button>
+        <button style="all: unset; flex: 1; height: 48px; background: #d4af37; color: #08140e; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center; opacity: 0.5;">পরবর্তী</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1c: WIZARD STEP 3 (mobile 360) ============ -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1c" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1c</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Wizard Step 3 — Payment (360)</span></div>
+    <div data-screen-label="Baseline Step 3" style="width: 360px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px;">
+      <div>
+        <div style="display: flex; gap: 6px;">
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+        </div>
+        <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #9fb3a6;">ধাপ 3/4 · Payment</p>
+      </div>
+      <div style="background: rgba(255,255,255,.05); backdrop-filter: blur(14px); border: 1px solid rgba(212,175,55,.16); border-radius: 20px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); padding: 20px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="border: 1px solid #1c3327; background: #0e1f16; border-radius: 10px; padding: 16px; font-size: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <p style="margin: 0; font-family: 'Noto Sans Bengali', Inter, sans-serif;">bKash/Nagad Send Money করে নিচের তথ্য দিন। Reference-এ আপনার নাম লিখুন।</p>
+          <p style="margin: 0; font-size: 18px; font-weight: 600; color: #d4af37;">01700-000000</p>
+          <p style="margin: 0; color: #9fb3a6;">ক্যাটাগরি ফি: <span style="font-weight: 600; color: #edf3ee;">৳3,500</span></p>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Payment Method / পেমেন্ট মাধ্যম</label>
+          <div style="display: flex; gap: 16px;">
+            <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #2e9e54; background: rgba(46,158,84,.1); border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #2e9e54; display: inline-flex; align-items: center; justify-content: center;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #2e9e54;"></span></span>bKash</label>
+            <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #1c3327; border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #1c3327;"></span>Nagad</label>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Sender Number / যে নম্বর থেকে টাকা পাঠিয়েছেন</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; box-sizing: border-box;">01712345678</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Transaction ID</label>
+          <div style="height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; text-transform: uppercase; box-sizing: border-box;">9AB3CD4EF5</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="font-size: 14px; font-weight: 500;">Comments (optional) / মন্তব্য</label>
+          <div style="min-height: 64px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; padding: 8px 12px; box-sizing: border-box;"></div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button style="all: unset; flex: 1; height: 48px; border: 1px solid #16281e; background: #08140e; color: #edf3ee; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center;">পূর্ববর্তী</button>
+        <button style="all: unset; flex: 1; height: 48px; background: #d4af37; color: #08140e; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center;">পরবর্তী</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1d: WIZARD STEP 4 (mobile 360) ============ -->
+  <div id="1d" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1d" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1d</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Wizard Step 4 — Review (360)</span></div>
+    <div data-screen-label="Baseline Step 4" style="width: 360px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px;">
+      <div>
+        <div style="display: flex; gap: 6px;">
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+          <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+        </div>
+        <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #9fb3a6;">ধাপ 4/4 · Review</p>
+      </div>
+      <div style="background: rgba(255,255,255,.05); backdrop-filter: blur(14px); border: 1px solid rgba(212,175,55,.16); border-radius: 20px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); padding: 20px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="border: 1px solid #1c3327; background: #0e1f16; border-radius: 10px; padding: 4px 16px;">
+          <sc-for list="{{ reviewRows }}" as="row" hint-placeholder-count="6">
+            <div style="display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #1c3327; padding: 8px 0; font-size: 14px;">
+              <span style="color: #9fb3a6;">{{ row.label }}</span>
+              <span style="text-align: right; font-weight: 500;">{{ row.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <label style="display: flex; align-items: flex-start; gap: 12px; border: 1px solid #1c3327; background: #0e1f16; border-radius: 10px; padding: 16px;">
+          <span style="margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; border-radius: 4px; background: #d4af37; display: inline-flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#08140e" stroke-width="3"><path d="M20 6L9 17l-5-5"></path></svg></span>
+          <span style="font-size: 14px; font-family: 'Noto Sans Bengali', Inter, sans-serif;">I am physically and mentally fit. আমি সব শর্ত মেনে রেজিস্ট্রেশন করছি এবং এটাও মানছি যে আয়োজকদের সিদ্ধান্ত চূড়ান্ত।</span>
+        </label>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button style="all: unset; flex: 1; height: 48px; border: 1px solid #16281e; background: #08140e; color: #edf3ee; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center;">পূর্ববর্তী</button>
+        <button style="all: unset; flex: 1; height: 48px; background: #d4af37; color: #08140e; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center;">সাবমিট করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1e: SUCCESS (mobile 360) ============ -->
+  <div id="1e" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1e" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1e</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Success screen (360)</span></div>
+    <div data-screen-label="Baseline Success" style="width: 360px; min-height: 640px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee; padding: 40px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; align-items: center; text-align: center;">
+      <div style="position: relative; width: 224px; height: 224px; display: flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 200 200" style="position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg);">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#1c3327" stroke-width="3"></circle>
+          <circle cx="100" cy="100" r="90" fill="none" stroke="#d4af37" stroke-width="3" stroke-linecap="round"></circle>
+        </svg>
+        <div style="position: relative;">
+          <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.2em; color: #9fb3a6;">Reference Code</p>
+          <p style="margin: 4px 0 0; font: 400 30px Oswald; text-transform: uppercase; color: #d4af37;">CD26-000042</p>
+          <p style="margin: 8px 0 0; font-size: 12px; color: #9fb3a6; text-decoration: underline; text-underline-offset: 2px;">Copy</p>
+        </div>
+      </div>
+      <div>
+        <p style="margin: 0; font-size: 18px; font-weight: 500;">Md. Rahim Uddin</p>
+        <p style="margin: 4px 0 0; font-size: 14px; color: #9fb3a6;">Male General · ৳3,500</p>
+      </div>
+      <div style="border: 1px solid #2e9e54; background: rgba(46,158,84,.1); border-radius: 10px; padding: 16px; font-size: 14px; font-family: 'Noto Sans Bengali', Inter, sans-serif;">আপনার রেজিস্ট্রেশন পেন্ডিং আছে — Transaction verify হলে confirm হবে।</div>
+      <p style="margin: 0; font-size: 14px; color: #9fb3a6; font-family: 'Noto Sans Bengali', Inter, sans-serif;">এই স্ক্রিনের স্ক্রিনশট রেখে দিন।</p>
+      <p style="margin: 0; font-size: 14px; color: #2e9e54; text-decoration: underline;">Triathlon Bangladesh — Facebook Page</p>
+    </div>
+  </div>
+
+  <!-- ============ 1f: DESKTOP WIZARD (1024) ============ -->
+  <div id="1f" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;"><a href="#1f" style="background: #d4af37; color: #08140e; font: 700 11px Inter; padding: 2px 8px; border-radius: 4px; text-decoration: none;">1f</a><span style="color: #9fb3a6; font-size: 12px;">Baseline · Desktop wizard, Step 1 (1024)</span></div>
+    <div data-screen-label="Baseline Desktop Wizard" style="width: 1024px; min-height: 760px; background-image: linear-gradient(rgba(46,158,84,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,158,84,.06) 1px, transparent 1px), radial-gradient(80% 40% at 85% -10%, rgba(20,102,63,.32), transparent 60%), radial-gradient(60% 40% at -10% 30%, rgba(11,61,46,.40), transparent 60%), linear-gradient(180deg, #0a1812 0%, #08140e 30%, #060f0a 100%); background-size: 90px 90px, 90px 90px, auto, auto, auto; color: #edf3ee; display: flex;">
+      <div style="position: relative; width: 40%; background-image: url('poster.jpg'); background-size: cover; background-position: center 35%; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(160deg, rgba(8,20,14,.55), rgba(8,20,14,.92));"></div>
+        <img src="triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" style="position: relative; z-index: 1; height: 48px; width: auto; align-self: flex-start;">
+        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font: 400 24px Oswald; text-transform: uppercase; letter-spacing: 0.1em;">Chattogram Duathlon 2026</h2>
+          <p style="margin: 0; font-size: 14px; color: #9fb3a6;">13 November 2026 · City Corporation Stadium, Bakolia</p>
+          <span style="font-size: 12px; color: #2e9e54; text-decoration: underline; text-underline-offset: 2px;">triathlonbangladesh.com ↗</span>
+        </div>
+      </div>
+      <div style="flex: 1; padding: 40px; box-sizing: border-box;">
+        <div style="max-width: 512px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+          <svg viewBox="0 0 200 32" style="height: 24px; width: auto; margin: 0 auto; display: block;">
+            <line x1="20" y1="16" x2="180" y2="16" stroke="#1c3327" stroke-width="2" stroke-dasharray="3 4"></line>
+            <g stroke="#2e9e54" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="16" cy="6" r="3" fill="#2e9e54" stroke="none"></circle><path d="M16 10 L14 18 L8 22 M16 10 L20 16 L26 14 M14 18 L20 24"></path></g>
+            <g stroke="#e23b3b" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="92" cy="22" r="6"></circle><circle cx="112" cy="22" r="6"></circle><path d="M92 22 L100 8 L112 22 M100 8 L104 8 M92 22 L106 22"></path></g>
+            <g stroke="#2e9e54" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="184" cy="6" r="3" fill="#2e9e54" stroke="none"></circle><path d="M184 10 L182 18 L176 22 M184 10 L188 16 L194 14 M182 18 L188 24"></path></g>
+          </svg>
+          <div>
+            <div style="display: flex; gap: 6px;">
+              <div style="height: 6px; flex: 1; border-radius: 999px; background: #2e9e54;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+              <div style="height: 6px; flex: 1; border-radius: 999px; background: #142a1f;"></div>
+            </div>
+            <p style="margin: 8px 0 0; text-align: center; font-size: 14px; color: #9fb3a6;">ধাপ 1/4 · Event</p>
+          </div>
+          <div style="background: rgba(255,255,255,.05); backdrop-filter: blur(14px); border: 1px solid rgba(212,175,55,.16); border-radius: 20px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6); padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+            <div style="border: 1px solid #1c3327; background: #0e1f16; border-radius: 10px; padding: 16px; text-align: center;">
+              <h2 style="margin: 0; font: 400 20px Oswald; text-transform: uppercase; letter-spacing: 0.05em;">Chattogram Duathlon 2026</h2>
+              <p style="margin: 4px 0 0; font-size: 14px; color: #9fb3a6;">13 November 2026 · City Corporation Stadium, Bakolia</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 14px; font-weight: 500;">Gender / লিঙ্গ</label>
+              <div style="display: flex; gap: 16px;">
+                <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #1c3327; border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #1c3327;"></span>Male</label>
+                <label style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #1c3327; border-radius: 8px; padding: 0 16px; font-size: 14px; box-sizing: border-box;"><span style="width: 16px; height: 16px; border-radius: 50%; border: 1px solid #1c3327;"></span>Female</label>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-size: 14px; font-weight: 500;">Date of Birth / জন্ম তারিখ</label>
+              <div style="display: flex; gap: 8px;">
+                <div style="flex: 1; height: 44px; background: rgba(0,0,0,.25); border: 1px solid rgba(46,158,84,.25); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; color: #9fb3a6; box-sizing: border-box;">dd/mm/yyyy</div>
+                <div style="width: 44px; height: 44px; border: 1px solid #16281e; background: #08140e; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#edf3ee" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button style="all: unset; flex: 1; height: 48px; background: #d4af37; color: #08140e; border-radius: 8px; font: 500 14px 'Noto Sans Bengali'; text-align: center; opacity: 0.5;">পরবর্তী</button>
+          </div>
+          <p style="margin: 0; text-align: center; font-size: 12px; color: #9fb3a6; text-decoration: underline;">Triathlon Bangladesh — triathlonbangladesh.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      reviewRows: [
+        { label: 'Event', value: 'Chattogram Duathlon 2026' },
+        { label: 'Category', value: 'Male General' },
+        { label: 'Fee', value: '৳3,500' },
+        { label: 'Name', value: 'Md. Rahim Uddin' },
+        { label: 'Phone', value: '01712345678' },
+        { label: 'Emergency Phone', value: '01898765432' },
+        { label: 'Email', value: 'rahim@example.com' },
+        { label: 'Blood Group', value: 'O+' },
+        { label: 'Jersey Size', value: 'M' },
+        { label: 'Payment Method', value: 'bKash' },
+        { label: 'Transaction ID', value: '9AB3CD4EF5' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

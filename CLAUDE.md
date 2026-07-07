@@ -17,15 +17,17 @@ src/
     xlsxExport.ts              # SheetJS wrapper for admin Excel exports
   features/
     register/                 # public 4-step registration wizard (/register/:eventSlug)
-      RegisterPage.tsx         # data fetch + wizard state + RPC submit + success/error/closed screens; desktop split layout (poster panel + wizard-shell glass card)
+      RegisterPage.tsx         # data fetch + wizard state + RPC submit + success/error/closed screens; "Start Line" identity-rail (dark ink panel) + form-column layout; blur-based `touched` map passed to steps
+      SuccessScreen.tsx        # the race "bib" — drawn SVG border + PENDING stamp; successor to the retired GoldRing
       formState.ts             # form shape + client-side category matching (matchCategory)
       steps/Step1..4*.tsx       # one component per wizard step
+      steps/fields.tsx          # shared FieldLabel/FieldError + inputBorder() helper for the wizard steps
     admin/                     # admin dashboard (/admin/*), guarded by AuthContext session
       AuthContext.tsx           # Supabase Auth session provider
       AdminLayout.tsx           # nav + auth guard (redirects to /admin/login if no session)
       DashboardPage.tsx         # stats (status counts, revenue, per-category, per-size, over-time, payment split), CountUp on all figures
       RegistrationsPage.tsx     # searchable/filterable table + pagination, opens RegistrationDetailDrawer
-      ManualAddPage.tsx         # admin manual/group entry, calls admin_register_participant() RPC; live per-field validation mirrors the public wizard; navigates to /admin/registrations on success
+      ManualAddPage.tsx         # admin manual/group entry, calls admin_register_participant() RPC; 3 grouped sections (Athlete/Classification/Payment), blur-based validation; on success stays on page + shows an inline "Added · REF" banner
       EventConfigPage.tsx       # event settings (open/deadline/max_total_slots/payment) + category CRUD
       ReportsPage.tsx           # jersey pivot / timing-partner / general Excel exports
       useEvents.ts              # shared event-list + selected-event hook used across admin pages
@@ -33,7 +35,7 @@ src/
     ui/                        # shadcn-generated primitives (base-ui backed) — don't hand-edit, re-run shadcn CLI to update
       calendar.tsx               # EXCEPTION: hand-rolled month/year grid, NOT shadcn-generated — no react-day-picker dep. Don't run shadcn CLI on this one, it'll pull that dependency back in.
       popover.tsx                # thin @base-ui/react/popover wrapper, same pattern as dialog.tsx/select.tsx
-    brand/                     # hand-built brand pieces: StepProgress, RunBikeRunStrip, JerseyChartTable, GoldRing, SimpleLineChart, BrandLoader, CountUp, DateOfBirthPicker
+    brand/                     # hand-built brand pieces: RouteProgress (race-distance step bar), TapTile (roving-tabindex radiogroup tiles), DashLoader (marching-dash — the ONLY spinner), CountUp, DateOfBirthPicker (themed popover, public + compact admin)
 ```
 
 ## Key Conventions
@@ -42,11 +44,16 @@ src/
 - **Admin manual entries go through `admin_register_participant()`**, a separate RPC granted only to `authenticated`. It shares the same `events.reg_counter` atomic sequence for `ref_code` but skips the public-only guards (capacity, phone dedupe).
 - **Two atomic capacity guards**, both `pg_advisory_xact_lock`-based: one keyed on the event id (`events.max_total_slots`, e.g. 250 for Chattogram Duathlon 2026), one keyed on the category id (`categories.max_slots`, currently unused/null for all seeded categories but wired up). Don't replace these with a plain `SELECT count(*)` check — that reintroduces the oversell race.
 - **Phone/name normalization is duplicated by necessity**: `src/lib/format.ts` (client-side live UI feedback) and the SQL functions (server-side source of truth, since the RPC is the only write path). If you change one, change the other.
-- **Theme is permanently dark** — `src/index.css` sets brand colors directly on `:root` (no `.dark` class, no light mode). Don't reintroduce shadcn's light/dark toggle scaffolding.
+- **Two visual systems, one codebase ("Start Line" / "Night Ops").** `src/index.css` `:root` is the LIGHT public palette (warm paper `#F1EFE6`, ink `#15180E`, chartreuse `#C6F53F`); `.dark` is the admin palette (near-black `#0B0D08`). Every admin surface is wrapped in `.dark` at its route boundary (`AdminLayout`, `AdminLoginPage`). `--radius: 0` everywhere — corners are cut, not rounded; don't patch `rounded-*` back in. Do NOT reintroduce the old "permanently dark `:root`" model.
+- **Portalled overlays escape the `.dark` wrapper.** base-ui `Select`/`Sheet`/`Dialog` portal their popups to `<body>` (outside the admin `.dark` div → they'd inherit the light `:root`). So those three primitives' popups carry a hard-coded `dark` class. All current usage is admin-only; if you ever use them on a public (light) surface, revisit that. The `DateOfBirthPicker` popover is inline (not portaled), so it inherits its surface theme correctly.
 - **shadcn is configured with the `base` (base-ui) library, not Radix.** `Select`/`RadioGroup` etc.'s `onValueChange` can receive `null` — always coalesce (`v ?? fallback`) rather than passing state setters directly. Also unlike Radix, base-ui's `<Select.Value>` does NOT read the label off the mounted `<SelectItem>` — it needs an explicit `items={[{value, label}, ...]}` prop on the `<Select>` root, or the trigger displays the raw value (e.g. a UUID or an "__all__" sentinel) instead of the item's text. Required wherever the value isn't already human-readable (ids, filter sentinels).
 - No `react-hook-form`/`zod` — forms are plain `useState` + the validators in `format.ts`, per the locked "no extra UI/form libs" project scope.
 - `FACEBOOK_PAGE_URL` and `TRIATHLON_BANGLADESH_URL` in `src/lib/constants.ts` are the only intentionally-hardcoded external links; update them there, not inline.
 - `src/lib/errorMessages.ts` holds the Bangla translations for every `RegisterParticipantError` code returned by both RPCs — shared by the public wizard and the admin manual-add form. Add new error codes there, not as inline maps.
 - **`CREATE OR REPLACE FUNCTION` does NOT let you add a new parameter to an existing RPC in place** — Postgres identifies a function by name + input argument types, so adding one (even with a default) creates a second overload alongside the old signature instead of replacing it. `admin_register_participant`'s `p_amount_paid` param hit this live: had to `drop function` the old 22-arg signature explicitly. Any future RPC signature change needs the same explicit drop-old-signature step in its migration.
-- **Design system lives in `src/index.css`**: the layered background (`body::before`/`::after` grid + grain, `#root` at `z-index:1`) is global; the glassmorphism/blur treatment is scoped to `.wizard-shell` (public wizard only — admin stays flat/utilitarian per its own density-over-decoration goal). Reuse `.wizard-shell`, `.btn-sheen`, `.status-chip-*`, `.admin-page-header`, and the `animate-*` keyframes already defined there rather than inventing new ad hoc animation classes.
-- `supabase/migrations/0003_validation_amount.sql` has been applied to the live DB (amount_paid column, transaction_id nullable, tightened format checks as `NOT VALID`, new RPC signatures). Future migrations still follow the same "written here, applied manually" convention — don't assume a new migration file is live until confirmed.
+- **Design system lives in `src/index.css`**: tokens (`:root`/`.dark`), the 10 `sl-*` keyframes, and reusable classes — `.sl-paper` (public bg), `.sl-card` (bib-white + 7px hard shadow), `.sl-tile` (tap tile), `.sl-stripe` (chartreuse caution stripe), `.sl-skeleton` (shimmer), `.status-chip-*` (bordered+tinted), `.admin-page-header`. Reuse these rather than inventing ad-hoc classes. The only two infinite animations are the admin skeleton shimmer and the dashed loader march; everything else plays once. (Retired: `.wizard-shell`, `.btn-sheen`, the layered grid/grain background, `GoldRing`, `StepProgress`, `RunBikeRunStrip`, `SimpleLineChart`, `JerseyChartTable`, `BrandLoader`.)
+- **≤8-option choices on the public wizard are `TapTileGroup`, not `<Select>`/`<RadioGroup>`** (gender, blood group, jersey size, payment method). Real `<button role="radio">` tiles with roving tab-index. Admin forms keep native/`<Select>`s.
+- **Public "slots claimed" = approved count via `public_event_slots(slug)` RPC** (SECURITY DEFINER, granted `anon`) — `anon` can't read `registrations` directly. Don't substitute `events.reg_counter` (that counts all ref codes, not approved).
+- **Payment methods are `bKash | Nagad | Rocket | Upay`** (`PaymentMethod` type, the `chk` on `registrations.payment_method`, and `events.payment_methods`). Public tiles render from `event.payment_methods`; keep the three in sync.
+- `admin_register_participant()` now has a friendly single-add dup-phone guard (`entry_source <> 'group_import'`); group imports may still share a phone. `transaction_id` accepts 8–15 chars (was 8–12) — mirrored in `format.ts`, `chk_txid`, and both RPCs.
+- **Migrations `0003`–`0005` are all applied to the live DB.** `0004` (Rocket/Upay) + `0005` (txid 8–15, venue/fee/methods refresh, `public_event_slots`, dup-phone guard) were applied via the Supabase MCP against project `tb-registration-portal`. Future migrations follow the same "written here, applied manually" convention — don't assume a new file is live until confirmed.
