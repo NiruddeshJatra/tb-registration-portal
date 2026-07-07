@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #0B0D08; }
+    input, textarea, select { font-family: Inter, 'Noto Sans Bengali', sans-serif; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #C6F53F !important; }
+    @keyframes no-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes no-drawer { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes no-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+    @keyframes no-dash { to { stroke-dashoffset: -14; } }
+    @keyframes no-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Night Ops Admin" style="min-height: 100vh; background: #0B0D08; color: #EDEFE4; font-family: Inter, 'Noto Sans Bengali', sans-serif;">
+
+  <!-- ══ header ══ -->
+  <div style="display: flex; align-items: center; gap: 20px; padding: 14px 24px; border-bottom: 1px solid #262B1B; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <img src="triathlon-bd-shield-white.png" alt="" style="height: 34px; width: auto;">
+      <div>
+        <p style="margin: 0; font: 600 14px Oswald; letter-spacing: 0.22em; text-transform: uppercase;">TB <span style="color: #C6F53F;">Race Ops</span></p>
+        <p style="margin: 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">register.triathlonbangladesh.com</p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; border: 1px solid #262B1B; background: #14170F; padding: 8px 14px; cursor: pointer;">
+      <span style="width: 7px; height: 7px; border-radius: 50%; background: #C6F53F; animation: no-blink 2s ease-in-out infinite;"></span>
+      <span style="font: 500 12px Inter;">Chattogram Duathlon 2026</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 18px;">
+      <p style="margin: 0; font: 500 12px 'IBM Plex Mono'; color: #C6F53F;">T−{{ daysToRace }} <span style="color: #7C8272;">days to race</span></p>
+      <p style="margin: 0; font: 400 11px 'IBM Plex Mono'; color: #7C8272;">admin@triathlonbd.com</p>
+      <button style="all: unset; font: 600 10px Oswald; letter-spacing: 0.18em; text-transform: uppercase; color: #9BA18A; border: 1px solid #262B1B; padding: 7px 12px; cursor: pointer;" style-hover="color: #EDEFE4; border-color: #9BA18A;">Sign out</button>
+    </div>
+  </div>
+
+  <!-- ══ nav ══ -->
+  <div style="display: flex; gap: 2px; padding: 0 24px; border-bottom: 1px solid #262B1B; overflow-x: auto;">
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+      <button onClick="{{ n.go }}" style="all: unset; display: flex; align-items: baseline; gap: 7px; padding: 12px 16px 11px; border-bottom: 2px solid {{ n.line }}; cursor: pointer; white-space: nowrap;" style-hover="background: rgba(198,245,63,.04);">
+        <span style="font: 500 9px 'IBM Plex Mono'; color: {{ n.numColor }};">{{ n.num }}</span>
+        <span style="font: 600 12px Oswald; letter-spacing: 0.18em; text-transform: uppercase; color: {{ n.color }};">{{ n.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- ══════════════ DASHBOARD ══════════════ -->
+  <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Dashboard" style="padding: 24px; max-width: 1320px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+
+      <!-- loading skeleton -->
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 10px;">
+            <sc-for list="{{ skel5 }}" as="k" hint-placeholder-count="5">
+              <div style="height: 108px; border: 1px solid #262B1B; background: linear-gradient(100deg, #14170F 40%, #1B1F13 50%, #14170F 60%); background-size: 200% 100%; animation: no-shimmer 1.4s linear infinite;"></div>
+            </sc-for>
+          </div>
+          <div style="height: 220px; border: 1px solid #262B1B; background: linear-gradient(100deg, #14170F 40%, #1B1F13 50%, #14170F 60%); background-size: 200% 100%; animation: no-shimmer 1.4s linear infinite;"></div>
+          <p style="margin: 4px 0 0; font: 500 11px 'IBM Plex Mono'; color: #7C8272; display: flex; align-items: center; gap: 10px;">
+            <svg width="60" height="10" viewBox="0 0 60 10"><line x1="2" y1="5" x2="58" y2="5" stroke="#C6F53F" stroke-width="2" stroke-dasharray="8 4" style="animation: no-dash .5s linear infinite;"></line></svg>
+            FETCHING REGISTRATIONS…
+          </p>
+        </div>
+      </sc-if>
+
+      <!-- empty -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed #363D28; padding: 64px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+          <svg width="140" height="26" viewBox="0 0 140 26">
+            <line x1="4" y1="13" x2="136" y2="13" stroke="#363D28" stroke-width="2" stroke-dasharray="4 5"></line>
+            <circle cx="4" cy="13" r="3.5" fill="#0B0D08" stroke="#7C8272" stroke-width="1.5"></circle>
+            <circle cx="47" cy="13" r="3.5" fill="#0B0D08" stroke="#7C8272" stroke-width="1.5"></circle>
+            <circle cx="104" cy="13" r="3.5" fill="#0B0D08" stroke="#7C8272" stroke-width="1.5"></circle>
+            <rect x="132" y="4" width="3" height="18" fill="#7C8272"></rect>
+          </svg>
+          <p style="margin: 0; font: 600 17px Oswald; letter-spacing: 0.1em; text-transform: uppercase; color: #9BA18A;">Start list is empty</p>
+          <p style="margin: 0; font: 400 13px 'Noto Sans Bengali'; color: #7C8272;">এখনও কোনো registration নেই — ফর্ম লিংক শেয়ার করুন।</p>
+          <p style="margin: 0; font: 500 11px 'IBM Plex Mono'; color: #C6F53F;">register.triathlonbangladesh.com/register/chattogram-duathlon-2026</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLive }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+
+          <!-- row 1: slots + statuses -->
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 10px;">
+            <div style="border: 1px solid #262B1B; background: #14170F; padding: 18px 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Slots claimed</p>
+                <p style="margin: 0; font: 500 10px 'IBM Plex Mono'; color: #C6F53F;">56%</p>
+              </div>
+              <p style="margin: 10px 0 0; font: 600 38px Oswald; line-height: 1;">140<span style="font-size: 17px; color: #7C8272;"> / 250</span></p>
+              <div style="margin-top: 12px; display: flex; gap: 2px;">
+                <sc-for list="{{ slotSegs }}" as="seg" hint-placeholder-count="25">
+                  <div style="flex: 1; height: 8px; background: {{ seg }};"></div>
+                </sc-for>
+              </div>
+            </div>
+            <sc-for list="{{ statusTiles }}" as="t" hint-placeholder-count="4">
+              <div style="border: 1px solid #262B1B; background: #14170F; padding: 18px 20px; border-top: 2px solid {{ t.color }};">
+                <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">{{ t.label }}</p>
+                <p style="margin: 10px 0 0; font: 600 38px Oswald; line-height: 1; color: {{ t.valColor }};">{{ t.count }}</p>
+                <p style="margin: 8px 0 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">{{ t.hint }}</p>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- row 2: revenue + payment + chart -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 10px;">
+            <div style="border: 1px solid #262B1B; background: #14170F; padding: 18px 20px;">
+              <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Verified revenue</p>
+              <p style="margin: 10px 0 0; font: 600 26px 'IBM Plex Mono'; color: #C6F53F;">৳336,000</p>
+              <p style="margin: 8px 0 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">96 approved × avg ৳3,500</p>
+            </div>
+            <div style="border: 1px solid #262B1B; background: #14170F; padding: 18px 20px;">
+              <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Pending revenue</p>
+              <p style="margin: 10px 0 0; font: 600 26px 'IBM Plex Mono'; color: #E8B931;">৳133,000</p>
+              <p style="margin: 8px 0 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">38 awaiting verification</p>
+            </div>
+            <div style="border: 1px solid #262B1B; background: #14170F; padding: 18px 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Registrations — cumulative</p>
+                <p style="margin: 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">08 JUN — 05 JUL</p>
+              </div>
+              <svg viewBox="0 0 560 96" style="width: 100%; display: block; margin-top: 10px;">
+                <line x1="0" y1="88" x2="560" y2="88" stroke="#262B1B" stroke-width="1"></line>
+                <line x1="0" y1="56" x2="560" y2="56" stroke="#1B1F13" stroke-width="1"></line>
+                <line x1="0" y1="24" x2="560" y2="24" stroke="#1B1F13" stroke-width="1"></line>
+                <path d="M0,86 L70,80 L140,72 L210,58 L280,48 L350,34 L420,22 L490,12 L560,6 L560,88 L0,88 Z" fill="rgba(198,245,63,.08)"></path>
+                <path d="M0,86 L70,80 L140,72 L210,58 L280,48 L350,34 L420,22 L490,12 L560,6" fill="none" stroke="#C6F53F" stroke-width="2"></path>
+                <circle cx="560" cy="6" r="3.5" fill="#C6F53F"></circle>
+                <text x="546" y="16" font-family="'IBM Plex Mono'" font-size="9" fill="#C6F53F" text-anchor="end">140</text>
+              </svg>
+            </div>
+          </div>
+
+          <!-- row 3: categories + jersey matrix + activity -->
+          <div style="display: grid; grid-template-columns: 1.1fr 1.6fr 1.1fr; gap: 10px; align-items: start;">
+            <div style="border: 1px solid #262B1B; background: #14170F;">
+              <p style="margin: 0; padding: 14px 18px 12px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A; border-bottom: 1px solid #262B1B;">By category</p>
+              <div style="padding: 6px 18px 14px;">
+                <sc-for list="{{ byCategory }}" as="c" hint-placeholder-count="4">
+                  <div style="padding: 10px 0; border-bottom: 1px solid #1B1F13;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                      <span style="font: 500 12.5px Inter;">{{ c.name }}</span>
+                      <span style="font: 500 12px 'IBM Plex Mono';">{{ c.count }} <span style="color: #7C8272;">· {{ c.revenue }}</span></span>
+                    </div>
+                    <div style="margin-top: 7px; height: 4px; background: #1B1F13;">
+                      <div style="width: {{ c.pct }}; height: 100%; background: #C6F53F;"></div>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="display: flex; justify-content: space-between; padding: 12px 0 0;">
+                  <span style="font: 600 10px Oswald; letter-spacing: 0.2em; text-transform: uppercase; color: #9BA18A;">Payment split</span>
+                  <span style="font: 500 11px 'IBM Plex Mono'; color: #9BA18A;">bKash 102 · Nagad 38</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="border: 1px solid #262B1B; background: #14170F;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 12px; border-bottom: 1px solid #262B1B;">
+                <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Category × jersey — t-shirt order</p>
+                <p style="margin: 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">active only</p>
+              </div>
+              <div style="padding: 10px 18px 16px; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="padding: 6px 4px; text-align: left; font: 600 9px Oswald; letter-spacing: 0.18em; text-transform: uppercase; color: #7C8272;">Category</th>
+                      <sc-for list="{{ sizeHeads }}" as="h" hint-placeholder-count="7">
+                        <th style="padding: 6px 4px; text-align: center; font: 500 10px 'IBM Plex Mono'; color: #7C8272;">{{ h }}</th>
+                      </sc-for>
+                      <th style="padding: 6px 4px; text-align: right; font: 600 9px Oswald; letter-spacing: 0.18em; text-transform: uppercase; color: #7C8272;">Tot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ matrixRows }}" as="row" hint-placeholder-count="4">
+                      <tr style="border-top: 1px solid #1B1F13;">
+                        <td style="padding: 7px 4px; font: 500 12px Inter; white-space: nowrap;">{{ row.name }}</td>
+                        <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="7">
+                          <td style="padding: 4px;"><div style="min-width: 26px; padding: 4px 0; text-align: center; font: 500 11px 'IBM Plex Mono'; background: {{ cell.bg }}; color: {{ cell.color }};">{{ cell.v }}</div></td>
+                        </sc-for>
+                        <td style="padding: 7px 4px; text-align: right; font: 600 12px 'IBM Plex Mono'; color: #C6F53F;">{{ row.total }}</td>
+                      </tr>
+                    </sc-for>
+                    <tr style="border-top: 1px solid #262B1B;">
+                      <td style="padding: 7px 4px; font: 600 9px Oswald; letter-spacing: 0.18em; text-transform: uppercase; color: #7C8272;">Order</td>
+                      <sc-for list="{{ matrixTotals }}" as="t" hint-placeholder-count="7">
+                        <td style="padding: 7px 4px; text-align: center; font: 600 11px 'IBM Plex Mono';">{{ t }}</td>
+                      </sc-for>
+                      <td style="padding: 7px 4px; text-align: right; font: 600 12px 'IBM Plex Mono';">134</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="border: 1px solid #262B1B; background: #14170F;">
+              <p style="margin: 0; padding: 14px 18px 12px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A; border-bottom: 1px solid #262B1B;">Recent activity</p>
+              <div style="padding: 8px 18px 14px;">
+                <sc-for list="{{ activity }}" as="a" hint-placeholder-count="6">
+                  <div style="display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1B1F13; align-items: baseline;">
+                    <span style="font: 400 9.5px 'IBM Plex Mono'; color: #7C8272; white-space: nowrap;">{{ a.time }}</span>
+                    <div>
+                      <p style="margin: 0; font: 500 12px Inter;">{{ a.text }}</p>
+                      <p style="margin: 1px 0 0; font: 400 10px 'IBM Plex Mono'; color: {{ a.metaColor }};">{{ a.meta }}</p>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ REGISTRATIONS ══════════════ -->
+  <sc-if value="{{ isRegistrations }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Registrations" style="padding: 24px; max-width: 1320px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+      <!-- toolbar -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <div style="position: relative;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2.5" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+          <input placeholder="Search name / phone / TxID / ref…" value="{{ search }}" onChange="{{ onSearch }}" style="box-sizing: border-box; width: 300px; height: 38px; background: #14170F; border: 1px solid #262B1B; color: #EDEFE4; padding: 0 12px 0 34px; font: 400 12.5px Inter; border-radius: 0;">
+        </div>
+        <div style="display: flex; border: 1px solid #262B1B;">
+          <sc-for list="{{ statusFilters }}" as="f" hint-placeholder-count="5">
+            <button onClick="{{ f.go }}" style="all: unset; padding: 9px 14px; font: 600 10px Oswald; letter-spacing: 0.16em; text-transform: uppercase; color: {{ f.color }}; background: {{ f.bg }}; cursor: pointer; border-right: 1px solid #262B1B;">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <sc-for list="{{ dropdownFilters }}" as="d" hint-placeholder-count="3">
+          <div style="position: relative; height: 38px;">
+            <select onChange="{{ d.onChange }}" value="{{ d.value }}" style="box-sizing: border-box; -webkit-appearance: none; appearance: none; height: 38px; border: 1px solid #262B1B; background: #14170F; padding: 0 28px 0 12px; font: 400 12px Inter; color: #9BA18A; cursor: pointer; color-scheme: dark;">
+              <sc-for list="{{ d.options }}" as="opt" hint-placeholder-count="5">
+                <option value="{{ opt }}">{{ opt }}</option>
+              </sc-for>
+            </select>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+        </sc-for>
+        <p style="margin: 0 0 0 auto; font: 500 11px 'IBM Plex Mono'; color: #7C8272;">{{ resultCount }} of 140</p>
+      </div>
+
+      <!-- table -->
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px solid #262B1B;">
+          <sc-for list="{{ skel8 }}" as="k" hint-placeholder-count="8">
+            <div style="height: 44px; border-bottom: 1px solid #1B1F13; background: linear-gradient(100deg, #14170F 40%, #1B1F13 50%, #14170F 60%); background-size: 200% 100%; animation: no-shimmer 1.4s linear infinite;"></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ regsEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed #363D28; padding: 56px 24px; text-align: center;">
+          <p style="margin: 0; font: 600 15px Oswald; letter-spacing: 0.12em; text-transform: uppercase; color: #9BA18A;">No matches</p>
+          <p style="margin: 8px 0 0; font: 400 12.5px 'Noto Sans Bengali'; color: #7C8272;">এই ফিল্টারে কোনো registration পাওয়া যায়নি — ফিল্টার বদলে দেখুন।</p>
+          <button onClick="{{ clearFilters }}" style="all: unset; margin-top: 16px; font: 600 10px 'IBM Plex Mono'; letter-spacing: 0.1em; text-transform: uppercase; color: #C6F53F; border: 1px solid #363D28; padding: 8px 16px; cursor: pointer;">Clear filters</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ regsShowTable }}" hint-placeholder-val="{{ true }}">
+        <div style="border: 1px solid #262B1B; overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; min-width: 980px;">
+            <thead>
+              <tr style="background: #14170F;">
+                <sc-for list="{{ tableHeads }}" as="h" hint-placeholder-count="9">
+                  <th style="padding: 10px 14px; text-align: left; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #262B1B; white-space: nowrap;">{{ h }}</th>
+                </sc-for>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ regRows }}" as="r" hint-placeholder-count="10">
+                <tr onClick="{{ r.open }}" style="cursor: pointer; border-bottom: 1px solid #1B1F13; border-left: 2px solid {{ r.leftRule }}; background: {{ r.rowBg }};" style-hover="background: rgba(198,245,63,.05);">
+                  <td style="padding: 9px 14px; font: 500 12px 'IBM Plex Mono'; color: #C6F53F; white-space: nowrap;">{{ r.ref }}</td>
+                  <td style="padding: 9px 14px; font: 500 12.5px Inter; white-space: nowrap;">{{ r.name }}</td>
+                  <td style="padding: 9px 14px; font: 400 11.5px 'IBM Plex Mono'; color: #9BA18A;">{{ r.phone }}</td>
+                  <td style="padding: 9px 14px; font: 400 12px Inter; color: #9BA18A; white-space: nowrap;">{{ r.cat }}</td>
+                  <td style="padding: 9px 14px; font: 500 11.5px 'IBM Plex Mono';">{{ r.jersey }}</td>
+                  <td style="padding: 9px 14px; font: 400 11.5px Inter; color: #9BA18A; text-transform: capitalize;">{{ r.role }}</td>
+                  <td style="padding: 9px 14px;"><span style="display: inline-block; border: 1px solid {{ r.chipBorder }}; color: {{ r.chipColor }}; background: {{ r.chipBg }}; font: 600 9px 'IBM Plex Mono'; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px;">{{ r.status }}</span></td>
+                  <td style="padding: 9px 14px; font: 400 11.5px 'IBM Plex Mono'; color: #9BA18A;">{{ r.txid }}</td>
+                  <td style="padding: 9px 14px; font: 400 11px 'IBM Plex Mono'; color: #7C8272; white-space: nowrap;">{{ r.created }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <p style="margin: 0; font: 400 11px 'IBM Plex Mono'; color: #7C8272;">PAGE 1/1 · CLICK A ROW FOR DETAIL</p>
+          <div style="display: flex; gap: 8px;">
+            <button style="all: unset; font: 600 10px Oswald; letter-spacing: 0.16em; text-transform: uppercase; color: #4A4F3D; border: 1px solid #262B1B; padding: 8px 14px;">← Prev</button>
+            <button style="all: unset; font: 600 10px Oswald; letter-spacing: 0.16em; text-transform: uppercase; color: #9BA18A; border: 1px solid #262B1B; padding: 8px 14px; cursor: pointer;" style-hover="color: #EDEFE4;">Next →</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ ADD ENTRY ══════════════ -->
+  <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Add Entry" style="padding: 24px; max-width: 860px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px;">
+      <div>
+        <h1 style="margin: 0; font: 600 22px Oswald; letter-spacing: 0.06em; text-transform: uppercase;">Manual entry</h1>
+        <p style="margin: 6px 0 0; font: 400 12.5px Inter; color: #9BA18A;">Bypasses capacity + duplicate guards — for organizers, crew, and offline payments.</p>
+      </div>
+      <div style="border: 1px solid #262B1B; background: #14170F;">
+        <p style="margin: 0; padding: 12px 20px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #C6F53F; border-bottom: 1px solid #262B1B;">01 · Athlete</p>
+        <div style="padding: 18px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Full name</label>
+            <input placeholder="Md. Rahim Uddin" value="{{ addName }}" onChange="{{ onAddName }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid {{ addNameBorder }}; padding: 0 12px; font: 400 12.5px Inter; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Phone</label>
+            <input placeholder="01XXXXXXXXX" value="{{ addPhone }}" onChange="{{ onAddPhone }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid {{ addPhoneBorder }}; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Emergency phone</label>
+            <input placeholder="01XXXXXXXXX" value="{{ addEphone }}" onChange="{{ onAddEphone }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Email</label>
+            <input placeholder="name@example.com" value="{{ addEmail }}" onChange="{{ onAddEmail }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 400 12.5px Inter; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Gender</label>
+            <div style="position: relative;">
+              <select value="{{ addGender }}" onChange="{{ onAddGender }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <option value="">Select</option><option value="male">Male</option><option value="female">Female</option>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Date of birth</label>
+            <div style="position: relative;">
+              <div style="display: flex; gap: 8px;">
+                <input placeholder="dd/mm/yyyy" value="{{ addDob }}" onChange="{{ onAddDob }}" style="box-sizing: border-box; flex: 1; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+                <button onClick="{{ toggleAddDobPicker }}" style="all: unset; box-sizing: border-box; width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #262B1B; background: {{ addDobPickerBg }}; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ addDobPickerIconColor }}" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="1"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </button>
+              </div>
+              <sc-if value="{{ addDobPickerOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; right: 0; background: #14170F; border: 1px solid #363D28; box-shadow: 0 20px 50px rgba(0,0,0,.5); padding: 14px; animation: no-rise .18s ease-out;">
+                  <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <div style="position: relative; flex: 1.4;">
+                      <select onChange="{{ onAddPickerMonth }}" value="{{ addPickerMonth }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 34px; border: 1px solid #363D28; background: #0B0D08; font: 600 11.5px Oswald; letter-spacing: 0.04em; text-transform: uppercase; color: #EDEFE4; padding: 0 24px 0 8px; cursor: pointer; color-scheme: dark;">
+                        <sc-for list="{{ monthOptions }}" as="m" hint-placeholder-count="12">
+                          <option value="{{ m.value }}">{{ m.label }}</option>
+                        </sc-for>
+                      </select>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2.5" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+                    </div>
+                    <div style="position: relative; flex: 1;">
+                      <select onChange="{{ onAddPickerYear }}" value="{{ addPickerYear }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 34px; border: 1px solid #363D28; background: #0B0D08; font: 600 12px 'IBM Plex Mono'; color: #EDEFE4; padding: 0 24px 0 8px; cursor: pointer; color-scheme: dark;">
+                        <sc-for list="{{ yearOptions }}" as="y" hint-placeholder-count="80">
+                          <option value="{{ y }}">{{ y }}</option>
+                        </sc-for>
+                      </select>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2.5" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+                    </div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 6px;">
+                    <sc-for list="{{ weekdayLabels }}" as="wd" hint-placeholder-count="7">
+                      <p style="margin: 0; text-align: center; font: 600 10px Oswald; letter-spacing: 0.08em; color: #7C8272;">{{ wd }}</p>
+                    </sc-for>
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;">
+                    <sc-for list="{{ addCalendarDays }}" as="d" hint-placeholder-count="35">
+                      <button onClick="{{ d.pick }}" disabled="{{ d.disabled }}" style="all: unset; box-sizing: border-box; aspect-ratio: 1; min-height: 32px; display: flex; align-items: center; justify-content: center; font: 600 13.5px 'IBM Plex Mono'; background: {{ d.bg }}; color: {{ d.color }}; cursor: {{ d.cursor }}; visibility: {{ d.visibility }};">{{ d.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Blood group</label>
+            <div style="position: relative;">
+              <select value="{{ addBlood }}" onChange="{{ onAddBlood }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <sc-for list="{{ bloodOptions }}" as="b" hint-placeholder-count="9">
+                  <option value="{{ b }}">{{ b }}</option>
+                </sc-for>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Jersey size</label>
+            <div style="position: relative;">
+              <select value="{{ addJersey }}" onChange="{{ onAddJersey }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <sc-for list="{{ jerseyOptions }}" as="j" hint-placeholder-count="8">
+                  <option value="{{ j }}">{{ j }}</option>
+                </sc-for>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="border: 1px solid #262B1B; background: #14170F;">
+        <p style="margin: 0; padding: 12px 20px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #C6F53F; border-bottom: 1px solid #262B1B;">02 · Classification</p>
+        <div style="padding: 18px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Category</label>
+            <div style="height: 40px; box-sizing: border-box; background: #0B0D08; border: 1px solid #262B1B; display: flex; align-items: center; padding: 0 12px; font: 400 12.5px Inter; color: {{ addCategoryColor }};">{{ addCategoryLabel }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Participant role</label>
+            <div style="position: relative;">
+              <select value="{{ addRole }}" onChange="{{ onAddRole }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <option value="runner">Runner</option><option value="pacer">Pacer</option><option value="volunteer">Volunteer</option>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Entry source</label>
+            <div style="height: 40px; box-sizing: border-box; background: #0B0D08; border: 1px solid #262B1B; display: flex; align-items: center; padding: 0 12px; font: 400 12.5px Inter; color: #EDEFE4;">Admin manual</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Registration type</label>
+            <div style="position: relative;">
+              <select value="{{ addRegType }}" onChange="{{ onAddRegType }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <option value="paid">Paid</option><option value="discounted">Discounted</option><option value="complimentary">Complimentary</option>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="border: 1px solid #262B1B; background: #14170F;">
+        <p style="margin: 0; padding: 12px 20px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #C6F53F; border-bottom: 1px solid #262B1B;">03 · Payment</p>
+        <div style="padding: 18px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Payment method</label>
+            <div style="position: relative;">
+              <select value="{{ addPayMethod }}" onChange="{{ onAddPayMethod }}" style="box-sizing: border-box; width: 100%; -webkit-appearance: none; appearance: none; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 28px 0 12px; font: 400 12.5px Inter; color: #EDEFE4; cursor: pointer; color-scheme: dark;">
+                <option value="">Select</option><option value="bKash">bKash</option><option value="Nagad">Nagad</option><option value="Rocket">Rocket</option><option value="Upay">Upay</option><option value="Cash">Cash</option>
+              </select>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Sender number</label>
+            <input placeholder="01XXXXXXXXX" value="{{ addSender }}" onChange="{{ onAddSender }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Transaction ID</label>
+            <input placeholder="9AB3CD4EF5 or COMP-NAME" value="{{ addTxid }}" onChange="{{ onAddTxid }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">Amount paid (৳, optional)</label>
+            <input placeholder="defaults to category fee" value="{{ addAmount }}" onChange="{{ onAddAmount }}" style="box-sizing: border-box; height: 40px; background: #0B0D08; border: 1px solid #262B1B; padding: 0 12px; font: 500 12.5px 'IBM Plex Mono'; color: #EDEFE4;">
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ addJustSubmitted }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px solid #2E4A1E; background: rgba(198,245,63,.07); padding: 14px 18px; animation: no-rise .2s ease-out;">
+          <p style="margin: 0; font: 600 12px Oswald; letter-spacing: 0.1em; text-transform: uppercase; color: #C6F53F;">Added · {{ addLastRef }}</p>
+          <p style="margin: 4px 0 0; font: 400 12px Inter; color: #9BA18A;">{{ addLastName }} is now on the start list as {{ addLastStatus }}.</p>
+        </div>
+      </sc-if>
+      <button onClick="{{ submitAdd }}" disabled="{{ addDisabled }}" style="all: unset; box-sizing: border-box; height: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; background: {{ addBtnBg }}; color: {{ addBtnColor }}; font: 600 13px Oswald; letter-spacing: 0.2em; text-transform: uppercase; cursor: {{ addBtnCursor }};" style-hover="background: #D4FF55;">Add to start list →</button>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ EVENT CONFIG ══════════════ -->
+  <sc-if value="{{ isConfig }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Event Config" style="padding: 24px; max-width: 1320px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h1 style="margin: 0; font: 600 22px Oswald; letter-spacing: 0.06em; text-transform: uppercase;">Event config</h1>
+          <p style="margin: 6px 0 0; font: 400 12.5px Inter; color: #9BA18A;">Chattogram Duathlon 2026 · CD26 · seeded 08 Jun 2026</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #2E4A1E; background: rgba(198,245,63,.06); padding: 9px 16px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: #C6F53F;"></span>
+          <span style="font: 600 11px Oswald; letter-spacing: 0.2em; text-transform: uppercase; color: #C6F53F;">Registration live</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 380px 1fr; gap: 14px; align-items: start;">
+        <div style="border: 1px solid #262B1B; background: #14170F;">
+          <p style="margin: 0; padding: 12px 20px; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A; border-bottom: 1px solid #262B1B;">Gate settings</p>
+          <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <p style="margin: 0; font: 500 13px Inter;">Registration open</p>
+                <p style="margin: 2px 0 0; font: 400 11px Inter; color: #7C8272;">Public form accepts entries</p>
+              </div>
+              <div style="width: 44px; height: 24px; background: #C6F53F; position: relative; cursor: pointer;">
+                <div style="position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; background: #0B0D08;"></div>
+              </div>
+            </div>
+            <sc-for list="{{ gateFields }}" as="f" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font: 600 9.5px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #9BA18A;">{{ f.label }}</label>
+                <div style="min-height: 40px; box-sizing: border-box; background: #0B0D08; border: 1px solid #262B1B; display: flex; align-items: center; padding: 9px 12px; font: 400 12.5px {{ f.font }}; color: #EDEFE4; line-height: 1.6;">{{ f.value }}</div>
+              </div>
+            </sc-for>
+            <button style="all: unset; box-sizing: border-box; height: 42px; display: flex; align-items: center; justify-content: center; background: #C6F53F; color: #0B0D08; font: 600 11px Oswald; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer;">Save settings</button>
+          </div>
+        </div>
+        <div style="border: 1px solid #262B1B; background: #14170F;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #262B1B;">
+            <p style="margin: 0; font: 600 10px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #9BA18A;">Categories · 4</p>
+            <button style="all: unset; font: 600 10px 'IBM Plex Mono'; letter-spacing: 0.1em; text-transform: uppercase; color: #C6F53F; border: 1px solid #2E4A1E; padding: 6px 12px; cursor: pointer;">+ Add category</button>
+          </div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="padding: 10px 20px; text-align: left; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Category</th>
+                <th style="padding: 10px 12px; text-align: left; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Gender</th>
+                <th style="padding: 10px 12px; text-align: left; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Age band</th>
+                <th style="padding: 10px 12px; text-align: right; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Fee</th>
+                <th style="padding: 10px 12px; text-align: right; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Slots</th>
+                <th style="padding: 10px 12px; text-align: right; font: 600 9px Oswald; letter-spacing: 0.22em; text-transform: uppercase; color: #7C8272; border-bottom: 1px solid #1B1F13;">Claimed</th>
+                <th style="padding: 10px 20px; border-bottom: 1px solid #1B1F13;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ configCats }}" as="c" hint-placeholder-count="4">
+                <tr style="border-bottom: 1px solid #1B1F13;" style-hover="background: rgba(198,245,63,.04);">
+                  <td style="padding: 12px 20px; font: 500 13px Inter;">{{ c.name }}</td>
+                  <td style="padding: 12px 12px; font: 400 12px Inter; color: #9BA18A;">{{ c.gender }}</td>
+                  <td style="padding: 12px 12px; font: 500 12px 'IBM Plex Mono'; color: #9BA18A;">{{ c.band }}</td>
+                  <td style="padding: 12px 12px; text-align: right; font: 500 12px 'IBM Plex Mono';">৳3,500</td>
+                  <td style="padding: 12px 12px; text-align: right; font: 400 12px 'IBM Plex Mono'; color: #7C8272;">—</td>
+                  <td style="padding: 12px 12px; text-align: right; font: 500 12px 'IBM Plex Mono'; color: #C6F53F;">{{ c.claimed }}</td>
+                  <td style="padding: 12px 20px; text-align: right;">
+                    <span style="font: 600 9.5px 'IBM Plex Mono'; letter-spacing: 0.08em; text-transform: uppercase; color: #9BA18A; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; margin-right: 14px;">Edit</span>
+                    <span style="font: 600 9.5px 'IBM Plex Mono'; letter-spacing: 0.08em; text-transform: uppercase; color: #E24E3B; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Delete</span>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ REPORTS ══════════════ -->
+  <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Reports" style="padding: 24px; max-width: 1100px; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px;">
+      <div>
+        <h1 style="margin: 0; font: 600 22px Oswald; letter-spacing: 0.06em; text-transform: uppercase;">Exports</h1>
+        <p style="margin: 6px 0 0; font: 400 12.5px Inter; color: #9BA18A;">Excel downloads, generated client-side from the live table.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px;">
+        <sc-for list="{{ reportCards }}" as="rep" hint-placeholder-count="3">
+          <div style="border: 1px solid #262B1B; background: #14170F; display: flex; flex-direction: column;">
+            <div style="padding: 18px 20px 0; display: flex; align-items: baseline; justify-content: space-between;">
+              <p style="margin: 0; font: 600 26px 'IBM Plex Mono'; color: #C6F53F;">{{ rep.num }}</p>
+              <p style="margin: 0; font: 400 9.5px 'IBM Plex Mono'; color: #7C8272;">.XLSX</p>
+            </div>
+            <div style="padding: 8px 20px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1;">
+              <p style="margin: 0; font: 600 15px Oswald; letter-spacing: 0.08em; text-transform: uppercase;">{{ rep.title }}</p>
+              <p style="margin: 0; font: 400 12px Inter; color: #9BA18A; line-height: 1.6;">{{ rep.desc }}</p>
+              <sc-if value="{{ rep.hasFilter }}" hint-placeholder-val="{{ false }}">
+                <div style="height: 38px; box-sizing: border-box; background: #0B0D08; border: 1px solid #262B1B; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font: 400 12px Inter; color: #9BA18A; margin-top: auto;">{{ rep.filterLabel }} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7C8272" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+              </sc-if>
+              <button style="all: unset; box-sizing: border-box; height: 42px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #C6F53F; color: #C6F53F; font: 600 11px Oswald; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; margin-top: {{ rep.btnMargin }};" style-hover="background: rgba(198,245,63,.08);">↓ Download</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font: 400 11px 'IBM Plex Mono'; color: #7C8272;">LAST GENERATED: JERSEY-REPORT-CHATTOGRAM-DUATHLON-2026.XLSX · 04 JUL 21:12</p>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ DETAIL DRAWER ══════════════ -->
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDrawer }}" style="position: fixed; inset: 0; background: rgba(4,5,3,.62); z-index: 40;"></div>
+    <div style="position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: #101308; border-left: 1px solid #363D28; z-index: 41; display: flex; flex-direction: column; animation: no-drawer .22s ease-out; box-shadow: -30px 0 80px rgba(0,0,0,.55);">
+      <!-- drawer header -->
+      <div style="padding: 20px 24px 16px; border-bottom: 1px solid #262B1B; background: #14170F;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <p style="margin: 0; font: 600 24px 'IBM Plex Mono'; letter-spacing: 0.02em; color: #C6F53F;">{{ drawerRef }}</p>
+          <button onClick="{{ closeDrawer }}" style="all: unset; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #262B1B; color: #9BA18A; cursor: pointer; font-size: 14px;" style-hover="color: #EDEFE4; border-color: #9BA18A;">✕</button>
+        </div>
+        <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+          <span style="display: inline-block; border: 1px solid {{ drawerChipBorder }}; color: {{ drawerChipColor }}; background: {{ drawerChipBg }}; font: 600 9.5px 'IBM Plex Mono'; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px;">{{ drawerStatus }}</span>
+          <span style="font: 500 13px Inter;">{{ drawerName }}</span>
+          <span style="font: 400 11px 'IBM Plex Mono'; color: #7C8272;">{{ drawerCat }}</span>
+        </div>
+      </div>
+      <!-- drawer body -->
+      <div style="flex: 1; overflow-y: auto; padding: 18px 24px; display: flex; flex-direction: column; gap: 18px;">
+        <sc-for list="{{ drawerSections }}" as="sec" hint-placeholder-count="3">
+          <div>
+            <p style="margin: 0 0 8px; font: 600 9.5px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #7C8272;">{{ sec.title }}</p>
+            <div style="border: 1px solid #262B1B; background: #14170F; padding: 4px 16px;">
+              <sc-for list="{{ sec.fields }}" as="f" hint-placeholder-count="5">
+                <div style="display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #1B1F13; padding: 8px 0;">
+                  <span style="font: 400 11px Inter; color: #7C8272;">{{ f.label }}</span>
+                  <span style="text-align: right; font: 500 12px {{ f.font }}; color: {{ f.color }};">{{ f.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <div>
+          <p style="margin: 0 0 8px; font: 600 9.5px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #7C8272;">Admin note</p>
+          <textarea rows="2" placeholder="Optional note — saved with status changes…" style="box-sizing: border-box; width: 100%; background: #14170F; border: 1px solid #262B1B; color: #EDEFE4; padding: 10px 14px; font: 400 12.5px Inter; resize: vertical; border-radius: 0;"></textarea>
+        </div>
+      </div>
+      <!-- drawer actions -->
+      <div style="padding: 16px 24px 20px; border-top: 1px solid #262B1B; background: #14170F;">
+        <p style="margin: 0 0 10px; font: 600 9.5px Oswald; letter-spacing: 0.26em; text-transform: uppercase; color: #7C8272;">Set status</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <sc-for list="{{ drawerActions }}" as="a" hint-placeholder-count="4">
+            <button onClick="{{ a.go }}" style="all: unset; box-sizing: border-box; height: 42px; display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid {{ a.border }}; background: {{ a.bg }}; color: {{ a.color }}; font: 600 10.5px Oswald; letter-spacing: 0.16em; text-transform: uppercase; cursor: {{ a.cursor }};">{{ a.label }}</button>
+          </sc-for>
+        </div>
+        <p style="margin: 12px 0 0; font: 400 10px 'IBM Plex Mono'; color: #7C8272;">CHANGES RECORDED AGAINST ADMIN@TRIATHLONBD.COM · REVERSIBLE</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ══════════════ CONFIRM DIALOG ══════════════ -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; background: rgba(4,5,3,.7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 24px;">
+      <div style="width: 100%; max-width: 400px; background: #14170F; border: 1px solid #363D28; border-top: 3px solid #E24E3B; padding: 24px; animation: no-rise .2s ease-out;">
+        <p style="margin: 0; font: 600 16px Oswald; letter-spacing: 0.08em; text-transform: uppercase;">{{ confirmTitle }}</p>
+        <p style="margin: 10px 0 0; font: 400 12.5px Inter; color: #9BA18A; line-height: 1.65;">This marks <span style="font: 500 12px 'IBM Plex Mono'; color: #C6F53F;">{{ drawerRef }}</span> as {{ confirmStatus }}. Recorded with your email — reversible later.</p>
+        <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;">
+          <button onClick="{{ cancelConfirm }}" style="all: unset; padding: 10px 18px; border: 1px solid #363D28; color: #9BA18A; font: 600 10.5px Oswald; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;">Cancel</button>
+          <button onClick="{{ applyConfirm }}" style="all: unset; padding: 10px 18px; background: #E24E3B; color: #0B0D08; font: 600 10.5px Oswald; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer;">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1360, &quot;height&quot;: 900}, &quot;view&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;interactive&quot;, &quot;dashboard&quot;, &quot;registrations&quot;, &quot;add&quot;, &quot;config&quot;, &quot;reports&quot;], &quot;default&quot;: &quot;interactive&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Preview state&quot;}, &quot;dataState&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;live&quot;, &quot;loading&quot;, &quot;empty&quot;], &quot;default&quot;: &quot;live&quot;, &quot;tsType&quot;: &quot;'live' | 'loading' | 'empty'&quot;, &quot;section&quot;: &quot;Preview state&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: 'dashboard',
+    search: '',
+    statusFilter: 'all',
+    catFilter: 'all',
+    sizeFilter: 'all',
+    roleFilter: 'all',
+    drawerId: null,
+    confirmStatus: null,
+    rows: null,
+    addName: '', addPhone: '', addEphone: '', addEmail: '', addGender: '', addDob: '',
+    addBlood: '', addJersey: '', addRole: 'runner', addRegType: 'paid',
+    addPayMethod: '', addSender: '', addTxid: '', addAmount: '',
+    addTouched: {}, addJustSubmitted: false, addLastRef: '', addLastName: '', addLastStatus: '',
+    addDobPickerOpen: false, addPickerMonth: 0, addPickerYear: 1995,
+  };
+
+  componentDidMount() {
+    // seed rows once
+    if (!this.state.rows) this.setState({ rows: this.seedRows() });
+  }
+
+  seedRows() {
+    const names = [
+      ['Tanvir Ahmed', 'male'], ['Nusrat Jahan', 'female'], ['Md. Kamal Hossain', 'male'], ['Sabrina Akter', 'female'],
+      ['Rafiq Islam', 'male'], ['Arif Chowdhury', 'male'], ['Farhana Rahman', 'female'], ['Shakil Mahmud', 'male'],
+      ['Jannatul Ferdous', 'female'], ['Imran Khan', 'male'], ['Mehedi Hasan', 'male'], ['Taslima Begum', 'female'],
+      ['Asif Iqbal', 'male'], ['Rumana Islam', 'female'], ['Sohel Rana', 'male'], ['Nadia Sultana', 'female'],
+    ];
+    const cats = ['Male General', 'Male Master (40+)', 'Female General', 'Female Master (40+)'];
+    const sizes = ['S', 'M', 'M', 'L', 'L', 'XL', 'M', 'S', '2XL', 'M'];
+    const statuses = ['pending', 'approved', 'approved', 'pending', 'approved', 'approved', 'rejected', 'approved', 'cancelled', 'approved', 'pending', 'approved', 'pending', 'approved', 'approved', 'pending'];
+    const roles = ['runner', 'runner', 'runner', 'runner', 'runner', 'pacer', 'runner', 'runner', 'runner', 'runner', 'runner', 'volunteer', 'runner', 'runner', 'runner', 'runner'];
+    const dates = ['05 JUL', '05 JUL', '04 JUL', '04 JUL', '04 JUL', '03 JUL', '03 JUL', '02 JUL', '02 JUL', '01 JUL', '01 JUL', '30 JUN', '30 JUN', '29 JUN', '28 JUN', '28 JUN'];
+    return names.map((n, i) => ({
+      id: i,
+      ref: 'CD26-000' + String(140 - i).padStart(3, '0'),
+      name: n[0],
+      gender: n[1],
+      phone: '017' + String(12345678 + i * 1111111).slice(0, 8),
+      cat: n[1] === 'female' ? (i % 5 === 0 ? cats[3] : cats[2]) : (i % 4 === 0 ? cats[1] : cats[0]),
+      jersey: sizes[i % sizes.length],
+      role: roles[i],
+      status: statuses[i],
+      txid: roles[i] === 'pacer' ? 'COMP-' + n[0].split(' ')[0].toUpperCase() : (i * 7 + 3) + 'AB' + (i * 13 + 11) + 'XZ' + (i * 3 + 5) + 'Q',
+      created: dates[i] + ' 2026',
+      email: n[0].toLowerCase().replace(/[^a-z]/g, '.') + '@gmail.com',
+      blood: ['O+', 'A+', 'B+', 'AB+', 'O-'][i % 5],
+      dob: (1978 + (i * 3) % 28) + '-0' + ((i % 9) + 1) + '-1' + (i % 9),
+      method: i % 3 === 0 ? 'Nagad' : 'bKash',
+    }));
+  }
+
+  dobToIsoLoose(display) {
+    const m = display.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return null;
+    const [, dd, mm, yyyy] = m;
+    const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    if (d.getFullYear() !== Number(yyyy) || d.getMonth() !== Number(mm) - 1 || d.getDate() !== Number(dd)) return null;
+    if (d > new Date()) return null;
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+  }
+  ageOnEventDayLoose(iso) {
+    const dob = new Date(iso), asOf = new Date('2026-11-13');
+    let age = asOf.getFullYear() - dob.getFullYear();
+    const md = asOf.getMonth() - dob.getMonth();
+    if (md < 0 || (md === 0 && asOf.getDate() < dob.getDate())) age--;
+    return age;
+  }
+  isValidBdPhoneLoose(input) {
+    let d = (input || '').replace(/[^0-9]/g, '');
+    if (d.startsWith('880')) d = d.slice(3);
+    return /^01[3-9][0-9]{8}$/.test(d);
+  }
+
+  chipStyles(status) {
+    const map = {
+      pending: { border: 'rgba(232,185,49,.5)', color: '#E8B931', bg: 'rgba(232,185,49,.08)' },
+      approved: { border: 'rgba(198,245,63,.45)', color: '#C6F53F', bg: 'rgba(198,245,63,.07)' },
+      rejected: { border: 'rgba(226,78,59,.5)', color: '#E24E3B', bg: 'rgba(226,78,59,.08)' },
+      cancelled: { border: 'rgba(124,130,114,.5)', color: '#9BA18A', bg: 'rgba(124,130,114,.08)' },
+    };
+    return map[status];
+  }
+
+  renderVals() {
+    const s = this.state;
+    const view = this.props.view && this.props.view !== 'interactive' ? this.props.view : s.view;
+    const dataState = this.props.dataState ?? 'live';
+    const rows = s.rows || this.seedRows();
+
+    const nav = [
+      { key: 'dashboard', label: 'Dashboard', num: '01' },
+      { key: 'registrations', label: 'Registrations', num: '02' },
+      { key: 'add', label: 'Add Entry', num: '03' },
+      { key: 'config', label: 'Event Config', num: '04' },
+      { key: 'reports', label: 'Reports', num: '05' },
+    ];
+
+    // registrations filtering
+    const q = s.search.trim().toLowerCase();
+    const filtered = rows.filter(r =>
+      (s.statusFilter === 'all' || r.status === s.statusFilter) &&
+      (s.catFilter === 'all' || r.cat === s.catFilter) &&
+      (s.sizeFilter === 'all' || r.jersey === s.sizeFilter) &&
+      (s.roleFilter === 'all' || r.role === s.roleFilter) &&
+      (!q || r.name.toLowerCase().includes(q) || r.phone.includes(q) || r.txid.toLowerCase().includes(q) || r.ref.toLowerCase().includes(q))
+    );
+    const sel = rows.find(r => r.id === s.drawerId) || null;
+    const selChip = sel ? this.chipStyles(sel.status) : null;
+
+    const setStatus = (status) => {
+      if (!sel) return;
+      if (status === 'rejected' || status === 'cancelled') { this.setState({ confirmStatus: status }); return; }
+      this.setState({ rows: rows.map(r => r.id === sel.id ? { ...r, status } : r) });
+    };
+
+    const slotSegs = Array.from({ length: 25 }, (_, i) => i < 14 ? '#C6F53F' : '#1B1F13');
+
+    const heat = (v) => v === 0 ? { bg: 'transparent', color: '#4A4F3D' } :
+      v < 5 ? { bg: 'rgba(198,245,63,.08)', color: '#9BA18A' } :
+      v < 15 ? { bg: 'rgba(198,245,63,.18)', color: '#EDEFE4' } :
+      { bg: 'rgba(198,245,63,.34)', color: '#EDEFE4' };
+    const matrix = [
+      { name: 'Male General', cells: [1, 8, 33, 25, 12, 3, 0], total: 82 },
+      { name: 'Male Master (40+)', cells: [0, 2, 7, 8, 4, 2, 1], total: 24 },
+      { name: 'Female General', cells: [2, 7, 9, 3, 0, 0, 0], total: 21 },
+      { name: 'Female Master (40+)', cells: [1, 2, 3, 1, 0, 0, 0], total: 7 },
+    ];
+
+    const dash = (v) => ({ label: v, value: v });
+
+    return {
+      daysToRace: Math.max(0, Math.ceil((new Date('2026-11-13') - new Date()) / 86400000)),
+      navItems: nav.map(n => ({
+        label: n.label, num: n.num,
+        go: () => this.setState({ view: n.key, drawerId: null }),
+        line: view === n.key ? '#C6F53F' : 'transparent',
+        color: view === n.key ? '#EDEFE4' : '#7C8272',
+        numColor: view === n.key ? '#C6F53F' : '#4A4F3D',
+      })),
+      isDashboard: view === 'dashboard',
+      isRegistrations: view === 'registrations',
+      isAdd: view === 'add',
+      isConfig: view === 'config',
+      isReports: view === 'reports',
+      isLoading: dataState === 'loading',
+      isEmpty: dataState === 'empty',
+      isLive: dataState === 'live',
+      skel5: [1, 2, 3, 4, 5],
+      skel8: [1, 2, 3, 4, 5, 6, 7, 8],
+      // dashboard
+      slotSegs,
+      statusTiles: [
+        { label: 'Pending', count: 38, color: '#E8B931', valColor: '#E8B931', hint: 'oldest 3 days ago' },
+        { label: 'Approved', count: 96, color: '#C6F53F', valColor: '#C6F53F', hint: '+12 this week' },
+        { label: 'Rejected', count: 4, color: '#E24E3B', valColor: '#EDEFE4', hint: 'bad TxID ×3' },
+        { label: 'Cancelled', count: 2, color: '#7C8272', valColor: '#EDEFE4', hint: 'refunds settled' },
+      ],
+      byCategory: [
+        { name: 'Male General', count: 82, revenue: '৳199.5K', pct: '100%' },
+        { name: 'Male Master (40+)', count: 24, revenue: '৳59.5K', pct: '29%' },
+        { name: 'Female General', count: 21, revenue: '৳56K', pct: '26%' },
+        { name: 'Female Master (40+)', count: 7, revenue: '৳21K', pct: '9%' },
+      ],
+      sizeHeads: ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+      matrixRows: matrix.map(m => ({ name: m.name, total: m.total, cells: m.cells.map(v => ({ v, ...heat(v) })) })),
+      matrixTotals: [4, 19, 52, 37, 16, 5, 1],
+      activity: [
+        { time: '21:40', text: 'Nusrat Jahan registered', meta: 'CD26-000139 · PENDING', metaColor: '#E8B931' },
+        { time: '21:12', text: 'Approved Tanver Hasan', meta: 'CD26-000128 · TXID VERIFIED', metaColor: '#C6F53F' },
+        { time: '19:03', text: 'Approved Mahmuda Khatun', meta: 'CD26-000131 · TXID VERIFIED', metaColor: '#C6F53F' },
+        { time: '18:44', text: 'Tanvir Ahmed registered', meta: 'CD26-000140 · PENDING', metaColor: '#E8B931' },
+        { time: '16:20', text: 'Rejected Farhana Rahman', meta: 'CD26-000134 · TXID NOT FOUND', metaColor: '#E24E3B' },
+        { time: '14:02', text: 'Manual entry: Arif Chowdhury', meta: 'CD26-000135 · COMPLIMENTARY · PACER', metaColor: '#9BA18A' },
+      ],
+      // registrations
+      search: s.search,
+      onSearch: (e) => this.setState({ search: e.target.value }),
+      statusFilters: ['all', 'pending', 'approved', 'rejected', 'cancelled'].map(f => ({
+        label: f,
+        go: () => this.setState({ statusFilter: f }),
+        color: s.statusFilter === f ? '#0B0D08' : '#9BA18A',
+        bg: s.statusFilter === f ? '#C6F53F' : 'transparent',
+      })),
+      dropdownFilters: [
+        { value: s.catFilter, onChange: (e) => this.setState({ catFilter: e.target.value }), options: ['all', 'Male General', 'Male Master (40+)', 'Female General', 'Female Master (40+)'] },
+        { value: s.sizeFilter, onChange: (e) => this.setState({ sizeFilter: e.target.value }), options: ['all', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'] },
+        { value: s.roleFilter, onChange: (e) => this.setState({ roleFilter: e.target.value }), options: ['all', 'runner', 'pacer', 'volunteer'] },
+      ],
+      resultCount: filtered.length,
+      regsEmpty: dataState === 'live' && filtered.length === 0,
+      regsShowTable: dataState === 'live' && filtered.length > 0,
+      clearFilters: () => this.setState({ search: '', statusFilter: 'all', catFilter: 'all', sizeFilter: 'all', roleFilter: 'all' }),
+      tableHeads: ['Ref', 'Name', 'Phone', 'Category', 'Size', 'Role', 'Status', 'TxID', 'Created'],
+      regRows: filtered.map(r => {
+        const c = this.chipStyles(r.status);
+        return {
+          ...r,
+          open: () => this.setState({ drawerId: r.id }),
+          chipBorder: c.border, chipColor: c.color, chipBg: c.bg,
+          leftRule: r.status === 'pending' ? '#E8B931' : 'transparent',
+          rowBg: s.drawerId === r.id ? 'rgba(198,245,63,.06)' : 'transparent',
+        };
+      }),
+      // drawer
+      drawerOpen: Boolean(sel),
+      closeDrawer: () => this.setState({ drawerId: null, confirmStatus: null }),
+      drawerRef: sel ? sel.ref : '',
+      drawerName: sel ? sel.name : '',
+      drawerCat: sel ? sel.cat : '',
+      drawerStatus: sel ? sel.status : '',
+      drawerChipBorder: selChip ? selChip.border : '', drawerChipColor: selChip ? selChip.color : '', drawerChipBg: selChip ? selChip.bg : '',
+      drawerSections: sel ? [
+        { title: 'Athlete', fields: [
+          { label: 'Full name', value: sel.name, font: 'Inter', color: '#EDEFE4' },
+          { label: 'Gender / DOB', value: sel.gender + ' · ' + sel.dob, font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Phone', value: sel.phone, font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Emergency', value: '01898765432', font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Email', value: sel.email, font: 'Inter', color: '#EDEFE4' },
+          { label: 'Blood group', value: sel.blood, font: "'IBM Plex Mono'", color: '#EDEFE4' },
+        ]},
+        { title: 'Race', fields: [
+          { label: 'Category', value: sel.cat, font: 'Inter', color: '#EDEFE4' },
+          { label: 'Jersey size', value: sel.jersey, font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Role', value: sel.role, font: 'Inter', color: '#EDEFE4' },
+          { label: 'Entry source', value: sel.role === 'pacer' ? 'admin_manual' : 'self', font: "'IBM Plex Mono'", color: '#9BA18A' },
+        ]},
+        { title: 'Payment', fields: [
+          { label: 'Method', value: sel.method, font: 'Inter', color: '#EDEFE4' },
+          { label: 'Sender', value: sel.phone, font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Transaction ID', value: sel.txid, font: "'IBM Plex Mono'", color: '#C6F53F' },
+          { label: 'Fee', value: '৳3,500', font: "'IBM Plex Mono'", color: '#EDEFE4' },
+          { label: 'Created', value: sel.created + ' · 14:22', font: "'IBM Plex Mono'", color: '#9BA18A' },
+        ]},
+      ] : [],
+      drawerActions: ['pending', 'approved', 'rejected', 'cancelled'].map(st => {
+        const active = sel && sel.status === st;
+        const colors = { pending: '#E8B931', approved: '#C6F53F', rejected: '#E24E3B', cancelled: '#9BA18A' };
+        return {
+          label: active ? '● ' + st : st,
+          go: () => !active && setStatus(st),
+          border: active ? colors[st] : '#262B1B',
+          bg: active ? 'rgba(198,245,63,.04)' : 'transparent',
+          color: active ? colors[st] : '#9BA18A',
+          cursor: active ? 'default' : 'pointer',
+        };
+      }),
+      // confirm
+      confirmOpen: Boolean(s.confirmStatus),
+      confirmStatus: s.confirmStatus || '',
+      confirmTitle: (s.confirmStatus || '') + ' this registration?',
+      cancelConfirm: () => this.setState({ confirmStatus: null }),
+      applyConfirm: () => {
+        if (sel && s.confirmStatus) {
+          this.setState({ rows: rows.map(r => r.id === sel.id ? { ...r, status: s.confirmStatus } : r), confirmStatus: null });
+        }
+      },
+      // add entry
+      addName: s.addName, onAddName: (e) => this.setState({ addName: e.target.value }),
+      addNameBorder: '#262B1B',
+      addPhone: s.addPhone, onAddPhone: (e) => this.setState({ addPhone: e.target.value }),
+      addPhoneBorder: '#262B1B',
+      addEphone: s.addEphone, onAddEphone: (e) => this.setState({ addEphone: e.target.value }),
+      addEmail: s.addEmail, onAddEmail: (e) => this.setState({ addEmail: e.target.value }),
+      addGender: s.addGender, onAddGender: (e) => this.setState({ addGender: e.target.value }),
+      addDob: s.addDob, onAddDob: (e) => this.setState({ addDob: e.target.value }),
+      addDobPickerOpen: s.addDobPickerOpen,
+      addDobPickerBg: s.addDobPickerOpen ? '#C6F53F' : '#0B0D08',
+      addDobPickerIconColor: s.addDobPickerOpen ? '#0B0D08' : '#9BA18A',
+      toggleAddDobPicker: () => {
+        if (!s.addDobPickerOpen) {
+          const iso = this.dobToIsoLoose(s.addDob);
+          const base = iso ? new Date(iso) : new Date(1995, 0, 1);
+          this.setState({ addDobPickerOpen: true, addPickerMonth: base.getMonth(), addPickerYear: base.getFullYear() });
+        } else {
+          this.setState({ addDobPickerOpen: false });
+        }
+      },
+      onAddPickerMonth: (e) => this.setState({ addPickerMonth: Number(e.target.value) }),
+      onAddPickerYear: (e) => this.setState({ addPickerYear: Number(e.target.value) }),
+      addPickerMonth: s.addPickerMonth,
+      addPickerYear: s.addPickerYear,
+      monthOptions: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((label, i) => ({ label, value: i })),
+      yearOptions: Array.from({ length: 90 }, (_, i) => 2026 - i),
+      weekdayLabels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      addCalendarDays: (() => {
+        const y = s.addPickerYear, m = s.addPickerMonth;
+        const firstDow = new Date(y, m, 1).getDay();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const today = new Date();
+        const cells = [];
+        for (let i = 0; i < firstDow; i++) cells.push({ label: '', pick: () => {}, disabled: true, cursor: 'default', bg: 'transparent', color: 'transparent', visibility: 'hidden' });
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dt = new Date(y, m, d);
+          const future = dt > today;
+          const dd = String(d).padStart(2, '0'), mm = String(m + 1).padStart(2, '0');
+          const iso = `${dd}/${mm}/${y}`;
+          const isSelected = this.dobToIsoLoose(s.addDob) === `${y}-${mm}-${dd}`;
+          cells.push({
+            label: d, disabled: future, cursor: future ? 'default' : 'pointer', visibility: 'visible',
+            pick: () => !future && this.setState({ addDob: iso, addDobPickerOpen: false }),
+            bg: isSelected ? '#C6F53F' : 'transparent',
+            color: future ? '#4A4F3D' : (isSelected ? '#0B0D08' : '#EDEFE4'),
+          });
+        }
+        return cells;
+      })(),
+      addBlood: s.addBlood, onAddBlood: (e) => this.setState({ addBlood: e.target.value }),
+      bloodOptions: ['', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+      addJersey: s.addJersey, onAddJersey: (e) => this.setState({ addJersey: e.target.value }),
+      jerseyOptions: ['', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'],
+      addRole: s.addRole, onAddRole: (e) => this.setState({ addRole: e.target.value }),
+      addRegType: s.addRegType, onAddRegType: (e) => this.setState({ addRegType: e.target.value }),
+      addPayMethod: s.addPayMethod, onAddPayMethod: (e) => this.setState({ addPayMethod: e.target.value }),
+      addSender: s.addSender, onAddSender: (e) => this.setState({ addSender: e.target.value }),
+      addTxid: s.addTxid, onAddTxid: (e) => this.setState({ addTxid: e.target.value.toUpperCase() }),
+      addAmount: s.addAmount, onAddAmount: (e) => this.setState({ addAmount: e.target.value }),
+      addCategoryLabel: (() => {
+        const iso = this.dobToIsoLoose(s.addDob);
+        if (!s.addGender || !iso) return 'Auto-detect from age/gender';
+        const age = this.ageOnEventDayLoose(iso);
+        if (age < 18) return 'No eligible category';
+        const g = s.addGender === 'male' ? 'Male' : 'Female';
+        return age >= 40 ? `${g} Master (40+)` : `${g} General`;
+      })(),
+      addCategoryColor: (s.addGender && this.dobToIsoLoose(s.addDob)) ? '#C6F53F' : '#7C8272',
+      addJustSubmitted: s.addJustSubmitted,
+      addLastRef: s.addLastRef, addLastName: s.addLastName, addLastStatus: s.addLastStatus,
+      addDisabled: !(s.addName.trim() && this.isValidBdPhoneLoose(s.addPhone) && s.addGender && this.dobToIsoLoose(s.addDob) && s.addJersey),
+      addBtnBg: (s.addName.trim() && this.isValidBdPhoneLoose(s.addPhone) && s.addGender && this.dobToIsoLoose(s.addDob) && s.addJersey) ? '#C6F53F' : 'rgba(198,245,63,.2)',
+      addBtnColor: '#0B0D08',
+      addBtnCursor: (s.addName.trim() && this.isValidBdPhoneLoose(s.addPhone) && s.addGender && this.dobToIsoLoose(s.addDob) && s.addJersey) ? 'pointer' : 'not-allowed',
+      submitAdd: () => {
+        const iso = this.dobToIsoLoose(s.addDob);
+        if (!(s.addName.trim() && this.isValidBdPhoneLoose(s.addPhone) && s.addGender && iso && s.addJersey)) return;
+        const age = this.ageOnEventDayLoose(iso);
+        const g = s.addGender === 'male' ? 'Male' : 'Female';
+        const catName = age >= 40 ? `${g} Master (40+)` : `${g} General`;
+        const newId = Math.max(0, ...rows.map(r => r.id)) + 1;
+        const ref = 'CD26-000' + String(141 + newId).padStart(3, '0');
+        const status = s.addRegType === 'complimentary' ? 'approved' : 'pending';
+        const entry = {
+          id: newId, ref, name: s.addName.trim(), gender: s.addGender, phone: s.addPhone,
+          cat: catName, jersey: s.addJersey, role: s.addRole, status,
+          txid: s.addTxid || (s.addRegType === 'complimentary' ? 'COMP-' + s.addName.trim().split(' ')[0].toUpperCase() : ''),
+          created: 'TODAY 2026', email: s.addEmail, blood: s.addBlood, dob: iso, method: s.addPayMethod || 'Cash',
+        };
+        this.setState({
+          rows: [entry, ...rows],
+          addName: '', addPhone: '', addEphone: '', addEmail: '', addGender: '', addDob: '',
+          addBlood: '', addJersey: '', addRole: 'runner', addRegType: 'paid',
+          addPayMethod: '', addSender: '', addTxid: '', addAmount: '',
+          addJustSubmitted: true, addLastRef: ref, addLastName: entry.name, addLastStatus: status,
+        });
+      },
+      // config
+      gateFields: [
+        { label: 'Registration deadline', value: '2026-11-10 · or when sold out', font: "'IBM Plex Mono'" },
+        { label: 'Max total slots', value: '250', font: "'IBM Plex Mono'" },
+        { label: 'Payment number', value: '01700-000000', font: "'IBM Plex Mono'" },
+        { label: 'Fee note (shown on step 3)', value: 'bKash/Nagad Send Money করে নিচের তথ্য দিন। Reference-এ আপনার নাম লিখুন।', font: "'Noto Sans Bengali'" },
+      ],
+      configCats: [
+        { name: 'Male General', gender: 'Male', band: '18–39', claimed: 82 },
+        { name: 'Male Master (40+)', gender: 'Male', band: '40+', claimed: 24 },
+        { name: 'Female General', gender: 'Female', band: '18–39', claimed: 21 },
+        { name: 'Female Master (40+)', gender: 'Female', band: '40+', claimed: 7 },
+      ],
+      // reports
+      reportCards: [
+        { num: '01', title: 'Jersey report', desc: 'Category × size pivot for the T-shirt order. Filter by role.', hasFilter: true, filterLabel: 'All participants', btnMargin: '0' },
+        { num: '02', title: 'Timing partner', desc: 'Approved athletes only — ref, name, gender, DOB, category, phone.', hasFilter: false, filterLabel: '', btnMargin: 'auto' },
+        { num: '03', title: 'General export', desc: 'Full registration list with status, TxID and timestamps.', hasFilter: true, filterLabel: 'All status', btnMargin: '0' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -31,9 +31,9 @@ export function isValidFullName(input: string): boolean {
   return /^[A-Za-z][A-Za-z .'-]{1,79}$/.test(toTitleCase(input));
 }
 
-// Validate transaction ID: trim + uppercase, then alphanumeric 8-12 chars, mirrors chk_txid in schema.sql
+// Validate transaction ID: trim + uppercase, then alphanumeric 8-15 chars, mirrors chk_txid in schema.sql
 export function isValidTransactionId(input: string): boolean {
-  return /^[A-Z0-9]{8,12}$/.test(input.trim().toUpperCase());
+  return /^[A-Z0-9]{8,15}$/.test(input.trim().toUpperCase());
 }
 
 // Emergency phone must differ from the main phone, compared post-normalization

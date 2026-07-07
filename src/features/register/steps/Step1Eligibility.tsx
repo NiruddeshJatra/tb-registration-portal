@@ -1,70 +1,85 @@
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { TapTileGroup } from '@/components/brand/TapTile'
 import { DateOfBirthPicker } from '@/components/brand/DateOfBirthPicker'
+import { FieldError, FieldLabel } from './fields'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
+import type { StepFieldProps } from '../RegisterPage'
 import { matchCategory } from '../formState'
-import { formatDate, formatTaka } from '@/lib/format'
+import { calculateAge, formatTaka } from '@/lib/format'
 
-interface Props {
+interface Props extends StepFieldProps {
   event: EventRow
   categories: CategoryRow[]
   form: RegisterFormState
   setField: <K extends keyof RegisterFormState>(key: K, value: RegisterFormState[K]) => void
 }
 
-export function Step1Eligibility({ event, categories, form, setField }: Props) {
+export function Step1Eligibility({ event, categories, form, setField, touched, markTouched, clearTouched }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const category =
     form.gender && form.date_of_birth ? matchCategory(categories, form.gender, form.date_of_birth, event.event_date) : null
-  const showNoMatch = form.gender && form.date_of_birth && !category
+  const showNoMatch = Boolean(form.gender && form.date_of_birth && !category)
+  const dobValid = Boolean(form.date_of_birth)
+  const dobError = Boolean(touched.dob) && !dobValid
+  const age = category ? calculateAge(form.date_of_birth, event.event_date) : null
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-border bg-card p-4 text-center">
-        <h2 className="text-xl text-foreground">{event.name}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {formatDate(event.event_date)} &middot; {event.venue}
+    <>
+      <div>
+        <h2 className="font-heading text-2xl font-semibold tracking-[0.02em] uppercase">Eligibility</h2>
+        <p className="mt-1.5 text-[13px] text-muted-foreground" lang="bn">
+          লিঙ্গ ও জন্ম তারিখ দিন — আপনার ক্যাটাগরি ও ফি স্বয়ংক্রিয়ভাবে দেখানো হবে।
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label>Gender / লিঙ্গ</Label>
-        <RadioGroup
-          value={form.gender}
-          onValueChange={(v) => setField('gender', v as RegisterFormState['gender'])}
-          className="flex gap-4"
-        >
-          <label className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md border border-border px-4 has-[[data-state=checked]]:border-accent has-[[data-state=checked]]:bg-accent/10">
-            <RadioGroupItem value="male" id="gender-male" />
-            Male
-          </label>
-          <label className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md border border-border px-4 has-[[data-state=checked]]:border-accent has-[[data-state=checked]]:bg-accent/10">
-            <RadioGroupItem value="female" id="gender-female" />
-            Female
-          </label>
-        </RadioGroup>
-      </div>
+      <TapTileGroup
+        name="gender"
+        label="Gender"
+        gloss="লিঙ্গ"
+        value={form.gender}
+        onChange={(v) => setField('gender', v as RegisterFormState['gender'])}
+        options={[
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' },
+        ]}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="dob">Date of Birth / জন্ম তারিখ</Label>
-        <DateOfBirthPicker id="dob" value={form.date_of_birth} onChange={(iso) => setField('date_of_birth', iso)} max={today} />
+      <div className="flex flex-col gap-2.5">
+        <FieldLabel htmlFor="dob" gloss="জন্ম তারিখ">Date of birth</FieldLabel>
+        <DateOfBirthPicker
+          id="dob"
+          value={form.date_of_birth}
+          onChange={(iso) => setField('date_of_birth', iso)}
+          max={today}
+          onBlur={() => markTouched('dob')}
+          onFocus={() => clearTouched('dob')}
+          invalid={dobError}
+          valid={dobValid}
+        />
+        <FieldError show={dobError}>সঠিক জন্ম তারিখ দিন (dd/mm/yyyy)</FieldError>
       </div>
 
       {category && (
-        <div className="rounded-lg border border-accent bg-accent/10 p-4 text-center">
-          <p className="text-foreground">
-            আপনার ক্যাটাগরি: <span className="font-semibold">{category.name}</span> — {formatTaka(category.fee)} টাকা
-          </p>
+        <div className="animate-rise flex items-center justify-between gap-3 border-[1.5px] border-border-strong bg-accent p-4">
+          <div>
+            <p className="font-heading text-[10px] font-semibold tracking-[0.26em] text-foreground uppercase">Your category</p>
+            <p className="mt-0.5 font-heading text-[19px] font-semibold tracking-[0.02em] text-foreground uppercase">{category.name}</p>
+            {age !== null && (
+              <p className="mt-0.5 text-[11.5px] text-foreground/75" lang="bn">
+                বয়স {age} · ইভেন্টের দিন অনুযায়ী
+              </p>
+            )}
+          </div>
+          <p className="font-mono text-[22px] font-semibold whitespace-nowrap text-foreground">{formatTaka(category.fee)}</p>
         </div>
       )}
 
       {showNoMatch && (
-        <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-center text-sm">
-          <p className="text-foreground">দুঃখিত, আপনার বয়স/লিঙ্গের জন্য কোনো উপযুক্ত ক্যাটাগরি নেই।</p>
-          <p className="mt-1 text-muted-foreground">Sorry, no eligible category matches your age/gender for this event.</p>
+        <div className="animate-rise border-[1.5px] border-destructive bg-destructive/[0.06] p-4">
+          <p className="text-[13px] font-medium text-destructive" lang="bn">দুঃখিত, আপনার বয়স/লিঙ্গের জন্য কোনো উপযুক্ত ক্যাটাগরি নেই।</p>
+          <p className="mt-1 text-xs text-muted-foreground">No eligible category matches your age/gender for this event.</p>
         </div>
       )}
-    </div>
+    </>
   )
 }

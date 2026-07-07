@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { StepProgress } from '@/components/brand/StepProgress'
-import { RunBikeRunStrip } from '@/components/brand/RunBikeRunStrip'
-import { BrandLoader } from '@/components/brand/BrandLoader'
+import { RouteProgress } from '@/components/brand/RouteProgress'
+import { DashLoader } from '@/components/brand/DashLoader'
 import { ClosedScreen } from './ClosedScreen'
 import { SuccessScreen } from './SuccessScreen'
 import { Step1Eligibility } from './steps/Step1Eligibility'
@@ -19,6 +17,15 @@ import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/typ
 
 const TOTAL_STEPS = 4
 
+export type TouchKey =
+  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid'
+
+export interface StepFieldProps {
+  touched: Partial<Record<TouchKey, boolean>>
+  markTouched: (key: TouchKey) => void
+  clearTouched: (key: TouchKey) => void
+}
+
 type LoadState =
   | { status: 'loading' }
   | { status: 'not_found' }
@@ -31,10 +38,12 @@ export function RegisterPage() {
   const [step, setStep] = useState(1)
   const [direction, setDirection] = useState<'forward' | 'back'>('forward')
   const [form, setForm] = useState<RegisterFormState>(EMPTY_FORM)
+  const [touched, setTouched] = useState<Partial<Record<TouchKey, boolean>>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [result, setResult] = useState<RegisterParticipantResult & { ok: true } | null>(null)
+  const [result, setResult] = useState<(RegisterParticipantResult & { ok: true }) | null>(null)
   const [showRestored, setShowRestored] = useState(false)
+  const [claimedApproved, setClaimedApproved] = useState<number | null>(null)
 
   const draftKey = eventSlug ? `tb-reg-draft:${eventSlug}` : null
 
@@ -49,7 +58,6 @@ export function RegisterPage() {
     } catch {
       // corrupt or inaccessible draft — ignore
     }
-    // Restore only once per mount, keyed on the event slug.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftKey])
 
@@ -94,6 +102,13 @@ export function RegisterPage() {
         .eq('event_id', event.id)
         .order('display_order')
       setLoad({ status: 'ready', event, categories: categories ?? [] })
+      // Real "slots claimed" = approved registrations, via a SECURITY DEFINER
+      // RPC (anon has no direct read on the registrations table).
+      supabase.rpc('public_event_slots', { p_event_slug: eventSlug }).then(({ data }) => {
+        if (cancelled || !data) return
+        const claimed = (data as { claimed?: number }).claimed
+        if (typeof claimed === 'number') setClaimedApproved(claimed)
+      })
     }
     fetchEvent()
     return () => {
@@ -113,8 +128,8 @@ export function RegisterPage() {
 
   if (load.status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <BrandLoader />
+      <div className="sl-paper flex min-h-screen items-center justify-center">
+        <DashLoader label="লোড হচ্ছে…" />
       </div>
     )
   }
@@ -128,14 +143,26 @@ export function RegisterPage() {
   const { event, categories } = load
 
   if (result) {
-    return <SuccessScreen refCode={result.ref_code} name={toTitleCase(form.full_name)} categoryName={result.category_name} fee={result.fee} />
+    return (
+      <SuccessScreen
+        event={event}
+        refCode={result.ref_code}
+        name={toTitleCase(form.full_name)}
+        categoryName={result.category_name}
+        fee={result.fee}
+      />
+    )
   }
 
   const setField = <K extends keyof RegisterFormState>(key: K, value: RegisterFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
+  const markTouched = (key: TouchKey) => setTouched((t) => ({ ...t, [key]: true }))
+  const clearTouched = (key: TouchKey) => setTouched((t) => ({ ...t, [key]: false }))
+  const touchProps: StepFieldProps = { touched, markTouched, clearTouched }
 
-  const category = form.gender && form.date_of_birth ? matchCategory(categories, form.gender, form.date_of_birth, event.event_date) : null
+  const category =
+    form.gender && form.date_of_birth ? matchCategory(categories, form.gender, form.date_of_birth, event.event_date) : null
 
   const stepValid: Record<number, boolean> = {
     1: Boolean(form.gender && form.date_of_birth && category),
@@ -205,101 +232,199 @@ export function RegisterPage() {
   function goNext() {
     setDirection('forward')
     setStep((s) => s + 1)
+    window.scrollTo(0, 0)
   }
   function goBack() {
     setDirection('back')
     setStep((s) => s - 1)
+    window.scrollTo(0, 0)
   }
 
+  const claimed = claimedApproved ?? event.reg_counter ?? 0
+  const cap = event.max_total_slots
+  const canNext = stepValid[step]
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col lg:min-h-screen lg:flex-row">
-        <div
-          className="reg-poster-panel flex h-48 shrink-0 flex-col justify-between p-5 sm:h-64 lg:h-auto lg:w-[40%] lg:p-10"
-          style={{ backgroundImage: "url('/assets/poster.jpg')" }}
-        >
-          <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="relative z-10 flex items-center gap-2">
-            <img src="/assets/triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" className="h-10 w-auto lg:h-12" />
+    <div className="sl-paper min-h-screen">
+      <div className="mx-auto flex min-h-screen max-w-[1060px] flex-wrap items-stretch">
+        {/* ── identity rail ── */}
+        <aside className="flex min-w-[300px] flex-[1_1_320px] flex-col bg-foreground px-9 pt-7 pb-6 text-background lg:max-w-[440px]">
+          <a
+            href={TRIATHLON_BANGLADESH_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-fit items-center gap-3 transition-opacity hover:opacity-85"
+          >
+            <img src="/assets/triathlon-bd-shield-white.png" alt="Triathlon Bangladesh" className="h-[42px] w-auto" />
+            <div>
+              <p className="font-heading text-[13px] font-semibold tracking-[0.24em] uppercase">Triathlon</p>
+              <p className="font-heading text-[13px] font-semibold tracking-[0.24em] text-accent uppercase">
+                Bangladesh <span className="text-[10px] font-normal tracking-normal text-faint">↗</span>
+              </p>
+            </div>
           </a>
-          <div className="relative z-10 space-y-1 lg:mt-auto lg:space-y-2">
-            <h2 className="font-heading text-lg uppercase tracking-[0.1em] text-foreground lg:text-2xl">{event.name}</h2>
-            <p className="text-xs text-muted-foreground lg:text-sm">
-              {formatDate(event.event_date)} &middot; {event.venue}
-            </p>
-            <a
-              href={TRIATHLON_BANGLADESH_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block text-xs text-accent underline underline-offset-2"
-            >
-              triathlonbangladesh.com ↗
-            </a>
+
+          <div className="mt-8">
+            <p className="font-heading text-xs font-semibold tracking-[0.3em] text-faint uppercase">Chattogram</p>
+            <h1 className="mt-0.5 font-heading text-[44px] leading-none font-bold tracking-[0.01em] text-background uppercase">
+              {event.name.replace(/\s*\d{4}\s*$/, '')}
+              <br />
+              <span className="text-accent">{event.name.match(/\d{4}/)?.[0]}</span>
+            </h1>
           </div>
-        </div>
 
-        <div className="flex-1 px-4 py-6 lg:px-10 lg:py-10">
-          <div className="mx-auto max-w-lg space-y-6">
-            <RunBikeRunStrip />
+          <div className="mt-8 flex items-stretch border-y border-background/20">
+            {[
+              { n: '10', unit: 'K', label: 'Run', hi: false },
+              { n: '40', unit: 'K', label: 'Bike', hi: true },
+              { n: '5', unit: 'K', label: 'Run', hi: false },
+            ].map((s, i) => (
+              <Fragment key={s.label}>
+                {i > 0 && <div className="w-px bg-background/20" />}
+                <div className="flex-1 py-3.5 text-center">
+                  <p className={`font-heading text-[30px] leading-none font-bold ${s.hi ? 'text-accent' : ''}`}>
+                    {s.n}
+                    <span className="text-sm text-faint">{s.unit}</span>
+                  </p>
+                  <p className="mt-1 font-heading text-[9px] font-semibold tracking-[0.3em] text-faint uppercase">{s.label}</p>
+                </div>
+              </Fragment>
+            ))}
+          </div>
 
-            {showRestored && (
-              <div className="flex items-center justify-between gap-3 rounded-lg border border-accent bg-accent/10 p-3 text-sm text-foreground">
-                <span>আগের অসম্পূর্ণ ফর্ম ফিরিয়ে আনা হয়েছে</span>
-                <button type="button" onClick={() => setShowRestored(false)} className="text-muted-foreground hover:text-foreground">
-                  ✕
-                </button>
+          <div className="mt-5 flex flex-col gap-2 text-[13px]">
+            <div className="flex items-baseline gap-2.5">
+              <span className="font-mono text-[10px] tracking-[0.08em] text-accent">DATE</span>
+              <span className="text-background">{formatDate(event.event_date)}</span>
+            </div>
+            <div className="flex items-baseline gap-2.5">
+              <span className="font-mono text-[10px] tracking-[0.08em] text-accent">VENUE</span>
+              <span className="text-background">{event.venue}</span>
+            </div>
+            <div className="flex items-baseline gap-2.5">
+              <span className="font-mono text-[10px] tracking-[0.08em] whitespace-nowrap text-accent">BIKE CHECK-IN</span>
+              <span className="text-background">12 November, 2026</span>
+            </div>
+            {event.fee_note && (
+              <div className="flex items-baseline gap-2.5">
+                <span className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</span>
+                <span className="text-background">{event.fee_note}</span>
               </div>
             )}
+          </div>
 
-            <StepProgress step={step} total={TOTAL_STEPS} />
-
-            <div className="wizard-shell p-5 sm:p-6">
-              <div key={step} className={direction === 'forward' ? 'animate-step-in-forward' : 'animate-step-in-back'}>
-                {step === 1 && <Step1Eligibility event={event} categories={categories} form={form} setField={setField} />}
-                {step === 2 && <Step2Personal jerseyChart={event.jersey_chart} form={form} setField={setField} />}
-                {step === 3 && <Step3Payment event={event} category={category} form={form} setField={setField} />}
-                {step === 4 && <Step4Review event={event} category={category} form={form} setField={setField} />}
-              </div>
-            </div>
-
-            {submitError && (
-              <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-center text-sm font-medium text-foreground">
-                {submitError}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              {step > 1 && (
-                <Button type="button" variant="outline" className="h-12 flex-1 transition-transform hover:-translate-y-px" onClick={goBack}>
-                  পূর্ববর্তী
-                </Button>
-              )}
-              {step < TOTAL_STEPS ? (
-                <Button
-                  type="button"
-                  className="btn-sheen h-12 flex-1 bg-primary text-primary-foreground transition-transform hover:-translate-y-px hover:bg-primary/90"
-                  disabled={!stepValid[step]}
-                  onClick={goNext}
-                >
-                  পরবর্তী
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  className="btn-sheen h-12 flex-1 bg-primary text-primary-foreground transition-transform hover:-translate-y-px hover:bg-primary/90"
-                  disabled={!stepValid[4] || submitting}
-                  onClick={handleSubmit}
-                >
-                  {submitting ? <BrandLoader inline label="সাবমিট হচ্ছে..." /> : 'সাবমিট করুন'}
-                </Button>
-              )}
-            </div>
-
-            <p className="text-center text-xs text-muted-foreground">
-              <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="underline">
-                Triathlon Bangladesh — triathlonbangladesh.com
+          <div className="mt-auto pt-6">
+            {cap ? (
+              <>
+                <div className="mb-1.5 flex items-baseline justify-between">
+                  <span className="font-heading text-[10px] font-semibold tracking-[0.26em] text-faint uppercase">Slots claimed</span>
+                  <span className="font-mono text-[13px] font-semibold text-accent tabular-nums">
+                    {claimed}
+                    <span className="text-faint">/{cap}</span>
+                  </span>
+                </div>
+                <div className="h-[5px] bg-background/15">
+                  <div className="h-full bg-accent" style={{ width: `${Math.min(100, Math.round((claimed / cap) * 100))}%` }} />
+                </div>
+              </>
+            ) : null}
+            <p className="mt-3.5 text-[11px] text-faint">
+              <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="text-faint underline underline-offset-[3px]">
+                triathlonbangladesh.com ↗
               </a>
             </p>
           </div>
+        </aside>
+
+        {/* ── form column ── */}
+        <div className="flex min-w-[320px] flex-[999_1_340px] flex-col justify-center px-4 py-7 sm:px-[clamp(16px,4vw,44px)]">
+          <RouteProgress step={step} />
+
+          {showRestored && (
+            <div className="mb-4 flex items-center justify-between gap-3 border-[1.5px] border-border-strong bg-accent/15 p-3 text-sm text-foreground">
+              <span lang="bn">আগের অসম্পূর্ণ ফর্ম ফিরিয়ে আনা হয়েছে</span>
+              <button type="button" onClick={() => setShowRestored(false)} className="text-muted-foreground hover:text-foreground">
+                ✕
+              </button>
+            </div>
+          )}
+
+          <div className="sl-card relative">
+            <p className="pointer-events-none absolute -top-1.5 right-3.5 m-0 font-heading text-[92px] leading-none font-bold text-foreground/[0.06] select-none">
+              0{step}
+            </p>
+            <div
+              key={step}
+              className={`flex flex-col gap-[22px] p-[clamp(20px,4vw,32px)] ${direction === 'forward' ? 'animate-step-fwd' : 'animate-step-back'}`}
+            >
+              {step === 1 && <Step1Eligibility event={event} categories={categories} form={form} setField={setField} {...touchProps} />}
+              {step === 2 && <Step2Personal jerseyChart={event.jersey_chart} form={form} setField={setField} {...touchProps} />}
+              {step === 3 && <Step3Payment event={event} category={category} form={form} setField={setField} {...touchProps} />}
+              {step === 4 && <Step4Review event={event} category={category} form={form} setField={setField} />}
+            </div>
+          </div>
+
+          {submitError && (
+            <div className="mt-4 border-[1.5px] border-destructive bg-destructive/10 p-3 text-center text-sm font-medium text-foreground" lang="bn">
+              {submitError}
+            </div>
+          )}
+
+          {/* nav */}
+          <div className="mt-[22px] flex gap-3">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={goBack}
+                className="flex h-14 flex-1 items-center justify-center gap-2 border-[1.5px] border-border-strong bg-transparent font-heading text-sm font-semibold tracking-[0.16em] text-foreground uppercase transition-transform hover:-translate-x-px hover:-translate-y-px"
+              >
+                <span className="relative -top-px">←</span>
+                <span className="font-sans text-sm font-medium tracking-normal normal-case" lang="bn">পূর্ববর্তী</span>
+              </button>
+            )}
+            {step < TOTAL_STEPS ? (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={!canNext}
+                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${
+                  canNext
+                    ? 'bg-foreground text-accent shadow-[4px_4px_0_rgba(21,24,14,.9)] hover:-translate-x-px hover:-translate-y-px'
+                    : 'cursor-not-allowed border-foreground/20 bg-foreground/[0.12] text-foreground/45'
+                }`}
+              >
+                <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">পরবর্তী</span>
+                <span className="relative -top-px">→</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!stepValid[4] || submitting}
+                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${
+                  stepValid[4] && !submitting
+                    ? 'bg-accent text-foreground shadow-[4px_4px_0_rgba(21,24,14,.9)] hover:-translate-x-px hover:-translate-y-px'
+                    : 'cursor-not-allowed border-foreground/20 bg-foreground/[0.12] text-foreground/45'
+                }`}
+              >
+                {submitting ? (
+                  <DashLoader inline label="সাবমিট হচ্ছে…" />
+                ) : (
+                  <>
+                    <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">সাবমিট করুন</span>
+                    <span className="relative -top-px">✓</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          <p className="mt-6 text-center text-[11px] text-muted-foreground">
+            Organised by{' '}
+            <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-[3px]">
+              Triathlon Bangladesh
+            </a>
+          </p>
         </div>
       </div>
     </div>

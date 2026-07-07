@@ -12,17 +12,31 @@
 @import "@fontsource/noto-sans-bengali/400.css";
 @import "@fontsource/noto-sans-bengali/500.css";
 @import "@fontsource/noto-sans-bengali/700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
 
-/* Triathlon Bangladesh is a dark-premium brand only — no light theme. */
+/* ============================================================================
+   START LINE / NIGHT OPS — two visual systems, one codebase.
+   Public wizard + success = :root (warm paper, hard ink, chartreuse).
+   Admin = .dark (near-black timing board). Corners are cut, not rounded.
+   ============================================================================ */
 
 @theme inline {
     --font-sans: 'Inter', 'Noto Sans Bengali', sans-serif;
     --font-heading: 'Oswald', 'Noto Sans Bengali', sans-serif;
-    --color-brand-green: var(--brand-green);
-    --color-bright-green: var(--bright-green);
-    --color-gold: var(--gold);
-    --color-swim-blue: var(--swim-blue);
-    --color-ride-red: var(--ride-red);
+    --font-mono: 'IBM Plex Mono', monospace;
+
+    --color-accent-ink: var(--accent-ink);
+    --color-warn: var(--warn);
+    --color-card-2: var(--card-2);
+    --color-faint: var(--faint);
+    --color-border-strong: var(--border-strong);
+    --color-status-pending: var(--status-pending);
+    --color-status-approved: var(--status-approved);
+    --color-status-rejected: var(--status-rejected);
+    --color-status-cancelled: var(--status-cancelled);
+
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -42,81 +56,124 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
+    --radius-sm: var(--radius);
+    --radius-md: var(--radius);
     --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-xl: var(--radius);
 }
 
+/* ── PUBLIC · "Start Line" (light) ── */
 :root {
-    --background: #08140e;
-    --foreground: #edf3ee;
-    --card: #0e1f16;
-    --card-foreground: #edf3ee;
-    --popover: #0e1f16;
-    --popover-foreground: #edf3ee;
-    --primary: #d4af37;
-    --primary-foreground: #08140e;
-    --secondary: #14663f;
-    --secondary-foreground: #edf3ee;
-    --muted: #142a1f;
-    --muted-foreground: #9fb3a6;
-    --accent: #2e9e54;
-    --accent-foreground: #08140e;
-    --destructive: #e23b3b;
-    --destructive-foreground: #edf3ee;
-    --border: #1c3327;
-    --input: #16281e;
-    --ring: #2e9e54;
-    --radius: 0.625rem;
+    --background: #f1efe6;      /* warm paper */
+    --foreground: #15180e;      /* ink */
+    --card: #fbfaf5;            /* bib white */
+    --card-foreground: #15180e;
+    --card-2: #f3f1e7;
+    --popover: #fbfaf5;
+    --popover-foreground: #15180e;
+    --primary: #15180e;         /* ink buttons… */
+    --primary-foreground: #c6f53f;  /* …chartreuse text */
+    --secondary: #c6f53f;       /* chartreuse fills (submit, category) */
+    --secondary-foreground: #15180e;
+    --muted: #e7e4d8;
+    --muted-foreground: #5a5f4a;
+    --faint: #7c8272;
+    --accent: #c6f53f;          /* THE pop. Never as long text on paper */
+    --accent-foreground: #15180e;
+    --accent-ink: #5a7a00;      /* chartreuse-as-text, AA on paper */
+    --destructive: #c7361f;
+    --destructive-foreground: #fbfaf5;
+    --border: rgba(21, 24, 14, 0.30);   /* idle input border */
+    --border-strong: #15180e;           /* cards, selected, focused */
+    --input: #ffffff;
+    --ring: #c6f53f;
+    --radius: 0px;              /* sharp. bib corners are cut, not rounded */
+    --warn: #b77e10;           /* pending stamp */
 
-    --brand-green: #14663f;
-    --bright-green: #2e9e54;
-    --gold: #d4af37;
-    --swim-blue: #1e88e5;
-    --ride-red: #e23b3b;
+    --status-pending: #b77e10;
+    --status-approved: #5a7a00;
+    --status-rejected: #c7361f;
+    --status-cancelled: #7c8272;
+}
+
+/* ── ADMIN · "Night Ops" (dark) ── */
+.dark {
+    --background: #0b0d08;
+    --foreground: #edefe4;
+    --card: #14170f;
+    --card-foreground: #edefe4;
+    --card-2: #1b1f13;          /* zebra / skeleton highlight */
+    --popover: #14170f;
+    --popover-foreground: #edefe4;
+    --primary: #c6f53f;
+    --primary-foreground: #0b0d08;
+    --secondary: #1b1f13;
+    --secondary-foreground: #edefe4;
+    --muted: #1b1f13;
+    --muted-foreground: #9ba18a;
+    --faint: #7c8272;           /* metadata, timestamps */
+    --accent: #c6f53f;          /* telemetry: numbers, active, approved */
+    --accent-foreground: #0b0d08;
+    --accent-ink: #c6f53f;
+    --destructive: #e24e3b;
+    --destructive-foreground: #0b0d08;
+    --border: #262b1b;
+    --border-strong: #363d28;
+    --input: #0b0d08;
+    --ring: #c6f53f;
+    --radius: 0px;
+    --warn: #e8b931;
+
+    --status-pending: #e8b931;
+    --status-approved: #c6f53f;
+    --status-rejected: #e24e3b;
+    --status-cancelled: #7c8272;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   html {
     @apply font-sans;
+  }
+  :root {
+    color-scheme: light;
+  }
+  .dark {
     color-scheme: dark;
   }
   body {
-    @apply text-foreground;
+    @apply bg-background text-foreground;
+    margin: 0;
   }
   h1, h2, h3, h4 {
-    @apply font-heading uppercase tracking-wide;
+    @apply font-heading uppercase;
   }
 }
 
-@keyframes step-in {
-  from {
-    opacity: 0;
-    transform: translateX(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+/* ============================================================================
+   ANIMATION — plain CSS, all gated behind prefers-reduced-motion.
+   The only two infinite loops in the whole system: sl-dash + shimmer.
+   ============================================================================ */
+@keyframes sl-step-fwd { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes sl-step-back { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes sl-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sl-shake { 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } }
+@keyframes sl-stamp { 0% { opacity: 0; transform: scale(1.35) rotate(-8deg); } 60% { opacity: 1; transform: scale(0.96) rotate(-4deg); } 100% { opacity: 1; transform: scale(1) rotate(-4deg); } }
+@keyframes sl-draw { to { stroke-dashoffset: 0; } }
+@keyframes sl-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes sl-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes sl-dash { to { stroke-dashoffset: -14; } }
+@keyframes sl-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes sl-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-.animate-step-in {
-  animation: step-in 200ms ease-out;
-}
-
-@keyframes gold-ring-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.gold-ring-draw {
-  animation: gold-ring-draw 1.1s ease-out 0.15s forwards;
-}
+.animate-step-fwd { animation: sl-step-fwd 0.26s ease-out; }
+.animate-step-back { animation: sl-step-back 0.26s ease-out; }
+.animate-rise { animation: sl-rise 0.3s ease-out both; }
+.animate-shake { animation: sl-shake 0.22s ease-in-out; }
+.animate-stamp { animation: sl-stamp 0.45s ease-out 1.5s both; }
+.animate-blink { animation: sl-blink 2s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -128,183 +185,67 @@
 }
 
 /* ============================================================================
-   BACKGROUND SYSTEM — layered atmosphere behind every page (public + admin)
+   PUBLIC BACKGROUND — warm paper with a faint contour-line print.
    ============================================================================ */
-body {
-  background:
-    radial-gradient(80vw 60vh at 85% -10%, rgba(20, 102, 63, .32), transparent 60%),
-    radial-gradient(60vw 50vh at -10% 30%, rgba(11, 61, 46, .40), transparent 60%),
-    linear-gradient(180deg, #0a1812 0%, #08140E 30%, #060f0a 100%);
-  background-attachment: fixed;
-}
-
-#root {
-  position: relative;
-  z-index: 1;
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* 1px grid, ~90px cells */
-body::before {
-  background-image:
-    linear-gradient(rgba(46, 158, 84, .06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46, 158, 84, .06) 1px, transparent 1px);
-  background-size: 90px 90px;
-}
-
-/* faint grain, same SVG-turbulence technique as the main site */
-body::after {
-  opacity: .04;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+.sl-paper {
+  background-color: var(--background);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560'%3E%3Cg fill='none' stroke='%2315180E' stroke-opacity='.045' stroke-width='1'%3E%3Cpath d='M-20 120 C120 60 240 180 400 110 S580 160 620 120'/%3E%3Cpath d='M-20 170 C130 110 250 230 410 160 S590 210 620 170'/%3E%3Cpath d='M-20 220 C140 160 260 280 420 210 S600 260 620 220'/%3E%3Cpath d='M-20 420 C120 360 240 470 400 410 S580 450 620 420'/%3E%3Cpath d='M-20 470 C130 410 250 520 410 460 S590 500 620 470'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ============================================================================
-   GLASSMORPHISM — wizard card + its inputs (scoped; admin stays utilitarian)
+   START LINE COMPONENT PATTERNS
    ============================================================================ */
-.wizard-shell {
-  background: rgba(255, 255, 255, .05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(212, 175, 55, .16);
-  border-radius: 20px;
-  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .6);
+
+/* Wizard step card: bib white, 1.5px ink border, hard offset shadow. */
+.sl-card {
+  background: var(--card);
+  border: 1.5px solid var(--border-strong);
+  box-shadow: 7px 7px 0 rgba(21, 24, 14, 0.9);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .wizard-shell {
-    background: #0E1F16;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
+/* Smaller hard-shadow surfaces (closed screen, popovers). */
+.sl-hard-shadow { box-shadow: 6px 6px 0 rgba(21, 24, 14, 0.85); }
+
+/* Tap tile — gender / blood / jersey / payment method. */
+.sl-tile {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  background: var(--input);
+  cursor: pointer;
+  transition: all 0.12s;
+  color: var(--foreground);
+}
+.sl-tile:hover:not([aria-pressed="true"]) { border-color: var(--border-strong); }
+.sl-tile[aria-pressed="true"] {
+  border-color: var(--border-strong);
+  background: var(--accent);
+}
+.sl-tile:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(198, 245, 63, 0.55);
+  border-color: var(--border-strong);
 }
 
-.wizard-shell [data-slot="input"],
-.wizard-shell [data-slot="textarea"],
-.wizard-shell [data-slot="select-trigger"] {
-  background: rgba(0, 0, 0, .25);
-  border-color: rgba(46, 158, 84, .25);
-  caret-color: var(--gold);
-  transition: box-shadow 120ms ease-in, border-color 120ms ease-in;
+/* Section label — Oswald caps, wide tracking. */
+.sl-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--foreground);
 }
 
-.wizard-shell [data-slot="input"]:focus-visible,
-.wizard-shell [data-slot="textarea"]:focus-visible,
-.wizard-shell [data-slot="select-trigger"]:focus-visible {
-  box-shadow: 0 0 0 3px rgba(46, 158, 84, .25);
-  border-color: var(--bright-green);
+/* Caution stripe footer (bib + closed screen). */
+.sl-stripe {
+  background: repeating-linear-gradient(90deg, #c6f53f 0 14px, #15180e 14px 28px);
 }
 
 /* ============================================================================
-   DESKTOP SPLIT LAYOUT — poster/branding panel beside the wizard
-   ============================================================================ */
-.reg-poster-panel {
-  position: relative;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center 35%;
-}
-
-.reg-poster-panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, rgba(8, 20, 14, .55), rgba(8, 20, 14, .92));
-}
-
-/* ============================================================================
-   MICRO-ANIMATIONS (all gated by prefers-reduced-motion above)
-   ============================================================================ */
-@keyframes spin-reverse {
-  to { transform: rotate(-360deg); }
-}
-.animate-spin-reverse {
-  animation: spin-reverse 0.8s linear infinite;
-}
-
-@keyframes field-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-field-rise {
-  opacity: 0;
-  animation: field-rise 250ms ease-out forwards;
-}
-
-@keyframes step-in-forward {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-@keyframes step-in-back {
-  from { opacity: 0; transform: translateX(-24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-.animate-step-in-forward {
-  animation: step-in-forward 200ms ease-out;
-}
-.animate-step-in-back {
-  animation: step-in-back 200ms ease-out;
-}
-
-/* stagger the fields inside each step (the step root's direct children) */
-.animate-step-in-forward > * > *,
-.animate-step-in-back > * > * {
-  opacity: 0;
-  animation: field-rise 250ms ease-out forwards;
-}
-.animate-step-in-forward > * > *:nth-child(1), .animate-step-in-back > * > *:nth-child(1) { animation-delay: 0ms; }
-.animate-step-in-forward > * > *:nth-child(2), .animate-step-in-back > * > *:nth-child(2) { animation-delay: 60ms; }
-.animate-step-in-forward > * > *:nth-child(3), .animate-step-in-back > * > *:nth-child(3) { animation-delay: 120ms; }
-.animate-step-in-forward > * > *:nth-child(4), .animate-step-in-back > * > *:nth-child(4) { animation-delay: 180ms; }
-.animate-step-in-forward > * > *:nth-child(5), .animate-step-in-back > * > *:nth-child(5) { animation-delay: 240ms; }
-.animate-step-in-forward > * > *:nth-child(6), .animate-step-in-back > * > *:nth-child(6) { animation-delay: 300ms; }
-.animate-step-in-forward > * > *:nth-child(7), .animate-step-in-back > * > *:nth-child(7) { animation-delay: 360ms; }
-.animate-step-in-forward > * > *:nth-child(n+8), .animate-step-in-back > * > *:nth-child(n+8) { animation-delay: 420ms; }
-
-@keyframes field-shake {
-  10%, 90% { transform: translateX(-1px); }
-  20%, 80% { transform: translateX(2px); }
-  30%, 50%, 70% { transform: translateX(-4px); }
-  40%, 60% { transform: translateX(4px); }
-}
-.animate-shake {
-  animation: field-shake 200ms ease-in-out;
-}
-
-@keyframes gold-sheen {
-  from { background-position: -150% 0; }
-  to { background-position: 250% 0; }
-}
-.btn-sheen {
-  position: relative;
-  overflow: hidden;
-  background-image: linear-gradient(100deg, transparent 40%, rgba(255, 255, 255, .35) 50%, transparent 60%);
-  background-size: 250% 100%;
-  background-repeat: no-repeat;
-}
-.btn-sheen:hover {
-  animation: gold-sheen 900ms ease-in-out;
-}
-
-@keyframes detail-reveal {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-detail-reveal {
-  opacity: 0;
-  animation: detail-reveal 300ms ease-out forwards;
-}
-
-/* ============================================================================
-   ADMIN — page header pattern + tables
+   ADMIN (NIGHT OPS) PATTERNS
    ============================================================================ */
 .admin-page-header {
   display: flex;
@@ -314,41 +255,30 @@ body::after {
   gap: 12px;
 }
 .admin-page-header h1 {
-  position: relative;
-  font-size: 1.25rem;
-  padding-bottom: 10px;
-}
-.admin-page-header h1::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 40px;
-  height: 3px;
-  background: var(--gold);
+  font-size: 1.375rem;
+  letter-spacing: 0.06em;
 }
 
-.admin-table tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, .02);
-}
-.admin-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--bg-elev, var(--card));
+/* Shimmer skeleton — one of the two infinite animations. */
+.sl-skeleton {
+  border: 1px solid var(--border);
+  background: linear-gradient(100deg, var(--card) 40%, var(--card-2) 50%, var(--card) 60%);
+  background-size: 200% 100%;
+  animation: sl-shimmer 1.4s linear infinite;
 }
 
+/* Status chip — bordered + tinted, square. Colors set inline per status. */
 .status-chip {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 11px;
+  display: inline-block;
+  border: 1px solid;
+  font-family: var(--font-mono);
   font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: capitalize;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
 }
-.status-chip-pending { background: rgba(212, 175, 55, .16); color: var(--gold); }
-.status-chip-approved { background: rgba(46, 158, 84, .18); color: var(--bright-green); }
-.status-chip-rejected { background: rgba(226, 59, 59, .18); color: var(--ride-red); }
-.status-chip-cancelled { background: rgba(255, 255, 255, .08); color: var(--muted-foreground); }
+.status-chip-pending   { border-color: color-mix(in srgb, var(--status-pending) 50%, transparent);   color: var(--status-pending);   background: color-mix(in srgb, var(--status-pending) 8%, transparent); }
+.status-chip-approved  { border-color: color-mix(in srgb, var(--status-approved) 50%, transparent);  color: var(--status-approved);  background: color-mix(in srgb, var(--status-approved) 8%, transparent); }
+.status-chip-rejected  { border-color: color-mix(in srgb, var(--status-rejected) 50%, transparent);  color: var(--status-rejected);  background: color-mix(in srgb, var(--status-rejected) 8%, transparent); }
+.status-chip-cancelled { border-color: color-mix(in srgb, var(--status-cancelled) 50%, transparent); color: var(--status-cancelled); background: color-mix(in srgb, var(--status-cancelled) 8%, transparent); }
