@@ -8,17 +8,15 @@ Reusable event-registration system for Triathlon Bangladesh. Built to replace an
 
 | Registration wizard | Category & payment |
 | --- | --- |
-| ![Registration step 1](docs/screenshots/register-step1.png) | ![Registration step 3](docs/screenshots/register-step3.png) |
+| ![Registration step 1](docs/screenshots/register-step1.png) | ![Registration step 2](docs/screenshots/register-step2.png) |
 
-| Success screen | Admin dashboard |
-| --- | --- |
-| ![Success bib](docs/screenshots/success-screen.png) | ![Admin dashboard](docs/screenshots/admin-dashboard.png) |
-
-| Admin registrations table |
+| Admin dashboard |
 | --- |
-| ![Admin registrations](docs/screenshots/admin-registrations.png) |
+| ![Admin dashboard](docs/screenshots/admin-dashboard.png) |
 
-*(Drop PNGs into [`docs/screenshots/`](docs/screenshots/) with the filenames above to populate this section.)*
+| Admin Event Configuration |
+| --- |
+| ![Admin Event Configuration](docs/screenshots/admin-config.png) |
 
 ## Tech Stack
 
