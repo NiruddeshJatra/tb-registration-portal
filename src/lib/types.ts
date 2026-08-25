@@ -111,6 +111,7 @@ export type RegisterParticipantError =
   | 'bad_name'
   | 'bad_txid'
   | 'bad_bike_type'
+  | 'bike_type_required'
   | 'bad_strava_link'
   | 'no_category'
   | 'category_full'

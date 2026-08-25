@@ -46,6 +46,7 @@ export function EventConfigPage() {
   const [requiresBikeType, setRequiresBikeType] = useState(false)
   const [collectsStravaLink, setCollectsStravaLink] = useState(false)
   const [manualCategorySelect, setManualCategorySelect] = useState(false)
+  const [isVirtual, setIsVirtual] = useState(false)
   const [savingEvent, setSavingEvent] = useState(false)
 
   const [categories, setCategories] = useState<CategoryRow[]>([])
@@ -63,6 +64,7 @@ export function EventConfigPage() {
     setRequiresBikeType(selectedEvent.requires_bike_type)
     setCollectsStravaLink(selectedEvent.collects_strava_link)
     setManualCategorySelect(selectedEvent.manual_category_select)
+    setIsVirtual(selectedEvent.is_virtual)
   }, [selectedEvent])
 
   useEffect(() => {
@@ -90,6 +92,7 @@ export function EventConfigPage() {
         requires_bike_type: requiresBikeType,
         collects_strava_link: collectsStravaLink,
         manual_category_select: manualCategorySelect,
+        is_virtual: isVirtual,
       })
       .eq('id', selectedEventId)
     setSavingEvent(false)
@@ -181,6 +184,12 @@ export function EventConfigPage() {
               hint="Distance tiles instead of age/gender auto-match"
               checked={manualCategorySelect}
               onChange={setManualCategorySelect}
+            />
+            <ToggleRow
+              title="Virtual event"
+              hint="No race day: hides the date + bike check-in, t-shirt sizing"
+              checked={isVirtual}
+              onChange={setIsVirtual}
             />
             <div className="flex flex-col gap-1.5">
               <AdminLabel>Registration deadline</AdminLabel>
