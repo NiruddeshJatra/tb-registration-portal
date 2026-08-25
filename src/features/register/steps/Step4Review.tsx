@@ -44,8 +44,10 @@ export function Step4Review({ event, category, form, setField }: Props) {
           <Row label="Phone" value={form.phone || '—'} mono />
           <Row label="Emergency" value={form.emergency_phone || '—'} mono />
           <Row label="Email" value={form.email || '—'} />
+          <Row label="Gender" value={form.gender ? form.gender[0].toUpperCase() + form.gender.slice(1) : '—'} />
+          <Row label="Address" value={form.address || '—'} />
           <Row label="Blood group" value={form.blood_group || '—'} mono />
-          <Row label="Jersey" value={form.jersey_size || '—'} />
+          <Row label={event.is_virtual ? 'T-shirt' : 'Jersey'} value={form.jersey_size || '—'} />
           <Row label="Payment" value={form.payment_method ? `${form.payment_method} · ${form.transaction_id}` : '—'} mono />
           <div className="flex justify-between gap-4 py-[11px]">
             <span className="self-center font-heading text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">Fee</span>

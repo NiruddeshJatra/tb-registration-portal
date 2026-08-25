@@ -1,8 +1,13 @@
 // Route-progress line — segment boundaries proportional to the real race
 // distances (RUN 10K / BIKE 40K / RUN 5K + finish gantry). Replaces StepProgress.
+// `legs` labels the three segments; events without the duathlon's legs (a
+// virtual run) pass their own. The geometry stays fixed either way.
 interface Props {
   step: number // 1..4
+  legs?: [string, string, string]
 }
+
+const DUATHLON_LEGS: [string, string, string] = ['RUN 10K', 'BIKE 40K', 'RUN 5K']
 
 const STEP_TITLES: Record<number, string> = {
   1: 'Segment 01 — Eligibility',
@@ -13,7 +18,7 @@ const STEP_TITLES: Record<number, string> = {
 // route geometry: segment boundaries at x = 2, 118, 290, 386 (finish), 398
 const PROGRESS_X: Record<number, number> = { 1: 118, 2: 290, 3: 386, 4: 398 }
 
-export function RouteProgress({ step }: Props) {
+export function RouteProgress({ step, legs = DUATHLON_LEGS }: Props) {
   const progressX = PROGRESS_X[step] ?? 118
   // Start Line is a light-only surface — hardcode the palette so the SVG
   // renders identically everywhere (no reliance on var() in fill/stroke attrs).
@@ -43,9 +48,9 @@ export function RouteProgress({ step }: Props) {
           <rect x="3" y="0" width="12" height="9" fill={step >= 4 ? cha : paper} stroke={ink} strokeWidth="0.5" />
         </g>
         <circle cx={progressX} cy="12" r="5.5" fill={cha} stroke={ink} strokeWidth="2" style={{ ...trackTransition, animation: 'sl-pulse 1.6s ease-in-out infinite' }} />
-        <text x="2" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={done}>RUN 10K</text>
-        <text x="118" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={step >= 2 ? done : todo}>BIKE 40K</text>
-        <text x="290" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={step >= 3 ? done : todo}>RUN 5K</text>
+        <text x="2" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={done}>{legs[0]}</text>
+        <text x="118" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={step >= 2 ? done : todo}>{legs[1]}</text>
+        <text x="290" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={step >= 3 ? done : todo}>{legs[2]}</text>
         <text x="398" y="31" fontFamily="Oswald" fontSize="8.5" letterSpacing="1.5" fill={step >= 4 ? done : todo} textAnchor="end">FINISH</text>
       </svg>
     </div>
