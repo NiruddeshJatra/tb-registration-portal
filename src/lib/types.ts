@@ -41,6 +41,7 @@ export interface EventRow {
   registration_deadline: string | null
   max_total_slots: number | null
   fee_note: string | null
+  participation_note: string | null
   payment_number: string | null
   payment_methods: PaymentMethod[]
   jersey_chart: JerseyChartRow[]

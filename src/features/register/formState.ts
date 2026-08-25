@@ -15,7 +15,6 @@ export interface RegisterFormState {
   // picked (e.g. '10K'). Auto-match events leave it empty.
   category_name: string
   bike_type: BikeType | ''
-  strava_link: string
   payment_method: PaymentMethod | ''
   payment_sender: string
   transaction_id: string
@@ -36,7 +35,6 @@ export const EMPTY_FORM: RegisterFormState = {
   address: '',
   category_name: '',
   bike_type: '',
-  strava_link: '',
   payment_method: '',
   payment_sender: '',
   transaction_id: '',

@@ -33,9 +33,6 @@ export function Step2Personal({ event, jerseyChart, form, setField, touched, mar
   const emErr = Boolean(touched.emergency) && emFilled && (!isValidBdPhone(form.emergency_phone) || samePhone)
   const emailErr = Boolean(touched.email) && emailFilled && !isValidEmail(form.email)
 
-  // Strava link is optional: only flag it once something non-empty is typed.
-  const stravaFilled = form.strava_link.trim().length > 0
-  const stravaErr = Boolean(touched.strava) && stravaFilled && !/^https?:\/\//i.test(form.strava_link.trim())
 
   return (
     <>
@@ -145,20 +142,10 @@ export function Step2Personal({ event, jerseyChart, form, setField, touched, mar
       )}
 
       {event.collects_strava_link && (
-        <div className="flex flex-col gap-2">
-          <FieldLabel htmlFor="strava_link" gloss="ঐচ্ছিক">Strava activity link</FieldLabel>
-          <Input
-            id="strava_link"
-            type="url"
-            inputMode="url"
-            value={form.strava_link}
-            onChange={(e) => setField('strava_link', e.target.value)}
-            onBlur={() => markTouched('strava')}
-            onFocus={() => clearTouched('strava')}
-            className={cn('h-[50px]', inputBorder(stravaErr, stravaFilled && !stravaErr))}
-            placeholder="https://www.strava.com/activities/..."
-          />
-          <FieldError show={stravaErr}>লিংক http:// বা https:// দিয়ে শুরু হতে হবে</FieldError>
+        <div className="border-l-[3px] border-accent bg-accent/15 px-3.5 py-2.5">
+          <p className="text-xs leading-[1.7] text-foreground" lang="bn">
+            📍 Strava লিংক এখন দিতে হবে না — রান শেষ করার পর WhatsApp-এ পাঠাবেন। বিস্তারিত সময়সূচি পাশের “HOW IT WORKS” অংশে দেওয়া আছে।
+          </p>
         </div>
       )}
 

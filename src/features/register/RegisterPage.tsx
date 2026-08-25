@@ -18,7 +18,7 @@ import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/typ
 const TOTAL_STEPS = 4
 
 export type TouchKey =
-  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid' | 'strava'
+  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid'
 
 export interface StepFieldProps {
   touched: Partial<Record<TouchKey, boolean>>
@@ -177,9 +177,7 @@ export function RegisterPage() {
       form.blood_group &&
       form.jersey_size &&
       // Bike type is mandatory wherever the event asks for it.
-      (!event.requires_bike_type || form.bike_type !== '') &&
-      // Strava link stays optional — only a non-empty, malformed one blocks.
-      (!event.collects_strava_link || form.strava_link.trim() === '' || /^https?:\/\//i.test(form.strava_link.trim())),
+      (!event.requires_bike_type || form.bike_type !== ''),
     ),
     3: Boolean(form.payment_method && isValidBdPhone(form.payment_sender) && isValidTransactionId(form.transaction_id)),
     4: form.consent,
@@ -219,7 +217,9 @@ export function RegisterPage() {
       p_payment_sender: normalizePhone(form.payment_sender),
       p_transaction_id: form.transaction_id,
       p_bike_type: form.bike_type || null,
-      p_strava_link: form.strava_link.trim() || null,
+      // Never collected on the public form: a virtual run's Strava link only
+      // exists after the run. It arrives by WhatsApp and an admin records it.
+      p_strava_link: null,
       // Only sent for manual_category_select events; null keeps the RPC on its
       // original age/gender auto-match path.
       p_category_id: event.manual_category_select ? category?.id ?? null : null,
@@ -333,6 +333,12 @@ export function RegisterPage() {
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</span>
                 <span className="text-background">{event.fee_note}</span>
+              </div>
+            )}
+            {event.participation_note && (
+              <div className="mt-1 border-l-2 border-accent pl-3">
+                <p className="font-mono text-[10px] tracking-[0.08em] text-accent">HOW IT WORKS</p>
+                <p className="mt-1 leading-[1.7] text-background" lang="bn">{event.participation_note}</p>
               </div>
             )}
           </div>
