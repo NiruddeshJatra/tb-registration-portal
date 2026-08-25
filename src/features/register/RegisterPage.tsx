@@ -176,6 +176,8 @@ export function RegisterPage() {
       isValidEmail(form.email) &&
       form.blood_group &&
       form.jersey_size &&
+      // Bike type is mandatory wherever the event asks for it.
+      (!event.requires_bike_type || form.bike_type !== '') &&
       // Strava link stays optional — only a non-empty, malformed one blocks.
       (!event.collects_strava_link || form.strava_link.trim() === '' || /^https?:\/\//i.test(form.strava_link.trim())),
     ),
