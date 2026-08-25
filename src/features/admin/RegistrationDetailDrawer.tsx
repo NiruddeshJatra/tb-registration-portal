@@ -109,6 +109,8 @@ export function RegistrationDetailDrawer({ registration, onClose, onUpdated }: P
               <Field label="Date of birth" value={r.date_of_birth} mono />
               <Field label="Blood group" value={r.blood_group} mono />
               <Field label="Address" value={r.address} />
+              <Field label="Bike type" value={r.bike_type} />
+              <Field label="Strava link" value={r.strava_link} />
             </Section>
 
             <Section title="Race">

@@ -4,7 +4,7 @@ import { FieldError, FieldLabel } from './fields'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import type { StepFieldProps } from '../RegisterPage'
-import { matchCategory } from '../formState'
+import { distinctCategoryNames, resolveCategory } from '../formState'
 import { calculateAge, formatTaka } from '@/lib/format'
 
 interface Props extends StepFieldProps {
@@ -16,19 +16,24 @@ interface Props extends StepFieldProps {
 
 export function Step1Eligibility({ event, categories, form, setField, touched, markTouched, clearTouched }: Props) {
   const today = new Date().toISOString().slice(0, 10)
-  const category =
-    form.gender && form.date_of_birth ? matchCategory(categories, form.gender, form.date_of_birth, event.event_date) : null
-  const showNoMatch = Boolean(form.gender && form.date_of_birth && !category)
+  const manualSelect = event.manual_category_select
+  const distances = manualSelect ? distinctCategoryNames(categories) : []
+  const category = resolveCategory(event, categories, form)
+  // Auto-match events warn when no category fits the age/gender. Manual-select
+  // events can't "not match" — the athlete simply hasn't picked a distance yet.
+  const showNoMatch = Boolean(!manualSelect && form.gender && form.date_of_birth && !category)
   const dobValid = Boolean(form.date_of_birth)
   const dobError = Boolean(touched.dob) && !dobValid
-  const age = category ? calculateAge(form.date_of_birth, event.event_date) : null
+  const age = category && form.date_of_birth ? calculateAge(form.date_of_birth, event.event_date) : null
 
   return (
     <>
       <div>
         <h2 className="font-heading text-2xl font-semibold tracking-[0.02em] uppercase">Eligibility</h2>
         <p className="mt-1.5 text-[13px] text-muted-foreground" lang="bn">
-          লিঙ্গ ও জন্ম তারিখ দিন — আপনার ক্যাটাগরি ও ফি স্বয়ংক্রিয়ভাবে দেখানো হবে।
+          {manualSelect
+            ? 'লিঙ্গ, জন্ম তারিখ ও আপনার দূরত্ব বেছে নিন — ফি দেখানো হবে।'
+            : 'লিঙ্গ ও জন্ম তারিখ দিন — আপনার ক্যাটাগরি ও ফি স্বয়ংক্রিয়ভাবে দেখানো হবে।'}
         </p>
       </div>
 
@@ -59,12 +64,23 @@ export function Step1Eligibility({ event, categories, form, setField, touched, m
         <FieldError show={dobError}>সঠিক জন্ম তারিখ দিন (dd/mm/yyyy)</FieldError>
       </div>
 
+      {manualSelect && distances.length > 0 && (
+        <TapTileGroup
+          name="category_name"
+          label="Distance"
+          gloss="দূরত্ব"
+          value={form.category_name}
+          onChange={(v) => setField('category_name', v)}
+          options={distances.map((d) => ({ value: d, label: d }))}
+        />
+      )}
+
       {category && (
         <div className="animate-rise flex items-center justify-between gap-3 border-[1.5px] border-border-strong bg-accent p-4">
           <div>
             <p className="font-heading text-[10px] font-semibold tracking-[0.26em] text-foreground uppercase">Your category</p>
             <p className="mt-0.5 font-heading text-[19px] font-semibold tracking-[0.02em] text-foreground uppercase">{category.name}</p>
-            {age !== null && (
+            {!manualSelect && age !== null && (
               <p className="mt-0.5 text-[11.5px] text-foreground/75" lang="bn">
                 বয়স {age} · ইভেন্টের দিন অনুযায়ী
               </p>

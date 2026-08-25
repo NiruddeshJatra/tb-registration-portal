@@ -1,145 +1,48 @@
--- Triathlon Bangladesh Registration Portal — schema.sql
--- Idempotent where practical. Run once in the Supabase SQL editor (or `supabase db push`).
--- After running: disable email signups in Auth settings, create admin users from the dashboard.
-
--- ============================================================================
--- EXTENSIONS
--- ============================================================================
-create extension if not exists pgcrypto; -- gen_random_uuid()
-
--- ============================================================================
--- TABLES
--- ============================================================================
-
-create table if not exists events (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  slug text not null unique,
-  short_code text not null unique, -- used as the ref_code prefix, e.g. 'CD26'
-  event_date date not null,
-  venue text not null,
-  registration_open boolean not null default false,
-  registration_deadline date,
-  max_total_slots int, -- null = unlimited; total cap across all categories combined
-  fee_note text,
-  payment_number text,
-  payment_methods text[] not null default '{}',
-  jersey_chart jsonb not null default '[]',
-  reg_counter int not null default 0, -- incremented atomically to build ref_code
-  created_at timestamptz not null default now()
-);
-
-create table if not exists categories (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references events(id) on delete cascade,
-  name text not null,
-  gender text not null check (gender in ('male', 'female')),
-  min_age int not null,
-  max_age int, -- null = no upper bound
-  fee int not null,
-  max_slots int, -- null = unlimited
-  display_order int not null default 0
-);
-
-create table if not exists registrations (
-  id uuid primary key default gen_random_uuid(),
-  ref_code text unique, -- assigned inside register_participant()
-  event_id uuid not null references events(id),
-  category_id uuid references categories(id), -- nullable: non-runner roles may have no category
-  full_name text not null,
-  phone text not null,
-  email text not null,
-  gender text not null check (gender in ('male', 'female')),
-  date_of_birth date not null,
-  blood_group text check (blood_group in ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')),
-  jersey_size text check (jersey_size in ('XS', 'S', 'M', 'L', 'XL', '2XL', '3XL')),
-  address text,
-  emergency_phone text not null,
-  comments text,
-  payment_method text check (payment_method in ('bKash', 'Nagad', 'Rocket', 'Upay')),
-  payment_sender text,
-  transaction_id text,
-  amount_paid int,
-  consent_given_at timestamptz not null,
-  participant_role text not null default 'runner'
-    check (participant_role in ('runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer')),
-  entry_source text not null default 'self'
-    check (entry_source in ('self', 'admin_manual', 'group_import')),
-  registration_type text not null default 'paid'
-    check (registration_type in ('paid', 'discounted', 'complimentary')),
-  discount_reason text,
-  complimentary_reason text,
-  authorized_by text,
-  group_name text,
-  status text not null default 'pending'
-    check (status in ('pending', 'approved', 'rejected', 'cancelled')),
-  managed_by text,
-  admin_comment text,
-  status_changed_at timestamptz,
-  created_at timestamptz not null default now(),
-  constraint registrations_event_txid_key unique (event_id, transaction_id),
-  constraint chk_full_name check (full_name ~ '^[A-Za-z][A-Za-z .''-]{1,79}$'),
-  constraint chk_email check (email ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$'),
-  constraint chk_phone_diff check (phone <> emergency_phone),
-  constraint chk_phone_format check (phone ~ '^01[3-9][0-9]{8}$'),
-  constraint chk_emergency_phone_format check (emergency_phone ~ '^01[3-9][0-9]{8}$'),
-  constraint chk_txid check (transaction_id is null or transaction_id ~ '^[A-Z0-9]{8,15}$'),
-  constraint chk_txid_required check (registration_type = 'complimentary' or transaction_id is not null)
-);
-
--- Only self-submitted registrations must have a unique phone per event.
--- Admin bulk/group entries may legitimately share a contact phone.
-create unique index if not exists registrations_event_phone_self_key
-  on registrations (event_id, phone)
-  where entry_source = 'self';
-
-create index if not exists registrations_event_category_idx on registrations (event_id, category_id);
-create index if not exists registrations_status_idx on registrations (status);
-
--- ============================================================================
--- ROW LEVEL SECURITY
--- ============================================================================
-
-alter table events enable row level security;
-alter table categories enable row level security;
-alter table registrations enable row level security;
-
-drop policy if exists events_select_all on events;
-create policy events_select_all on events for select using (true);
-drop policy if exists events_auth_all on events;
-create policy events_auth_all on events for all to authenticated using (true) with check (true);
-
-drop policy if exists categories_select_all on categories;
-create policy categories_select_all on categories for select using (true);
-drop policy if exists categories_auth_all on categories;
-create policy categories_auth_all on categories for all to authenticated using (true) with check (true);
-
--- registrations: anon gets NO policy at all (default-deny: no select/insert/update/delete).
--- All public writes go through register_participant() below, which is SECURITY DEFINER
--- and owned by a role that bypasses RLS (the default Supabase table owner).
-drop policy if exists registrations_auth_select on registrations;
-create policy registrations_auth_select on registrations for select to authenticated using (true);
-drop policy if exists registrations_auth_insert on registrations;
-create policy registrations_auth_insert on registrations for insert to authenticated with check (true);
-drop policy if exists registrations_auth_update on registrations;
-create policy registrations_auth_update on registrations for update to authenticated using (true) with check (true);
--- No delete policy for anyone: cancellation is a status change, not a row deletion (keeps the audit trail).
-
--- ============================================================================
--- register_participant(): the ONLY public write path into registrations
--- ============================================================================
--- Returns jsonb:
---   success -> {"ok": true, "ref_code", "category_name", "fee", "status"}
---   failure -> {"ok": false, "error": one of
---       'event_not_found' | 'registration_closed' | 'deadline_passed' | 'event_full' |
---       'bad_phone' | 'no_category' | 'category_full' | 'dup_txid' | 'dup_phone'}
+-- 0006_bike_type_and_virtual_run.sql
+-- 1. Bike type question for the Chattogram Duathlon 2026 form.
+-- 2. New event: Chatto Metro Virtual Run 2026 — distance-based self-select
+--    categories (5K/10K/21K) + optional Strava proof link.
 --
--- Atomicity of the capacity guards: we take pg_advisory_xact_lock() keyed on
--- the event id (total slots) and separately on the category id (per-category
--- slots). This serializes concurrent calls for the SAME event/category — the
--- second caller blocks until the first commits/rolls back, so the "count
--- current registrations" + "insert" pair can never race and oversell either
--- cap. Locks are released automatically at the end of the transaction.
+-- Idempotent: safe to re-run. Additive only — the existing duathlon
+-- registrations keep NULLs in every new column, no backfill, no NOT NULLs.
+--
+-- Also moves the duathlon race date to 6 November 2026 (section 5).
+--
+-- PLACEHOLDERS (see the seed block at the bottom): event name, short_code,
+-- payment_number, fee_note and the category fees are provisional.
+
+-- ============================================================================
+-- 1. EVENTS: per-event feature flags
+-- ============================================================================
+alter table events add column if not exists requires_bike_type boolean not null default false;
+alter table events add column if not exists collects_strava_link boolean not null default false;
+alter table events add column if not exists manual_category_select boolean not null default false;
+
+-- ============================================================================
+-- 2. REGISTRATIONS: two new optional columns
+-- ============================================================================
+alter table registrations add column if not exists bike_type text;
+alter table registrations add column if not exists strava_link text;
+
+alter table registrations drop constraint if exists chk_bike_type;
+alter table registrations add constraint chk_bike_type
+  check (bike_type is null or bike_type in ('MTB', 'Road/TT'));
+
+alter table registrations drop constraint if exists chk_strava_link;
+alter table registrations add constraint chk_strava_link
+  check (strava_link is null or strava_link ~* '^https?://');
+
+-- ============================================================================
+-- 3. register_participant()
+-- ============================================================================
+-- Postgres identifies a function by name + input argument types, so
+-- CREATE OR REPLACE with new trailing params would create a SECOND overload
+-- and leave the old 15-arg one live (this bit us on admin_register_participant
+-- in 0003). Drop the exact old signature first. Grants do not survive the
+-- drop — they are re-issued at the bottom of this block.
+drop function if exists register_participant(
+  text, text, text, text, text, date, text, text, text, text, text, text, text, text, text
+);
 
 create or replace function register_participant(
   p_event_slug text,
@@ -156,7 +59,10 @@ create or replace function register_participant(
   p_payment_method text,
   p_payment_sender text,
   p_transaction_id text,
-  p_participant_role text default 'runner'
+  p_participant_role text default 'runner',
+  p_bike_type text default null,
+  p_strava_link text default null,
+  p_category_id uuid default null
 )
 returns jsonb
 language plpgsql
@@ -171,6 +77,8 @@ declare
   v_emergency_phone text;
   v_full_name text;
   v_transaction_id text;
+  v_bike_type text;
+  v_strava_link text;
   v_count int;
   v_total_count int;
   v_ref_code text;
@@ -241,18 +149,49 @@ begin
     return jsonb_build_object('ok', false, 'error', 'bad_txid');
   end if;
 
-  -- 2. age + category match
-  v_age := extract(year from age(v_event.event_date, p_date_of_birth))::int;
-  select * into v_category
-    from categories
-   where event_id = v_event.id
-     and gender = p_gender
-     and min_age <= v_age
-     and (max_age is null or v_age <= max_age)
-   order by display_order
-   limit 1;
-  if not found then
-    return jsonb_build_object('ok', false, 'error', 'no_category');
+  -- bike type / strava link: both optional. Blank folds to NULL; a non-blank
+  -- value is validated here so the failure surfaces as a RegisterParticipantError
+  -- code rather than a raw CHECK-constraint exception.
+  v_bike_type := nullif(trim(coalesce(p_bike_type, '')), '');
+  if v_bike_type is not null and v_bike_type not in ('MTB', 'Road/TT') then
+    return jsonb_build_object('ok', false, 'error', 'bad_bike_type');
+  end if;
+
+  v_strava_link := nullif(trim(coalesce(p_strava_link, '')), '');
+  if v_strava_link is not null and v_strava_link !~* '^https?://' then
+    return jsonb_build_object('ok', false, 'error', 'bad_strava_link');
+  end if;
+
+  -- 2. category resolution.
+  --    p_category_id NULL  -> legacy auto-match by gender + age (duathlon path,
+  --                           behaviour unchanged).
+  --    p_category_id given -> self-select events (manual_category_select), where
+  --                           several categories share the same gender/age range
+  --                           and auto-match would always pick the first one.
+  --                           The id is still verified to belong to this event
+  --                           and to match the submitted gender.
+  if p_category_id is not null then
+    select * into v_category
+      from categories
+     where id = p_category_id
+       and event_id = v_event.id
+       and gender = p_gender;
+    if not found then
+      return jsonb_build_object('ok', false, 'error', 'no_category');
+    end if;
+  else
+    v_age := extract(year from age(v_event.event_date, p_date_of_birth))::int;
+    select * into v_category
+      from categories
+     where event_id = v_event.id
+       and gender = p_gender
+       and min_age <= v_age
+       and (max_age is null or v_age <= max_age)
+     order by display_order
+     limit 1;
+    if not found then
+      return jsonb_build_object('ok', false, 'error', 'no_category');
+    end if;
   end if;
 
   -- 3. capacity guard (atomic): advisory lock keyed on category id serializes
@@ -278,12 +217,12 @@ begin
       ref_code, event_id, category_id, full_name, phone, email, gender, date_of_birth,
       blood_group, jersey_size, address, emergency_phone, comments,
       payment_method, payment_sender, transaction_id, consent_given_at,
-      participant_role, entry_source
+      participant_role, entry_source, bike_type, strava_link
     ) values (
       v_ref_code, v_event.id, v_category.id, v_full_name, v_phone, p_email, p_gender, p_date_of_birth,
       p_blood_group, p_jersey_size, p_address, v_emergency_phone, p_comments,
       p_payment_method, p_payment_sender, v_transaction_id, now(),
-      coalesce(p_participant_role, 'runner'), 'self'
+      coalesce(p_participant_role, 'runner'), 'self', v_bike_type, v_strava_link
     );
   exception
     when unique_violation then
@@ -308,17 +247,18 @@ end;
 $$;
 
 grant execute on function register_participant(
-  text, text, text, text, text, date, text, text, text, text, text, text, text, text, text
+  text, text, text, text, text, date, text, text, text, text, text, text, text, text, text,
+  text, text, uuid
 ) to anon, authenticated;
 
 -- ============================================================================
--- admin_register_participant(): manual/group entry path for the admin dashboard.
--- Only authenticated users can execute this (no grant to anon). Unlike the
--- public RPC, it accepts an explicit category (nullable, for non-runner roles)
--- and skips the capacity/phone-dedupe guards — admins are trusted and can see
--- slot counts on the dashboard. It still uses the same atomic per-event
--- counter for ref_code and still guards against duplicate transaction IDs.
+-- 4. admin_register_participant()
 -- ============================================================================
+-- Same drop-then-create dance, against the exact 23-arg signature from 0003.
+drop function if exists admin_register_participant(
+  uuid, uuid, text, text, text, text, date, text, text, text, text, text,
+  text, text, text, text, text, text, text, text, text, text, int
+);
 
 create or replace function admin_register_participant(
   p_event_id uuid,
@@ -343,7 +283,9 @@ create or replace function admin_register_participant(
   p_complimentary_reason text,
   p_authorized_by text,
   p_group_name text,
-  p_amount_paid int default null
+  p_amount_paid int default null,
+  p_bike_type text default null,
+  p_strava_link text default null
 )
 returns jsonb
 language plpgsql
@@ -356,6 +298,8 @@ declare
   v_emergency_phone text;
   v_full_name text;
   v_transaction_id text;
+  v_bike_type text;
+  v_strava_link text;
   v_ref_code text;
   v_counter int;
   v_constraint text;
@@ -402,6 +346,16 @@ begin
     end if;
   end if;
 
+  v_bike_type := nullif(trim(coalesce(p_bike_type, '')), '');
+  if v_bike_type is not null and v_bike_type not in ('MTB', 'Road/TT') then
+    return jsonb_build_object('ok', false, 'error', 'bad_bike_type');
+  end if;
+
+  v_strava_link := nullif(trim(coalesce(p_strava_link, '')), '');
+  if v_strava_link is not null and v_strava_link !~* '^https?://' then
+    return jsonb_build_object('ok', false, 'error', 'bad_strava_link');
+  end if;
+
   -- Friendly duplicate-phone guard for single manual adds. Group imports
   -- (entry_source = 'group_import') may legitimately share a contact phone.
   if p_entry_source is distinct from 'group_import' then
@@ -424,13 +378,13 @@ begin
       blood_group, jersey_size, address, emergency_phone, comments,
       payment_method, payment_sender, transaction_id, amount_paid, consent_given_at,
       participant_role, entry_source, registration_type, discount_reason,
-      complimentary_reason, authorized_by, group_name
+      complimentary_reason, authorized_by, group_name, bike_type, strava_link
     ) values (
       v_ref_code, v_event.id, p_category_id, v_full_name, v_phone, p_email, p_gender, p_date_of_birth,
       p_blood_group, p_jersey_size, p_address, v_emergency_phone, p_comments,
       p_payment_method, p_payment_sender, v_transaction_id, p_amount_paid, now(),
       p_participant_role, p_entry_source, p_registration_type, p_discount_reason,
-      p_complimentary_reason, p_authorized_by, p_group_name
+      p_complimentary_reason, p_authorized_by, p_group_name, v_bike_type, v_strava_link
     );
   exception
     when unique_violation then
@@ -448,51 +402,46 @@ $$;
 
 grant execute on function admin_register_participant(
   uuid, uuid, text, text, text, text, date, text, text, text, text, text,
-  text, text, text, text, text, text, text, text, text, text, int
+  text, text, text, text, text, text, text, text, text, text, int, text, text
 ) to authenticated;
 
 -- ============================================================================
--- public_event_slots(): read-only slot telemetry for the public registration
--- rail. anon has no direct read on `registrations`, so this SECURITY DEFINER
--- function exposes only two aggregate numbers: approved count + the cap.
+-- 5. Chattogram Duathlon 2026: turn the bike-type question on and move the
+--    race date to 6 November 2026 (was 13 November). Bike check-in is the day
+--    before, 5 November — that line is copy in the registration rail, not a
+--    column. Existing registrations are untouched: event_date only feeds the
+--    age calculation for auto-matched categories, and the age brackets here
+--    (18-39 / 40+) are unaffected by a one-week shift.
 -- ============================================================================
-create or replace function public_event_slots(p_event_slug text)
-returns jsonb
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select jsonb_build_object(
-    'claimed', (
-      select count(*)
-        from registrations r
-        join events e on e.id = r.event_id
-       where e.slug = p_event_slug
-         and r.status = 'approved'
-    ),
-    'cap', (select max_total_slots from events where slug = p_event_slug)
-  );
-$$;
-
-grant execute on function public_event_slots(text) to anon, authenticated;
+update events
+   set requires_bike_type = true,
+       event_date = '2026-11-06'
+ where slug = 'chattogram-duathlon-2026';
 
 -- ============================================================================
--- SEED DATA — Chattogram Duathlon 2026
+-- 6. SEED — Chatto Metro Virtual Run 2026
 -- ============================================================================
-
-insert into events (name, slug, short_code, event_date, venue, registration_open, max_total_slots, payment_number, payment_methods, fee_note, jersey_chart)
+-- !! PLACEHOLDER VALUES — confirm before go-live:
+--    name, short_code (ref_code prefix), venue copy, payment_number,
+--    fee_note, category fees.
+--    registration_open is deliberately FALSE — flip it from Admin - Event
+--    config once the fee/payment copy is final.
+insert into events (
+  name, slug, short_code, event_date, venue, registration_open,
+  max_total_slots, payment_number, payment_methods, fee_note, jersey_chart,
+  requires_bike_type, collects_strava_link, manual_category_select
+)
 values (
-  'Chattogram Duathlon 2026',
-  'chattogram-duathlon-2026',
-  'CD26',
-  '2026-11-12',
-  'বাকলিয়া স্টেডিয়াম, নোমান কলেজ রোড, চট্টগ্রাম',
-  true,
-  250,
-  '01785750821',
+  'Chatto Metro Virtual Run 2026',          -- CONFIRM
+  'chatto-metro-virtual-run-2026',
+  'CMVR26',                                 -- CONFIRM (ref_code prefix)
+  '2026-08-21',                             -- nominal only: virtual event, no race day
+  'Virtual — Run Anywhere',
+  false,                                    -- keep closed until the date/copy are real
+  null,
+  '01785750821',                            -- CONFIRM
   array['bKash', 'Nagad', 'Rocket', 'Upay'],
-  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Send Money করুন, তারপর Transaction ID টি ফর্মে দিন।',
+  null,                                     -- CONFIRM fee_note copy
   '[
     {"size": "XS", "chest": 34, "length": 24},
     {"size": "S", "chest": 36, "length": 25},
@@ -501,33 +450,36 @@ values (
     {"size": "XL", "chest": 42, "length": 28},
     {"size": "2XL", "chest": 44, "length": 29},
     {"size": "3XL", "chest": 46, "length": 30}
-  ]'::jsonb
+  ]'::jsonb,
+  false,
+  true,
+  true
 )
 on conflict (slug) do update set
-  event_date = excluded.event_date,
   venue = excluded.venue,
-  max_total_slots = excluded.max_total_slots,
-  payment_number = excluded.payment_number,
   payment_methods = excluded.payment_methods,
-  fee_note = excluded.fee_note,
-  jersey_chart = excluded.jersey_chart;
+  requires_bike_type = excluded.requires_bike_type,
+  collects_strava_link = excluded.collects_strava_link,
+  manual_category_select = excluded.manual_category_select;
 
+-- Six category rows: distance x gender. categories.gender is NOT NULL, so each
+-- distance is duplicated per gender by design — the wizard dedupes them down to
+-- three visible options (5K / 10K / 21K) and resolves the row by gender.
 insert into categories (event_id, name, gender, min_age, max_age, fee, max_slots, display_order)
-select id, c.name, c.gender, c.min_age, c.max_age, 3500, null, c.display_order
+select e.id, c.name, c.gender, c.min_age, c.max_age, c.fee, null, c.display_order
 from events e
 cross join (values
-  ('Male General', 'male', 18, 39, 1),
-  ('Female General', 'female', 18, 39, 2),
-  ('Male Masters', 'male', 40, null, 3),
-  ('Female Masters', 'female', 40, null, 4)
-) as c(name, gender, min_age, max_age, display_order)
-where e.slug = 'chattogram-duathlon-2026'
+  -- max_age is null for every row here, so the column would be inferred as text
+  -- without an explicit cast on the first one.
+  ('5K',  'male',   0, null::int,  800, 1),
+  ('5K',  'female', 0, null,  800, 2),
+  ('10K', 'male',   0, null,  900, 3),
+  ('10K', 'female', 0, null,  900, 4),
+  ('21K', 'male',   0, null, 1000, 5),
+  ('21K', 'female', 0, null, 1000, 6)
+) as c(name, gender, min_age, max_age, fee, display_order)
+where e.slug = 'chatto-metro-virtual-run-2026'
   and not exists (
-    select 1 from categories cat where cat.event_id = e.id and cat.name = c.name
+    select 1 from categories cat
+     where cat.event_id = e.id and cat.name = c.name and cat.gender = c.gender
   );
-
--- keep fee/slots current if this script is re-run after categories already exist
-update categories cat
-set fee = 3500, max_slots = null
-from events e
-where cat.event_id = e.id and e.slug = 'chattogram-duathlon-2026';

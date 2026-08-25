@@ -12,10 +12,11 @@ import { matchCategory } from '@/features/register/formState'
 import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone } from '@/lib/format'
 import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import { cn } from '@/lib/utils'
-import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod } from '@/lib/types'
+import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod, BikeType } from '@/lib/types'
 
 const ROLES: ParticipantRole[] = ['runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer']
 const PAYMENT_METHODS: PaymentMethod[] = ['bKash', 'Nagad', 'Rocket', 'Upay']
+const BIKE_TYPES: BikeType[] = ['MTB', 'Road/TT']
 const AUTO = '__auto__'
 const NA = '__na__'
 
@@ -50,6 +51,8 @@ export function ManualAddPage() {
   const [bloodGroup, setBloodGroup] = useState<BloodGroup | ''>('')
   const [jerseySize, setJerseySize] = useState<JerseySize | ''>('')
   const [address, setAddress] = useState('')
+  const [bikeType, setBikeType] = useState<BikeType | ''>('')
+  const [stravaLink, setStravaLink] = useState('')
   const [comments, setComments] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('')
   const [paymentSender, setPaymentSender] = useState('')
@@ -107,6 +110,7 @@ export function ManualAddPage() {
   const senderFilled = paymentSender.length > 0
   const senderErr = Boolean(touched.sender) && senderFilled && !isValidBdPhone(paymentSender)
   const amountInvalid = amountPaid !== '' && amountPaid < 0
+  const stravaInvalid = stravaLink.trim() !== '' && !/^https?:\/\//i.test(stravaLink.trim())
 
   const isFormValid =
     isValidFullName(fullName) &&
@@ -120,6 +124,7 @@ export function ManualAddPage() {
     (!txidRequired || isValidTransactionId(transactionId)) &&
     (paymentSender === '' || isValidBdPhone(paymentSender)) &&
     !amountInvalid &&
+    !stravaInvalid &&
     (registrationType !== 'discounted' || (amountPaid !== '' && amountPaid > 0))
 
   function validate(): string | null {
@@ -131,12 +136,13 @@ export function ManualAddPage() {
     if (txidRequired && !isValidTransactionId(transactionId)) return REGISTER_ERROR_MESSAGES.bad_txid
     if (registrationType === 'discounted' && (amountPaid === '' || amountPaid <= 0)) return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য সঠিক Amount Paid দিন।'
     if (amountPaid !== '' && amountPaid < 0) return 'Amount Paid ঋণাত্মক হতে পারবে না।'
+    if (stravaLink.trim() !== '' && !/^https?:\/\//i.test(stravaLink.trim())) return REGISTER_ERROR_MESSAGES.bad_strava_link
     return null
   }
 
   function resetForm() {
     setFullName(''); setPhone(''); setEmergencyPhone(''); setEmail(''); setGender(''); setDob('')
-    setBloodGroup(''); setJerseySize(''); setAddress(''); setComments(''); setPaymentMethod('')
+    setBloodGroup(''); setJerseySize(''); setAddress(''); setBikeType(''); setStravaLink(''); setComments(''); setPaymentMethod('')
     setPaymentSender(''); setTransactionId(''); setRole('runner'); setRegistrationType('paid')
     setDiscountReason(''); setComplimentaryReason(''); setGroupName(''); setAmountPaid(''); setCategoryChoice(AUTO); setTouched({})
   }
@@ -175,6 +181,8 @@ export function ManualAddPage() {
       p_authorized_by: authorizedBy || null,
       p_group_name: groupName || null,
       p_amount_paid: registrationType === 'complimentary' ? null : amountPaid === '' ? null : amountPaid,
+      p_bike_type: bikeType || null,
+      p_strava_link: stravaLink.trim() || null,
     })
     setSubmitting(false)
     if (error) {
@@ -260,6 +268,18 @@ export function ManualAddPage() {
             <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>{['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
           </Select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <AdminLabel>Bike type</AdminLabel>
+          <Select value={bikeType} onValueChange={(v) => setBikeType((v ?? '') as BikeType)} items={BIKE_TYPES.map((b) => ({ value: b, label: b }))}>
+            <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>{BIKE_TYPES.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <AdminLabel>Strava link</AdminLabel>
+          <Input type="url" value={stravaLink} onChange={(e) => setStravaLink(e.target.value)} className={fieldCls(stravaInvalid)} placeholder="https://www.strava.com/activities/..." />
+          {stravaInvalid && <p className="text-xs text-destructive" lang="bn">লিংক http:// বা https:// দিয়ে শুরু হতে হবে</p>}
         </div>
         <div className="flex flex-col gap-1.5 sm:col-span-full">
           <AdminLabel>Address</AdminLabel>

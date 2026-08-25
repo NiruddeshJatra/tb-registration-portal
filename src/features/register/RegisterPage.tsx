@@ -9,7 +9,7 @@ import { Step1Eligibility } from './steps/Step1Eligibility'
 import { Step2Personal } from './steps/Step2Personal'
 import { Step3Payment } from './steps/Step3Payment'
 import { Step4Review } from './steps/Step4Review'
-import { EMPTY_FORM, isFormDirty, matchCategory, type RegisterFormState } from './formState'
+import { EMPTY_FORM, distinctCategoryNames, isFormDirty, resolveCategory, type RegisterFormState } from './formState'
 import { formatDate, isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone, toTitleCase } from '@/lib/format'
 import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import { TRIATHLON_BANGLADESH_URL } from '@/lib/constants'
@@ -18,7 +18,7 @@ import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/typ
 const TOTAL_STEPS = 4
 
 export type TouchKey =
-  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid'
+  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid' | 'strava'
 
 export interface StepFieldProps {
   touched: Partial<Record<TouchKey, boolean>>
@@ -52,7 +52,8 @@ export function RegisterPage() {
     try {
       const raw = localStorage.getItem(draftKey)
       if (raw) {
-        setForm(JSON.parse(raw) as RegisterFormState)
+        // Merge over EMPTY_FORM: drafts saved before a field existed restore without it.
+        setForm({ ...EMPTY_FORM, ...(JSON.parse(raw) as Partial<RegisterFormState>) })
         setShowRestored(true)
       }
     } catch {
@@ -161,19 +162,22 @@ export function RegisterPage() {
   const clearTouched = (key: TouchKey) => setTouched((t) => ({ ...t, [key]: false }))
   const touchProps: StepFieldProps = { touched, markTouched, clearTouched }
 
-  const category =
-    form.gender && form.date_of_birth ? matchCategory(categories, form.gender, form.date_of_birth, event.event_date) : null
+  // Manual-select events resolve the category from the picked distance + gender;
+  // everything else keeps the age/gender auto-match.
+  const category = resolveCategory(event, categories, form)
 
   const stepValid: Record<number, boolean> = {
     1: Boolean(form.gender && form.date_of_birth && category),
     2: Boolean(
       isValidFullName(form.full_name) &&
-        isValidBdPhone(form.phone) &&
-        isValidBdPhone(form.emergency_phone) &&
-        !isSamePhone(form.phone, form.emergency_phone) &&
-        isValidEmail(form.email) &&
-        form.blood_group &&
-        form.jersey_size,
+      isValidBdPhone(form.phone) &&
+      isValidBdPhone(form.emergency_phone) &&
+      !isSamePhone(form.phone, form.emergency_phone) &&
+      isValidEmail(form.email) &&
+      form.blood_group &&
+      form.jersey_size &&
+      // Strava link stays optional — only a non-empty, malformed one blocks.
+      (!event.collects_strava_link || form.strava_link.trim() === '' || /^https?:\/\//i.test(form.strava_link.trim())),
     ),
     3: Boolean(form.payment_method && isValidBdPhone(form.payment_sender) && isValidTransactionId(form.transaction_id)),
     4: form.consent,
@@ -212,6 +216,11 @@ export function RegisterPage() {
       p_payment_method: form.payment_method,
       p_payment_sender: normalizePhone(form.payment_sender),
       p_transaction_id: form.transaction_id,
+      p_bike_type: form.bike_type || null,
+      p_strava_link: form.strava_link.trim() || null,
+      // Only sent for manual_category_select events; null keeps the RPC on its
+      // original age/gender auto-match path.
+      p_category_id: event.manual_category_select ? category?.id ?? null : null,
     })
     setSubmitting(false)
 
@@ -239,6 +248,19 @@ export function RegisterPage() {
     setStep((s) => s - 1)
     window.scrollTo(0, 0)
   }
+
+  // The duathlon's three legs are fixed copy; a virtual event has no legs, so
+  // its strip is built from the distances the athlete can pick.
+  const railSegments = event.is_virtual
+    ? distinctCategoryNames(categories).map((name) => {
+        const [, n = name, unit = ''] = /^(\d+)\s*(.*)$/.exec(name) ?? []
+        return { n, unit, label: 'Run', hi: false }
+      })
+    : [
+        { n: '10', unit: 'K', label: 'Run', hi: false },
+        { n: '40', unit: 'K', label: 'Bike', hi: true },
+        { n: '5', unit: 'K', label: 'Run', hi: false },
+      ]
 
   const claimed = claimedApproved ?? event.reg_counter ?? 0
   const cap = event.max_total_slots
@@ -274,12 +296,8 @@ export function RegisterPage() {
           </div>
 
           <div className="mt-8 flex items-stretch border-y border-background/20">
-            {[
-              { n: '10', unit: 'K', label: 'Run', hi: false },
-              { n: '40', unit: 'K', label: 'Bike', hi: true },
-              { n: '5', unit: 'K', label: 'Run', hi: false },
-            ].map((s, i) => (
-              <Fragment key={s.label}>
+            {railSegments.map((s, i) => (
+              <Fragment key={`${s.n}${s.unit}-${s.label}`}>
                 {i > 0 && <div className="w-px bg-background/20" />}
                 <div className="flex-1 py-3.5 text-center">
                   <p className={`font-heading text-[30px] leading-none font-bold ${s.hi ? 'text-accent' : ''}`}>
@@ -293,18 +311,22 @@ export function RegisterPage() {
           </div>
 
           <div className="mt-5 flex flex-col gap-2 text-[13px]">
-            <div className="flex items-baseline gap-2.5">
-              <span className="font-mono text-[10px] tracking-[0.08em] text-accent">DATE</span>
-              <span className="text-background">{formatDate(event.event_date)}</span>
-            </div>
+            {!event.is_virtual && (
+              <div className="flex items-baseline gap-2.5">
+                <span className="font-mono text-[10px] tracking-[0.08em] text-accent">DATE</span>
+                <span className="text-background">{formatDate(event.event_date)}</span>
+              </div>
+            )}
             <div className="flex items-baseline gap-2.5">
               <span className="font-mono text-[10px] tracking-[0.08em] text-accent">VENUE</span>
               <span className="text-background">{event.venue}</span>
             </div>
-            <div className="flex items-baseline gap-2.5">
-              <span className="font-mono text-[10px] tracking-[0.08em] whitespace-nowrap text-accent">BIKE CHECK-IN</span>
-              <span className="text-background">12 November, 2026</span>
-            </div>
+            {event.requires_bike_type && (
+              <div className="flex items-baseline gap-2.5">
+                <span className="font-mono text-[10px] tracking-[0.08em] whitespace-nowrap text-accent">BIKE CHECK-IN</span>
+                <span className="text-background">5 November, 2026</span>
+              </div>
+            )}
             {event.fee_note && (
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</span>
@@ -338,7 +360,7 @@ export function RegisterPage() {
 
         {/* ── form column ── */}
         <div className="flex min-w-[320px] flex-[999_1_340px] flex-col justify-center px-4 py-7 sm:px-[clamp(16px,4vw,44px)]">
-          <RouteProgress step={step} />
+          <RouteProgress step={step} legs={event.is_virtual ? ['WARM-UP', 'MID-RACE', 'LAST KM'] : undefined} />
 
           {showRestored && (
             <div className="mb-4 flex items-center justify-between gap-3 border-[1.5px] border-border-strong bg-accent/15 p-3 text-sm text-foreground">
@@ -358,7 +380,7 @@ export function RegisterPage() {
               className={`flex flex-col gap-[22px] p-[clamp(20px,4vw,32px)] ${direction === 'forward' ? 'animate-step-fwd' : 'animate-step-back'}`}
             >
               {step === 1 && <Step1Eligibility event={event} categories={categories} form={form} setField={setField} {...touchProps} />}
-              {step === 2 && <Step2Personal jerseyChart={event.jersey_chart} form={form} setField={setField} {...touchProps} />}
+              {step === 2 && <Step2Personal event={event} jerseyChart={event.jersey_chart} form={form} setField={setField} {...touchProps} />}
               {step === 3 && <Step3Payment event={event} category={category} form={form} setField={setField} {...touchProps} />}
               {step === 4 && <Step4Review event={event} category={category} form={form} setField={setField} />}
             </div>
@@ -387,11 +409,10 @@ export function RegisterPage() {
                 type="button"
                 onClick={goNext}
                 disabled={!canNext}
-                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${
-                  canNext
+                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${canNext
                     ? 'bg-foreground text-accent shadow-[4px_4px_0_rgba(21,24,14,.9)] hover:-translate-x-px hover:-translate-y-px'
                     : 'cursor-not-allowed border-foreground/20 bg-foreground/[0.12] text-foreground/45'
-                }`}
+                  }`}
               >
                 <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">পরবর্তী</span>
                 <span className="relative -top-px">→</span>
@@ -401,11 +422,10 @@ export function RegisterPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={!stepValid[4] || submitting}
-                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${
-                  stepValid[4] && !submitting
+                className={`flex h-14 flex-[2] items-center justify-center gap-2.5 border-[1.5px] border-border-strong font-heading text-[15px] font-semibold tracking-[0.16em] uppercase transition-all ${stepValid[4] && !submitting
                     ? 'bg-accent text-foreground shadow-[4px_4px_0_rgba(21,24,14,.9)] hover:-translate-x-px hover:-translate-y-px'
                     : 'cursor-not-allowed border-foreground/20 bg-foreground/[0.12] text-foreground/45'
-                }`}
+                  }`}
               >
                 {submitting ? (
                   <DashLoader inline label="সাবমিট হচ্ছে…" />

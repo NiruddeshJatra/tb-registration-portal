@@ -15,6 +15,27 @@ function AdminLabel({ children, className }: { children: React.ReactNode; classN
   return <label className={cn('font-heading text-[9.5px] font-semibold tracking-[0.22em] text-muted-foreground uppercase', className)}>{children}</label>
 }
 
+function ToggleRow({ title, hint, checked, onChange }: { title: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[13px]">{title}</p>
+        <p className="mt-0.5 text-[11px] text-faint">{hint}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className="relative h-6 w-11 shrink-0"
+        style={{ background: checked ? 'var(--accent)' : 'var(--border-strong)' }}
+      >
+        <span className="absolute top-[3px] h-[18px] w-[18px] transition-all" style={{ background: checked ? 'var(--background)' : 'var(--faint)', right: checked ? 3 : 23 }} />
+      </button>
+    </div>
+  )
+}
+
 export function EventConfigPage() {
   const { events, selectedEventId, setSelectedEventId, selectedEvent } = useEvents()
   const [registrationOpen, setRegistrationOpen] = useState(false)
@@ -22,6 +43,9 @@ export function EventConfigPage() {
   const [maxTotalSlots, setMaxTotalSlots] = useState<number | ''>('')
   const [paymentNumber, setPaymentNumber] = useState('')
   const [feeNote, setFeeNote] = useState('')
+  const [requiresBikeType, setRequiresBikeType] = useState(false)
+  const [collectsStravaLink, setCollectsStravaLink] = useState(false)
+  const [manualCategorySelect, setManualCategorySelect] = useState(false)
   const [savingEvent, setSavingEvent] = useState(false)
 
   const [categories, setCategories] = useState<CategoryRow[]>([])
@@ -36,6 +60,9 @@ export function EventConfigPage() {
     setMaxTotalSlots(selectedEvent.max_total_slots ?? '')
     setPaymentNumber(selectedEvent.payment_number ?? '')
     setFeeNote(selectedEvent.fee_note ?? '')
+    setRequiresBikeType(selectedEvent.requires_bike_type)
+    setCollectsStravaLink(selectedEvent.collects_strava_link)
+    setManualCategorySelect(selectedEvent.manual_category_select)
   }, [selectedEvent])
 
   useEffect(() => {
@@ -60,6 +87,9 @@ export function EventConfigPage() {
         max_total_slots: maxTotalSlots === '' ? null : maxTotalSlots,
         payment_number: paymentNumber || null,
         fee_note: feeNote || null,
+        requires_bike_type: requiresBikeType,
+        collects_strava_link: collectsStravaLink,
+        manual_category_select: manualCategorySelect,
       })
       .eq('id', selectedEventId)
     setSavingEvent(false)
@@ -134,6 +164,24 @@ export function EventConfigPage() {
                 <span className="absolute top-[3px] h-[18px] w-[18px] transition-all" style={{ background: registrationOpen ? 'var(--background)' : 'var(--faint)', right: registrationOpen ? 3 : 23 }} />
               </button>
             </div>
+            <ToggleRow
+              title="Ask for bike type"
+              hint="Shows MTB / Road-TT tiles on the public form"
+              checked={requiresBikeType}
+              onChange={setRequiresBikeType}
+            />
+            <ToggleRow
+              title="Collect Strava link"
+              hint="Optional activity-proof URL — virtual events"
+              checked={collectsStravaLink}
+              onChange={setCollectsStravaLink}
+            />
+            <ToggleRow
+              title="Athlete picks category"
+              hint="Distance tiles instead of age/gender auto-match"
+              checked={manualCategorySelect}
+              onChange={setManualCategorySelect}
+            />
             <div className="flex flex-col gap-1.5">
               <AdminLabel>Registration deadline</AdminLabel>
               <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="h-10" />

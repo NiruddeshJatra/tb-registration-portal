@@ -6,6 +6,8 @@ export type JerseySize = 'XS' | 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL'
 
 export type PaymentMethod = 'bKash' | 'Nagad' | 'Rocket' | 'Upay'
 
+export type BikeType = 'MTB' | 'Road/TT'
+
 export type ParticipantRole =
   | 'runner'
   | 'organizer'
@@ -42,6 +44,10 @@ export interface EventRow {
   payment_number: string | null
   payment_methods: PaymentMethod[]
   jersey_chart: JerseyChartRow[]
+  requires_bike_type: boolean
+  collects_strava_link: boolean
+  manual_category_select: boolean
+  is_virtual: boolean
   reg_counter: number
   created_at: string
 }
@@ -71,6 +77,8 @@ export interface RegistrationRow {
   blood_group: BloodGroup | null
   jersey_size: JerseySize | null
   address: string | null
+  bike_type: BikeType | null
+  strava_link: string | null
   emergency_phone: string
   comments: string | null
   payment_method: PaymentMethod | null
@@ -102,6 +110,8 @@ export type RegisterParticipantError =
   | 'bad_email'
   | 'bad_name'
   | 'bad_txid'
+  | 'bad_bike_type'
+  | 'bad_strava_link'
   | 'no_category'
   | 'category_full'
   | 'dup_txid'

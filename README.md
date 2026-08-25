@@ -1,6 +1,6 @@
 # Triathlon Bangladesh — Registration Portal
 
-Reusable event-registration system for Triathlon Bangladesh. Built to replace an all-manual Google Form workflow with a self-serve wizard, atomic slot capacity, and an admin dashboard — without adding email/SMS or a payment gateway. v1 ships with **Chattogram Duathlon 2026** (13 Nov 2026, Bakolia Stadium, Chattogram) seeded as the first event.
+Reusable event-registration system for Triathlon Bangladesh. Built to replace an all-manual Google Form workflow with a self-serve wizard, atomic slot capacity, and an admin dashboard — without adding email/SMS or a payment gateway. v1 ships with **Chattogram Duathlon 2026** (6 Nov 2026, Bakolia Stadium, Chattogram) seeded as the first event.
 
 **Live:** [register.triathlonbangladesh.com](https://register.triathlonbangladesh.com)
 

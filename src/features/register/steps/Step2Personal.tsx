@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { TapTileGroup } from '@/components/brand/TapTile'
 import { FieldError, FieldLabel, inputBorder } from './fields'
-import type { JerseyChartRow } from '@/lib/types'
+import type { EventRow, JerseyChartRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import type { StepFieldProps } from '../RegisterPage'
 import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, toTitleCase } from '@/lib/format'
@@ -13,12 +13,13 @@ const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 const JERSEY_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
 
 interface Props extends StepFieldProps {
+  event: EventRow
   jerseyChart: JerseyChartRow[]
   form: RegisterFormState
   setField: <K extends keyof RegisterFormState>(key: K, value: RegisterFormState[K]) => void
 }
 
-export function Step2Personal({ jerseyChart, form, setField, touched, markTouched, clearTouched }: Props) {
+export function Step2Personal({ event, jerseyChart, form, setField, touched, markTouched, clearTouched }: Props) {
   const [chartOpen, setChartOpen] = useState(false)
 
   const nameFilled = form.full_name.length > 0
@@ -31,6 +32,10 @@ export function Step2Personal({ jerseyChart, form, setField, touched, markTouche
   const phoneErr = Boolean(touched.phone) && phoneFilled && !isValidBdPhone(form.phone)
   const emErr = Boolean(touched.emergency) && emFilled && (!isValidBdPhone(form.emergency_phone) || samePhone)
   const emailErr = Boolean(touched.email) && emailFilled && !isValidEmail(form.email)
+
+  // Strava link is optional: only flag it once something non-empty is typed.
+  const stravaFilled = form.strava_link.trim().length > 0
+  const stravaErr = Boolean(touched.strava) && stravaFilled && !/^https?:\/\//i.test(form.strava_link.trim())
 
   return (
     <>
@@ -125,11 +130,45 @@ export function Step2Personal({ jerseyChart, form, setField, touched, markTouche
         <Textarea id="address" rows={2} value={form.address} onChange={(e) => setField('address', e.target.value)} />
       </div>
 
+      {event.requires_bike_type && (
+        <TapTileGroup
+          name="bike_type"
+          label="Bike type"
+          gloss="সাইকেলের ধরন"
+          value={form.bike_type}
+          onChange={(v) => setField('bike_type', v as RegisterFormState['bike_type'])}
+          options={[
+            { value: 'MTB', label: 'MTB' },
+            { value: 'Road/TT', label: 'Road / TT' },
+          ]}
+        />
+      )}
+
+      {event.collects_strava_link && (
+        <div className="flex flex-col gap-2">
+          <FieldLabel htmlFor="strava_link" gloss="ঐচ্ছিক">Strava activity link</FieldLabel>
+          <Input
+            id="strava_link"
+            type="url"
+            inputMode="url"
+            value={form.strava_link}
+            onChange={(e) => setField('strava_link', e.target.value)}
+            onBlur={() => markTouched('strava')}
+            onFocus={() => clearTouched('strava')}
+            className={cn('h-[50px]', inputBorder(stravaErr, stravaFilled && !stravaErr))}
+            placeholder="https://www.strava.com/activities/..."
+          />
+          <FieldError show={stravaErr}>লিংক http:// বা https:// দিয়ে শুরু হতে হবে</FieldError>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2.5">
         <div className="flex items-baseline justify-between">
           <span className="sl-label">
-            Jersey size
-            <span className="ml-1 font-sans text-[11px] font-normal tracking-normal text-muted-foreground normal-case" lang="bn">/ জার্সির মাপ</span>
+            {event.is_virtual ? 'T-shirt size' : 'Jersey size'}
+            <span className="ml-1 font-sans text-[11px] font-normal tracking-normal text-muted-foreground normal-case" lang="bn">
+              / {event.is_virtual ? 'টি-শার্টের মাপ' : 'জার্সির মাপ'}
+            </span>
           </span>
           <button
             type="button"
@@ -177,6 +216,7 @@ export function Step2Personal({ jerseyChart, form, setField, touched, markTouche
           </div>
         )}
 
+        {!event.is_virtual && (
         <div className="border-l-[3px] border-accent bg-accent/15 px-3.5 py-2.5">
           <p className="text-xs leading-[1.7] text-foreground" lang="bn">
             ⚠️ প্রো জার্সি সাধারণ টি-শার্টের মতো ঢিলা নয় — চার্টের মাপ অনুযায়ী গায়ে ফিট হবে।
@@ -184,6 +224,7 @@ export function Step2Personal({ jerseyChart, form, setField, touched, markTouche
             <span className="font-sans text-[11.5px] text-muted-foreground">Pro jerseys fit true to the chart — NOT loose like regular T-shirts.</span>
           </p>
         </div>
+        )}
       </div>
     </>
   )
