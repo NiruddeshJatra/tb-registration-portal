@@ -42,7 +42,7 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
           )}
         </div>
         <p className="mt-0.5 text-[11.5px] text-faint" lang="bn">
-          {event.payment_methods.join(', ')} — Personal নম্বরে Send Money করুন।
+          {event.payment_methods.join(', ')} — agent নম্বরে Send Money করুন।
         </p>
       </div>
 
