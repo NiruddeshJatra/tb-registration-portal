@@ -1,0 +1,90 @@
+{
+  "baseUrl": "https://register.triathlonbangladesh.com",
+  "pages": [
+    {
+      "path": "/",
+      "slug": null,
+      "title": "Chattogram Duathlon 2026 — Register | Triathlon Bangladesh",
+      "description": "Register for Chattogram Duathlon 2026 — 10K run, 40K bike, 5K run along the Karnaphuli. 6 November 2026, Bakolia Stadium, Chattogram. ৳3,500. Limited to 250 slots.",
+      "ogTitle": "Chattogram Duathlon 2026 — Registration Open",
+      "ogDescription": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,500, 250 slots.",
+      "image": "/duathlon-og.jpg",
+      "jsonLd": {
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        "name": "Chattogram Duathlon 2026",
+        "startDate": "2026-11-06T06:00:00+06:00",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "location": {
+          "@type": "Place",
+          "name": "Bakolia Stadium",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Noman College Road",
+            "addressLocality": "Chattogram",
+            "addressCountry": "BD"
+          }
+        },
+        "image": "{{baseUrl}}/duathlon-og.jpg",
+        "description": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,500, 250 slots.",
+        "organizer": {
+          "@type": "Organization",
+          "name": "Triathlon Bangladesh",
+          "url": "https://triathlonbangladesh.com"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "3500",
+          "priceCurrency": "BDT",
+          "availability": "https://schema.org/InStock",
+          "url": "{{baseUrl}}/register/chattogram-duathlon-2026"
+        }
+      }
+    },
+    {
+      "path": "/register/chattogram-duathlon-2026",
+      "slug": "chattogram-duathlon-2026",
+      "sameAsRoot": true,
+      "canonicalPath": "/"
+    },
+    {
+      "path": "/register/chatto-metro-virtual-run-2026",
+      "slug": "chatto-metro-virtual-run-2026",
+      "title": "Chatto Metro Virtual Run 2026 — 5K / 10K / 21K | Triathlon Bangladesh",
+      "description": "Register for the Chatto Metro Virtual Run 2026. Run 5K, 10K or 21K anywhere between 1–15 September 2026, send your Strava link, and get a finisher medal, t-shirt, gift and e-certificate. ৳700 / ৳800 / ৳900.",
+      "ogTitle": "Grab Your Virtual Slot — Chatto Metro Virtual Run 2026",
+      "ogDescription": "Anywhere. Anytime. Your challenge. 5K · 10K · 21K — ৳700 / ৳800 / ৳900. Finisher medal, t-shirt, gift and e-certificate for every finisher.",
+      "image": "/virtual-run-og.jpg",
+      "jsonLd": {
+        "@context": "https://schema.org",
+        "@type": "SportsEvent",
+        "name": "Chatto Metro Virtual Run 2026",
+        "startDate": "2026-09-01T00:00:00+06:00",
+        "endDate": "2026-09-15T23:59:00+06:00",
+        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "location": {
+          "@type": "VirtualLocation",
+          "url": "{{baseUrl}}/register/chatto-metro-virtual-run-2026"
+        },
+        "image": "{{baseUrl}}/virtual-run-og.jpg",
+        "description": "Anywhere. Anytime. Your challenge. Run 5K, 10K or 21K anywhere between 1–15 September 2026 and submit your Strava activity. Finisher medal, t-shirt, gift and e-certificate for every finisher.",
+        "organizer": {
+          "@type": "Organization",
+          "name": "Triathlon Bangladesh",
+          "url": "https://triathlonbangladesh.com"
+        },
+        "offers": {
+          "@type": "AggregateOffer",
+          "lowPrice": "700",
+          "highPrice": "900",
+          "priceCurrency": "BDT",
+          "offerCount": "3",
+          "availability": "https://schema.org/InStock",
+          "url": "{{baseUrl}}/register/chatto-metro-virtual-run-2026"
+        }
+      }
+    }
+  ]
+}
