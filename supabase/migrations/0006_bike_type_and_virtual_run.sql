@@ -471,12 +471,12 @@ from events e
 cross join (values
   -- max_age is null for every row here, so the column would be inferred as text
   -- without an explicit cast on the first one.
-  ('5K',  'male',   0, null::int,  800, 1),
-  ('5K',  'female', 0, null,  800, 2),
-  ('10K', 'male',   0, null,  900, 3),
-  ('10K', 'female', 0, null,  900, 4),
-  ('21K', 'male',   0, null, 1000, 5),
-  ('21K', 'female', 0, null, 1000, 6)
+  ('5K',  'male',   0, null::int, 700, 1),
+  ('5K',  'female', 0, null, 700, 2),
+  ('10K', 'male',   0, null, 800, 3),
+  ('10K', 'female', 0, null, 800, 4),
+  ('21K', 'male',   0, null, 900, 5),
+  ('21K', 'female', 0, null, 900, 6)
 ) as c(name, gender, min_age, max_age, fee, display_order)
 where e.slug = 'chatto-metro-virtual-run-2026'
   and not exists (

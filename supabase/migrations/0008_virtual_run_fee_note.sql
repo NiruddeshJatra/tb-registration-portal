@@ -10,5 +10,5 @@
 -- Idempotent: safe to re-run.
 
 update events
-   set fee_note = 'রেজিস্ট্রেশন ফি ৫ কিমি ৮০০ টাকা, ১০ কিমি ৯০০ টাকা, ২১ কিমি ১০০০ টাকা — 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Cash Out করুন, তারপর Transaction ID টি ফর্মে দিন।'
+   set fee_note = 'রেজিস্ট্রেশন ফি ৫ কিমি ৭০০ টাকা, ১০ কিমি ৮০০ টাকা, ২১ কিমি ৯০০ টাকা — 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Cash Out করুন, তারপর Transaction ID টি ফর্মে দিন।'
  where slug = 'chatto-metro-virtual-run-2026';
