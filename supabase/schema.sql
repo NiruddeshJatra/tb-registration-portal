@@ -492,7 +492,7 @@ values (
   250,
   '01785750821',
   array['bKash', 'Nagad', 'Rocket', 'Upay'],
-  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Send Money করুন, তারপর Transaction ID টি ফর্মে দিন।',
+  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Cash Out করুন, তারপর Transaction ID টি ফর্মে দিন।',
   '[
     {"size": "XS", "chest": 34, "length": 24},
     {"size": "S", "chest": 36, "length": 25},

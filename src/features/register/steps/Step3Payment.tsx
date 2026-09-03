@@ -32,7 +32,7 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
 
       {/* send-money ticket */}
       <div className="flex flex-col gap-1.5 border-[1.5px] border-border-strong bg-foreground px-5 py-[18px] text-background">
-        <p className="font-heading text-[10px] font-semibold tracking-[0.26em] text-faint uppercase">Send money to</p>
+        <p className="font-heading text-[10px] font-semibold tracking-[0.26em] text-faint uppercase">Cash Out to</p>
         <div className="flex flex-wrap items-baseline justify-between gap-2.5">
           <p className="font-mono text-[26px] font-semibold tracking-[0.05em] text-accent">{event.payment_number ?? '—'}</p>
           {category && (
@@ -42,7 +42,7 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
           )}
         </div>
         <p className="mt-0.5 text-[11.5px] text-faint" lang="bn">
-          {event.payment_methods.join(', ')} — agent নম্বরে Send Money করুন।
+          {event.payment_methods.join(', ')} — agent নম্বরে Cash Out করুন।
         </p>
       </div>
 
