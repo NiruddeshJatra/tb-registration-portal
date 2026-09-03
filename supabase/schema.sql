@@ -492,7 +492,7 @@ values (
   250,
   '01785750821',
   array['bKash', 'Nagad', 'Rocket', 'Upay'],
-  'রেজিস্ট্রেশন ফি ৩৫০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Cash Out করুন, তারপর Transaction ID টি ফর্মে দিন।',
+  'রেজিস্ট্রেশন ফি ৩২০০ টাকা 01785750821 নম্বরে bKash, Nagad, Rocket অথবা Upay দিয়ে Cash Out করুন, তারপর Transaction ID টি ফর্মে দিন।',
   '[
     {"size": "XS", "chest": 34, "length": 24},
     {"size": "S", "chest": 36, "length": 25},
@@ -513,7 +513,7 @@ on conflict (slug) do update set
   jersey_chart = excluded.jersey_chart;
 
 insert into categories (event_id, name, gender, min_age, max_age, fee, max_slots, display_order)
-select id, c.name, c.gender, c.min_age, c.max_age, 3500, null, c.display_order
+select id, c.name, c.gender, c.min_age, c.max_age, 3200, null, c.display_order
 from events e
 cross join (values
   ('Male General', 'male', 18, 39, 1),
@@ -528,6 +528,6 @@ where e.slug = 'chattogram-duathlon-2026'
 
 -- keep fee/slots current if this script is re-run after categories already exist
 update categories cat
-set fee = 3500, max_slots = null
+set fee = 3200, max_slots = null
 from events e
 where cat.event_id = e.id and e.slug = 'chattogram-duathlon-2026';

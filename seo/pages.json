@@ -5,9 +5,9 @@
       "path": "/",
       "slug": null,
       "title": "Chattogram Duathlon 2026 — Register | Triathlon Bangladesh",
-      "description": "Register for Chattogram Duathlon 2026 — 10K run, 40K bike, 5K run along the Karnaphuli. 6 November 2026, Bakolia Stadium, Chattogram. ৳3,500. Limited to 250 slots.",
+      "description": "Register for Chattogram Duathlon 2026 — 10K run, 40K bike, 5K run along the Karnaphuli. 6 November 2026, Bakolia Stadium, Chattogram. ৳3,200. Limited to 250 slots.",
       "ogTitle": "Chattogram Duathlon 2026 — Registration Open",
-      "ogDescription": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,500, 250 slots.",
+      "ogDescription": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,200, 250 slots.",
       "image": "/duathlon-og.jpg",
       "jsonLd": {
         "@context": "https://schema.org",
@@ -27,7 +27,7 @@
           }
         },
         "image": "{{baseUrl}}/duathlon-og.jpg",
-        "description": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,500, 250 slots.",
+        "description": "Run. Ride. Run. Conquer Chattogram. 10K run · 40K bike · 5K run — 6 Nov 2026, Bakolia Stadium. ৳3,200, 250 slots.",
         "organizer": {
           "@type": "Organization",
           "name": "Triathlon Bangladesh",
@@ -35,7 +35,7 @@
         },
         "offers": {
           "@type": "Offer",
-          "price": "3500",
+          "price": "3200",
           "priceCurrency": "BDT",
           "availability": "https://schema.org/InStock",
           "url": "{{baseUrl}}/register/chattogram-duathlon-2026"
