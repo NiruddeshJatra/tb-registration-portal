@@ -26,7 +26,7 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
       <div>
         <h2 className="font-heading text-2xl font-semibold tracking-[0.02em] uppercase">Payment</h2>
         <p className="mt-1.5 text-[13px] text-muted-foreground" lang="bn">
-          Send Money করে নিচের তথ্য দিন। Reference-এ আপনার নাম লিখুন।
+          Cash Out করে নিচের তথ্য দিন।
         </p>
       </div>
 
