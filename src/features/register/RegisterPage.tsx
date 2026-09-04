@@ -338,7 +338,7 @@ export function RegisterPage() {
             {event.participation_note && (
               <div className="mt-1 border-l-2 border-accent pl-3">
                 <p className="font-mono text-[10px] tracking-[0.08em] text-accent">HOW IT WORKS</p>
-                <p className="mt-1 leading-[1.7] text-background" lang="bn">{event.participation_note}</p>
+                <p className="mt-1 leading-[1.7] whitespace-pre-line text-background" lang="bn">{event.participation_note}</p>
               </div>
             )}
           </div>
