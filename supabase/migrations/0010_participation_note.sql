@@ -13,5 +13,9 @@
 alter table events add column if not exists participation_note text;
 
 update events
-   set participation_note = 'রান সম্পন্ন করার সময়: ১–১৫ সেপ্টেম্বর ২০২৬। রান শেষে আপনার Strava অ্যাক্টিভিটির লিংক WhatsApp-এ পাঠান 01303358202 নম্বরে। যাচাই সম্পন্ন হলে ২৫ সেপ্টেম্বর থেকে মেডেল ও অন্যান্য সামগ্রী পাঠানো শুরু হবে।'
+   set participation_note = 'রেজিস্ট্রেশনের লাস্ট ডেইট ১৫ই সেপ্টেম্বর।
+
+১৬ সেপ্টেম্বর থেকে ৩০ সেপ্টেম্বরের মধ্যে রান ডাটা পাঠাতে হবে 01303-358202 (Whatsapp) এই নম্বরে।
+
+৩০ তারিখ থেকে ডাটা চেক করে আপনাদের পার্সেল পাঠিয়ে দেয়া হবে।'
  where slug = 'chatto-metro-virtual-run-2026';
