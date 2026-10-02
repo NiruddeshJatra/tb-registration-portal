@@ -337,16 +337,26 @@ export function RegisterPage() {
                 <span className="text-background">5 November, 2026</span>
               </div>
             )}
-            {event.fee_note && (
+            {/* A one-line fee note sits beside its label; a multi-line one (Bangla
+                line + English line) stacks under it, one paragraph per line. */}
+            {event.fee_note && !event.fee_note.includes('\n') && (
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</span>
-                <span className="whitespace-pre-line text-background">{event.fee_note}</span>
+                <span className="text-background">{event.fee_note}</span>
+              </div>
+            )}
+            {event.fee_note?.includes('\n') && (
+              <div className="mt-1">
+                <p className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</p>
+                {event.fee_note.split('\n').map((line) => (
+                  <p key={line} className="mt-1.5 leading-[1.7] text-background">{line}</p>
+                ))}
               </div>
             )}
             {event.participation_note && (
               <div className="mt-1 border-l-2 border-accent pl-3">
-                <p className="font-mono text-[10px] tracking-[0.08em] text-accent">{event.is_virtual ? 'HOW IT WORKS' : 'EVENT INFO'}</p>
-                <p className="mt-1 leading-[1.7] whitespace-pre-line text-background" lang="bn">{event.participation_note}</p>
+                {event.is_virtual && <p className="mb-1 font-mono text-[10px] tracking-[0.08em] text-accent">HOW IT WORKS</p>}
+                <p className="leading-[1.7] whitespace-pre-line text-background" lang="bn">{event.participation_note}</p>
               </div>
             )}
           </div>
