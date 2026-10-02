@@ -9,9 +9,9 @@ import { Step1Eligibility } from './steps/Step1Eligibility'
 import { Step2Personal } from './steps/Step2Personal'
 import { Step3Payment } from './steps/Step3Payment'
 import { Step4Review } from './steps/Step4Review'
-import { EMPTY_FORM, distinctCategoryNames, isFormDirty, resolveCategory, type RegisterFormState } from './formState'
+import { EMPTY_FORM, distinctCategoryNames, isFormDirty, needsIdDocument, resolveCategory, type RegisterFormState } from './formState'
 import { formatDate, isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone, toTitleCase } from '@/lib/format'
-import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
+import { GENERIC_ERROR_MESSAGE, REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import { TRIATHLON_BANGLADESH_URL } from '@/lib/constants'
 import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/types'
 
@@ -85,16 +85,16 @@ export function RegisterPage() {
     async function fetchEvent() {
       const { data: event } = await supabase.from('events').select('*').eq('slug', eventSlug).maybeSingle()
       if (cancelled) return
-      if (!event) {
+      if (!event || event.is_archived) {
         setLoad({ status: 'not_found' })
         return
       }
       if (!event.registration_open) {
-        setLoad({ status: 'closed', reason: 'এই ইভেন্টের জন্য রেজিস্ট্রেশন এখনো খোলা হয়নি অথবা বন্ধ হয়ে গেছে।' })
+        setLoad({ status: 'closed', reason: 'এই ইভেন্টের জন্য রেজিস্ট্রেশন এখনো খোলা হয়নি অথবা বন্ধ হয়ে গেছে।\nRegistration for this event has not opened yet, or has closed.' })
         return
       }
       if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
-        setLoad({ status: 'closed', reason: 'রেজিস্ট্রেশনের সময়সীমা শেষ হয়ে গেছে।' })
+        setLoad({ status: 'closed', reason: 'রেজিস্ট্রেশনের সময়সীমা শেষ হয়ে গেছে।\nThe registration deadline has passed.' })
         return
       }
       const { data: categories } = await supabase
@@ -130,12 +130,12 @@ export function RegisterPage() {
   if (load.status === 'loading') {
     return (
       <div className="sl-paper flex min-h-screen items-center justify-center">
-        <DashLoader label="লোড হচ্ছে…" />
+        <DashLoader label="লোড হচ্ছে… / Loading…" />
       </div>
     )
   }
   if (load.status === 'not_found') {
-    return <ClosedScreen message="ইভেন্ট পাওয়া যায়নি।" />
+    return <ClosedScreen message={'ইভেন্ট পাওয়া যায়নি।\nEvent not found.'} />
   }
   if (load.status === 'closed') {
     return <ClosedScreen message={load.reason} />
@@ -165,9 +165,10 @@ export function RegisterPage() {
   // Manual-select events resolve the category from the picked distance + gender;
   // everything else keeps the age/gender auto-match.
   const category = resolveCategory(event, categories, form)
+  const needsId = needsIdDocument(event, form.date_of_birth)
 
   const stepValid: Record<number, boolean> = {
-    1: Boolean(form.gender && form.date_of_birth && category),
+    1: Boolean(form.gender && form.date_of_birth && category && (!needsId || form.id_document_path)),
     2: Boolean(
       isValidFullName(form.full_name) &&
       isValidBdPhone(form.phone) &&
@@ -177,7 +178,11 @@ export function RegisterPage() {
       form.blood_group &&
       form.jersey_size &&
       // Bike type is mandatory wherever the event asks for it.
-      (!event.requires_bike_type || form.bike_type !== ''),
+      (!event.requires_bike_type || form.bike_type !== '') &&
+      // Transport is mandatory wherever a shuttle runs; shuttle riders also pick a point.
+      (!event.offers_shuttle ||
+        form.transport_mode === 'private_car' ||
+        (form.transport_mode === 'shuttle_bus' && form.shuttle_point !== '')),
     ),
     3: Boolean(form.payment_method && isValidBdPhone(form.payment_sender) && isValidTransactionId(form.transaction_id)),
     4: form.consent,
@@ -223,11 +228,14 @@ export function RegisterPage() {
       // Only sent for manual_category_select events; null keeps the RPC on its
       // original age/gender auto-match path.
       p_category_id: event.manual_category_select ? category?.id ?? null : null,
+      p_transport_mode: event.offers_shuttle ? form.transport_mode || null : null,
+      p_shuttle_point: form.transport_mode === 'shuttle_bus' ? form.shuttle_point || null : null,
+      p_id_document_path: needsId ? form.id_document_path || null : null,
     })
     setSubmitting(false)
 
     if (error) {
-      setSubmitError('একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+      setSubmitError(GENERIC_ERROR_MESSAGE)
       return
     }
 
@@ -236,7 +244,7 @@ export function RegisterPage() {
       clearDraft()
       setResult(res)
     } else {
-      setSubmitError(REGISTER_ERROR_MESSAGES[res.error] ?? 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।')
+      setSubmitError(REGISTER_ERROR_MESSAGES[res.error] ?? GENERIC_ERROR_MESSAGE)
     }
   }
 
@@ -251,11 +259,11 @@ export function RegisterPage() {
     window.scrollTo(0, 0)
   }
 
-  // The duathlon's three legs are fixed copy; a virtual event has no legs, so
-  // its strip is built from the distances the athlete can pick.
-  const railSegments = event.is_virtual
+  // The duathlon's three legs are fixed copy; a pick-your-distance event has no
+  // legs, so its strip is built from the distances the athlete can pick.
+  const railSegments = event.manual_category_select
     ? distinctCategoryNames(categories).map((name) => {
-        const [, n = name, unit = ''] = /^(\d+)\s*(.*)$/.exec(name) ?? []
+        const [, n = name, unit = ''] = /^([\d.]+)\s*(.*)$/.exec(name) ?? []
         return { n, unit, label: 'Run', hi: false }
       })
     : [
@@ -289,7 +297,7 @@ export function RegisterPage() {
           </a>
 
           <div className="mt-8">
-            <p className="font-heading text-xs font-semibold tracking-[0.3em] text-faint uppercase">Chattogram</p>
+            <p className="font-heading text-xs font-semibold tracking-[0.3em] text-faint uppercase">{event.name.split(' ')[0]}</p>
             <h1 className="mt-0.5 font-heading text-[44px] leading-none font-bold tracking-[0.01em] text-background uppercase">
               {event.name.replace(/\s*\d{4}\s*$/, '')}
               <br />
@@ -332,12 +340,12 @@ export function RegisterPage() {
             {event.fee_note && (
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-[10px] tracking-[0.08em] text-accent">FEE</span>
-                <span className="text-background">{event.fee_note}</span>
+                <span className="whitespace-pre-line text-background">{event.fee_note}</span>
               </div>
             )}
             {event.participation_note && (
               <div className="mt-1 border-l-2 border-accent pl-3">
-                <p className="font-mono text-[10px] tracking-[0.08em] text-accent">HOW IT WORKS</p>
+                <p className="font-mono text-[10px] tracking-[0.08em] text-accent">{event.is_virtual ? 'HOW IT WORKS' : 'EVENT INFO'}</p>
                 <p className="mt-1 leading-[1.7] whitespace-pre-line text-background" lang="bn">{event.participation_note}</p>
               </div>
             )}
@@ -367,12 +375,12 @@ export function RegisterPage() {
         </aside>
 
         {/* ── form column ── */}
-        <div className="flex min-w-[320px] flex-[999_1_340px] flex-col justify-center px-4 py-7 sm:px-[clamp(16px,4vw,44px)]">
-          <RouteProgress step={step} legs={event.is_virtual ? ['WARM-UP', 'MID-RACE', 'LAST KM'] : undefined} />
+        <div className="flex min-w-[320px] flex-[999_1_340px] flex-col px-4 py-7 sm:px-[clamp(16px,4vw,44px)]">
+          <RouteProgress step={step} legs={event.manual_category_select ? ['WARM-UP', 'MID-RACE', 'LAST KM'] : undefined} />
 
           {showRestored && (
             <div className="mb-4 flex items-center justify-between gap-3 border-[1.5px] border-border-strong bg-accent/15 p-3 text-sm text-foreground">
-              <span lang="bn">আগের অসম্পূর্ণ ফর্ম ফিরিয়ে আনা হয়েছে</span>
+              <span lang="bn">আগের অসম্পূর্ণ ফর্ম ফিরিয়ে আনা হয়েছে / Your unfinished form has been restored</span>
               <button type="button" onClick={() => setShowRestored(false)} className="text-muted-foreground hover:text-foreground">
                 ✕
               </button>
@@ -409,7 +417,7 @@ export function RegisterPage() {
                 className="flex h-14 flex-1 items-center justify-center gap-2 border-[1.5px] border-border-strong bg-transparent font-heading text-sm font-semibold tracking-[0.16em] text-foreground uppercase transition-transform hover:-translate-x-px hover:-translate-y-px"
               >
                 <span className="relative -top-px">←</span>
-                <span className="font-sans text-sm font-medium tracking-normal normal-case" lang="bn">পূর্ববর্তী</span>
+                <span className="font-sans text-sm font-medium tracking-normal normal-case" lang="bn">পূর্ববর্তী / Back</span>
               </button>
             )}
             {step < TOTAL_STEPS ? (
@@ -422,7 +430,7 @@ export function RegisterPage() {
                     : 'cursor-not-allowed border-foreground/20 bg-foreground/[0.12] text-foreground/45'
                   }`}
               >
-                <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">পরবর্তী</span>
+                <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">পরবর্তী / Next</span>
                 <span className="relative -top-px">→</span>
               </button>
             ) : (
@@ -436,10 +444,10 @@ export function RegisterPage() {
                   }`}
               >
                 {submitting ? (
-                  <DashLoader inline label="সাবমিট হচ্ছে…" />
+                  <DashLoader inline label="সাবমিট হচ্ছে… / Submitting…" />
                 ) : (
                   <>
-                    <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">সাবমিট করুন</span>
+                    <span className="font-sans text-[15px] font-medium tracking-normal normal-case" lang="bn">সাবমিট করুন / Submit</span>
                     <span className="relative -top-px">✓</span>
                   </>
                 )}

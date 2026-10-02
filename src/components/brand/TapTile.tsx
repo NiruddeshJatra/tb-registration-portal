@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 export interface TapOption {
   value: string
   label: string
+  gloss?: string // Bengali gloss shown under the tile label
 }
 
 interface Props {
@@ -65,13 +66,16 @@ export function TapTileGroup({ label, gloss, options, value, onChange, gridClass
               tabIndex={selected || (!value && opt === options[0]) ? 0 : -1}
               onClick={() => onChange(opt.value)}
               className={cn(
-                'sl-tile min-h-11 px-2',
+                'sl-tile min-h-11 flex-col gap-0.5 px-2 py-1.5',
                 tileFont === 'mono'
                   ? 'font-mono text-[13px] font-semibold'
                   : 'font-heading text-[14px] font-semibold tracking-[0.1em] uppercase',
               )}
             >
               {opt.label}
+              {opt.gloss && (
+                <span className="font-sans text-[11.5px] font-normal tracking-normal normal-case" lang="bn">{opt.gloss}</span>
+              )}
             </button>
           )
         })}

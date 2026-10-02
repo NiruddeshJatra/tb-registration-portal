@@ -7,9 +7,19 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DashLoader } from '@/components/brand/DashLoader'
 import { cn } from '@/lib/utils'
-import type { CategoryRow, Gender } from '@/lib/types'
+import type { CategoryRow, Gender, ShuttlePoint } from '@/lib/types'
 
 const emptyDraft = { name: '', gender: 'male' as Gender, min_age: 18, max_age: '' as number | '', fee: 0, max_slots: '' as number | '', display_order: 0 }
+
+// Shuttle pickup points are edited as one "English | বাংলা" line each.
+const pointsToText = (points: ShuttlePoint[]) => points.map((p) => `${p.en} | ${p.bn}`).join('\n')
+function textToPoints(text: string): ShuttlePoint[] {
+  return text
+    .split('\n')
+    .map((line) => line.split('|').map((part) => part.trim()))
+    .filter(([en]) => en)
+    .map(([en, bn]) => ({ en, bn: bn || en }))
+}
 
 function AdminLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return <label className={cn('font-heading text-[9.5px] font-semibold tracking-[0.22em] text-muted-foreground uppercase', className)}>{children}</label>
@@ -47,6 +57,9 @@ export function EventConfigPage() {
   const [collectsStravaLink, setCollectsStravaLink] = useState(false)
   const [manualCategorySelect, setManualCategorySelect] = useState(false)
   const [isVirtual, setIsVirtual] = useState(false)
+  const [offersShuttle, setOffersShuttle] = useState(false)
+  const [shuttlePointsText, setShuttlePointsText] = useState('')
+  const [idDocMinAge, setIdDocMinAge] = useState<number | ''>('')
   const [savingEvent, setSavingEvent] = useState(false)
 
   const [categories, setCategories] = useState<CategoryRow[]>([])
@@ -65,6 +78,9 @@ export function EventConfigPage() {
     setCollectsStravaLink(selectedEvent.collects_strava_link)
     setManualCategorySelect(selectedEvent.manual_category_select)
     setIsVirtual(selectedEvent.is_virtual)
+    setOffersShuttle(selectedEvent.offers_shuttle)
+    setShuttlePointsText(pointsToText(selectedEvent.shuttle_points))
+    setIdDocMinAge(selectedEvent.id_doc_min_age ?? '')
   }, [selectedEvent])
 
   useEffect(() => {
@@ -93,6 +109,9 @@ export function EventConfigPage() {
         collects_strava_link: collectsStravaLink,
         manual_category_select: manualCategorySelect,
         is_virtual: isVirtual,
+        offers_shuttle: offersShuttle,
+        shuttle_points: textToPoints(shuttlePointsText),
+        id_doc_min_age: idDocMinAge === '' ? null : idDocMinAge,
       })
       .eq('id', selectedEventId)
     setSavingEvent(false)
@@ -187,10 +206,28 @@ export function EventConfigPage() {
             />
             <ToggleRow
               title="Virtual event"
-              hint="No race day: hides the date + bike check-in, t-shirt sizing"
+              hint="No race day: hides the date on the public form"
               checked={isVirtual}
               onChange={setIsVirtual}
             />
+            <ToggleRow
+              title="Offer shuttle bus"
+              hint="Asks private car / shuttle bus + pickup point"
+              checked={offersShuttle}
+              onChange={setOffersShuttle}
+            />
+            {offersShuttle && (
+              <div className="flex flex-col gap-1.5">
+                <AdminLabel>Shuttle pickup points</AdminLabel>
+                <Textarea value={shuttlePointsText} onChange={(e) => setShuttlePointsText(e.target.value)} rows={5} placeholder="GEC | জিইসি" />
+                <p className="text-[11px] text-faint">One per line: English | বাংলা. Renaming a point does not update existing registrations.</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-1.5">
+              <AdminLabel>ID photo from age</AdminLabel>
+              <Input type="number" placeholder="not required" value={idDocMinAge} onChange={(e) => setIdDocMinAge(e.target.value === '' ? '' : Number(e.target.value))} className="h-10 font-mono" />
+              <p className="text-[11px] text-faint">Athletes this age or older on race day must upload NID/passport</p>
+            </div>
             <div className="flex flex-col gap-1.5">
               <AdminLabel>Registration deadline</AdminLabel>
               <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="h-10" />
