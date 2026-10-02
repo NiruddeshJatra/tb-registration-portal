@@ -79,7 +79,9 @@ export function SuccessScreen({ event, refCode, name, categoryName, fee }: Props
             <p className="font-heading text-[17px] font-bold tracking-[0.06em] text-foreground">{year}</p>
           </div>
           <p className="mt-1 font-mono text-[10px] tracking-[0.12em] text-foreground uppercase">
-            {formatDate(event.event_date)} · {event.venue.split(',')[0]} · <span className="whitespace-nowrap">10K—40K—5K</span>
+            {!event.is_virtual && <>{formatDate(event.event_date)} · </>}
+            {event.venue.split(',')[0]}
+            {event.requires_bike_type && <> · <span className="whitespace-nowrap">10K—40K—5K</span></>}
           </p>
         </div>
 
@@ -118,6 +120,8 @@ export function SuccessScreen({ event, refCode, name, categoryName, fee }: Props
         <div className="relative flex items-center justify-between gap-3 px-6 pt-[18px] pb-[22px]">
           <p className="max-w-[210px] text-xs leading-[1.65] text-muted-foreground" lang="bn">
             রেজিস্ট্রেশন পেন্ডিং আছে — transaction verify হলে confirm হবে।
+            <br />
+            Pending — confirmed once your transaction is verified.
           </p>
           <div
             className="animate-stamp origin-center border-[2.5px] px-3 py-[7px] font-heading text-[13px] font-bold tracking-[0.18em] uppercase"
@@ -133,6 +137,9 @@ export function SuccessScreen({ event, refCode, name, categoryName, fee }: Props
 
       <p className="animate-rise mt-7 text-[13px] font-medium text-foreground" style={{ animationDelay: '1.9s' }} lang="bn">
         📸 এই স্ক্রিনের স্ক্রিনশট রেখে দিন — এটাই আপনার রিসিট।
+      </p>
+      <p className="animate-rise mt-1 text-xs text-muted-foreground" style={{ animationDelay: '1.9s' }}>
+        Keep a screenshot of this screen — it is your receipt.
       </p>
       <div className="animate-rise mt-2.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5" style={{ animationDelay: '2s' }}>
         <a

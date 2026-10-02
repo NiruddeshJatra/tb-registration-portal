@@ -68,7 +68,7 @@ export function ReportsPage() {
     setBusy('general')
     let query = supabase
       .from('registrations')
-      .select('ref_code, full_name, phone, jersey_size, participant_role, registration_type, status, transaction_id, created_at, categories(name)')
+      .select('ref_code, full_name, phone, jersey_size, participant_role, registration_type, status, transaction_id, transport_mode, shuttle_point, created_at, categories(name)')
       .eq('event_id', selectedEventId)
     if (generalStatus !== ALL) query = query.eq('status', generalStatus)
     const { data } = await query.order('created_at', { ascending: false })
@@ -82,9 +82,42 @@ export function ReportsPage() {
       Type: r.registration_type,
       Status: r.status,
       'Transaction ID': r.transaction_id,
+      Transport: r.transport_mode,
+      'Shuttle Point': r.shuttle_point,
       Created: r.created_at,
     }))
     downloadExcel(`registrations-${selectedEvent?.slug ?? 'event'}.xlsx`, 'Registrations', rows)
+    setBusy(null)
+  }
+
+  // Bus planning: riders per pickup point, pending + approved only.
+  async function exportShuttleReport() {
+    setBusy('shuttle')
+    const { data } = await supabase
+      .from('registrations')
+      .select('ref_code, full_name, phone, shuttle_point, status, categories(name)')
+      .eq('event_id', selectedEventId)
+      .eq('transport_mode', 'shuttle_bus')
+      .in('status', ['pending', 'approved'])
+      .order('shuttle_point')
+    const rows = (data ?? []).map((r) => ({
+      'Shuttle Point': r.shuttle_point,
+      'Ref Code': r.ref_code,
+      Name: r.full_name,
+      Phone: r.phone,
+      Category: (r.categories as unknown as { name: string } | null)?.name ?? '',
+      Status: r.status,
+    }))
+    const points = [...new Set(rows.map((r) => r['Shuttle Point']))]
+    const summary = points.map((p) => ({
+      'Shuttle Point': `${p} — TOTAL`,
+      'Ref Code': '',
+      Name: String(rows.filter((r) => r['Shuttle Point'] === p).length),
+      Phone: '',
+      Category: '',
+      Status: '',
+    }))
+    downloadExcel(`shuttle-${selectedEvent?.slug ?? 'event'}.xlsx`, 'Shuttle', [...summary, ...rows])
     setBusy(null)
   }
 
@@ -123,6 +156,18 @@ export function ReportsPage() {
         </Select>
       ),
     },
+    ...(selectedEvent?.offers_shuttle
+      ? [
+          {
+            num: '04',
+            title: 'Shuttle Headcount',
+            desc: 'Riders per pickup point (pending + approved), then the full rider list.',
+            onClick: exportShuttleReport,
+            key: 'shuttle',
+            filter: null,
+          },
+        ]
+      : []),
   ]
 
   return (

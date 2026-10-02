@@ -49,40 +49,48 @@
       "canonicalPath": "/"
     },
     {
-      "path": "/register/chatto-metro-virtual-run-2026",
-      "slug": "chatto-metro-virtual-run-2026",
-      "title": "Chatto Metro Virtual Run 2026 — 5K / 10K / 21K | Triathlon Bangladesh",
-      "description": "Register for the Chatto Metro Virtual Run 2026. Run 5K, 10K or 21K anywhere between 1–15 September 2026, send your Strava link, and get a finisher medal, t-shirt, gift and e-certificate. ৳700 / ৳800 / ৳900.",
-      "ogTitle": "Grab Your Virtual Slot — Chatto Metro Virtual Run 2026",
-      "ogDescription": "Anywhere. Anytime. Your challenge. 5K · 10K · 21K — ৳700 / ৳800 / ৳900. Finisher medal, t-shirt, gift and e-certificate for every finisher.",
-      "image": "/virtual-run-og.jpg",
+      "path": "/register/mirsharai-coastal-marathon-2027",
+      "slug": "mirsharai-coastal-marathon-2027",
+      "title": "Mirsharai Coastal Marathon 2027 — 42.2K / 21.1K / 10K | Triathlon Bangladesh",
+      "description": "Register for the Mirsharai Coastal Marathon 2027 — 42.2K, 21.1K and 10K on Friday 5 February 2027 at Bhuiarhat Beribandh, Mirsharai Economic Zone, Chattogram. ৳1,700 / ৳1,500 / ৳1,400. General and Veteran (50+) podiums, free shuttle bus from Chattogram city.",
+      "ogTitle": "Mirsharai Coastal Marathon 2027 — Register Now",
+      "ogDescription": "Run the coast. 42.2K · 21.1K · 10K — Friday 5 February 2027, Bhuiarhat Beribandh, Mirsharai Economic Zone. ৳1,700 / ৳1,500 / ৳1,400. Free shuttle bus from Chattogram city.",
+      "image": "/mirsharai-marathon-og.jpg",
       "jsonLd": {
         "@context": "https://schema.org",
         "@type": "SportsEvent",
-        "name": "Chatto Metro Virtual Run 2026",
-        "startDate": "2026-09-01T00:00:00+06:00",
-        "endDate": "2026-09-15T23:59:00+06:00",
-        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "name": "Mirsharai Coastal Marathon 2027",
+        "startDate": "2027-02-05T05:00:00+06:00",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
         "eventStatus": "https://schema.org/EventScheduled",
         "location": {
-          "@type": "VirtualLocation",
-          "url": "{{baseUrl}}/register/chatto-metro-virtual-run-2026"
+          "@type": "Place",
+          "name": "Bhuiarhat Beribandh",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Katachara, Mirsharai Economic Zone",
+            "addressLocality": "Mirsharai, Chattogram",
+            "addressCountry": "BD"
+          }
         },
-        "image": "{{baseUrl}}/virtual-run-og.jpg",
-        "description": "Anywhere. Anytime. Your challenge. Run 5K, 10K or 21K anywhere between 1–15 September 2026 and submit your Strava activity. Finisher medal, t-shirt, gift and e-certificate for every finisher.",
+        "image": "{{baseUrl}}/mirsharai-marathon-og.jpg",
+        "description": "Run the coast. 42.2K · 21.1K · 10K — Friday 5 February 2027, Bhuiarhat Beribandh, Mirsharai Economic Zone. ৳1,700 / ৳1,500 / ৳1,400. Free shuttle bus from Chattogram city.",
         "organizer": {
           "@type": "Organization",
           "name": "Triathlon Bangladesh",
           "url": "https://triathlonbangladesh.com"
         },
+        "sponsor": {
+          "@type": "Organization",
+          "name": "Young Power in Social Action (YPSA)"
+        },
         "offers": {
           "@type": "AggregateOffer",
-          "lowPrice": "700",
-          "highPrice": "900",
+          "lowPrice": "1400",
+          "highPrice": "1700",
           "priceCurrency": "BDT",
           "offerCount": "3",
-          "availability": "https://schema.org/InStock",
-          "url": "{{baseUrl}}/register/chatto-metro-virtual-run-2026"
+          "url": "{{baseUrl}}/register/mirsharai-coastal-marathon-2027"
         }
       }
     }

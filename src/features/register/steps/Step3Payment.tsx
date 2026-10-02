@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { TapTileGroup } from '@/components/brand/TapTile'
-import { FieldError, FieldLabel, inputBorder } from './fields'
+import { FieldError, FieldLabel, StepIntro, inputBorder } from './fields'
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import type { StepFieldProps } from '../RegisterPage'
@@ -23,12 +23,12 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
 
   return (
     <>
-      <div>
-        <h2 className="font-heading text-2xl font-semibold tracking-[0.02em] uppercase">Payment</h2>
-        <p className="mt-1.5 text-[13px] text-muted-foreground" lang="bn">
-          Cash Out করে নিচের তথ্য দিন।
-        </p>
-      </div>
+      <StepIntro
+        title="Payment"
+        gloss="পেমেন্ট"
+        bn="Cash Out করে নিচের তথ্য দিন।"
+        en="Cash Out the fee, then fill in the details below."
+      />
 
       {/* send-money ticket */}
       <div className="flex flex-col gap-1.5 border-[1.5px] border-border-strong bg-foreground px-5 py-[18px] text-background">
@@ -42,14 +42,14 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
           )}
         </div>
         <p className="mt-0.5 text-[11.5px] text-faint" lang="bn">
-          {event.payment_methods.join(', ')} — agent নম্বরে Cash Out করুন।
+          {event.payment_methods.join(', ')} — agent নম্বরে Cash Out করুন। / Cash Out to this agent number.
         </p>
       </div>
 
       <TapTileGroup
         name="payment_method"
         label="Payment method"
-        gloss="মাধ্যম"
+        gloss="পেমেন্টের মাধ্যম"
         gridClassName="[grid-template-columns:repeat(auto-fit,minmax(120px,1fr))]"
         value={form.payment_method}
         onChange={(v) => setField('payment_method', v as RegisterFormState['payment_method'])}
@@ -69,11 +69,11 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
           className={cn('h-[50px] font-mono', inputBorder(senderErr, senderFilled && !senderErr))}
           placeholder="01XXXXXXXXX"
         />
-        <FieldError show={senderErr}>সঠিক ১১ ডিজিটের নম্বর দিন</FieldError>
+        <FieldError show={senderErr}>সঠিক ১১ ডিজিটের নম্বর দিন / Enter a valid 11-digit number</FieldError>
       </div>
 
       <div className="flex flex-col gap-2">
-        <FieldLabel htmlFor="transaction_id">Transaction ID</FieldLabel>
+        <FieldLabel htmlFor="transaction_id" gloss="ট্রানজেকশন আইডি">Transaction ID</FieldLabel>
         <Input
           id="transaction_id"
           value={form.transaction_id}
@@ -83,7 +83,7 @@ export function Step3Payment({ event, category, form, setField, touched, markTou
           className={cn('h-[50px] font-mono uppercase', inputBorder(txErr, txFilled && !txErr))}
           placeholder="9AB3CD4EF5"
         />
-        <FieldError show={txErr}>সঠিক Transaction ID দিন (৮–১৫ অক্ষর)</FieldError>
+        <FieldError show={txErr}>সঠিক Transaction ID দিন (৮–১৫ অক্ষর) / Enter a valid Transaction ID (8–15 characters)</FieldError>
       </div>
 
       <div className="flex flex-col gap-2">

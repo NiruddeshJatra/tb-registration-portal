@@ -8,6 +8,14 @@ export type PaymentMethod = 'bKash' | 'Nagad' | 'Rocket' | 'Upay'
 
 export type BikeType = 'MTB' | 'Road/TT'
 
+export type TransportMode = 'private_car' | 'shuttle_bus'
+
+// A shuttle pickup point. `en` is the value stored on the registration.
+export interface ShuttlePoint {
+  en: string
+  bn: string
+}
+
 export type ParticipantRole =
   | 'runner'
   | 'organizer'
@@ -49,6 +57,10 @@ export interface EventRow {
   collects_strava_link: boolean
   manual_category_select: boolean
   is_virtual: boolean
+  is_archived: boolean
+  offers_shuttle: boolean
+  shuttle_points: ShuttlePoint[]
+  id_doc_min_age: number | null
   reg_counter: number
   created_at: string
 }
@@ -57,6 +69,7 @@ export interface CategoryRow {
   id: string
   event_id: string
   name: string
+  group_label: string | null
   gender: Gender
   min_age: number
   max_age: number | null
@@ -80,6 +93,9 @@ export interface RegistrationRow {
   address: string | null
   bike_type: BikeType | null
   strava_link: string | null
+  transport_mode: TransportMode | null
+  shuttle_point: string | null
+  id_document_path: string | null
   emergency_phone: string
   comments: string | null
   payment_method: PaymentMethod | null
@@ -114,6 +130,9 @@ export type RegisterParticipantError =
   | 'bad_bike_type'
   | 'bike_type_required'
   | 'bad_strava_link'
+  | 'transport_required'
+  | 'shuttle_point_required'
+  | 'id_document_required'
   | 'no_category'
   | 'category_full'
   | 'dup_txid'

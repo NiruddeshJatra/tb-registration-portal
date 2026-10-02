@@ -17,7 +17,7 @@ const STATUS_TABS: (RegistrationStatus | typeof ALL)[] = [ALL, 'pending', 'appro
 type Row = RegistrationRow & { categories?: { name: string; fee: number } | null }
 
 export function RegistrationsPage() {
-  const { events, selectedEventId, setSelectedEventId, loading: eventsLoading } = useEvents()
+  const { events, selectedEventId, setSelectedEventId, selectedEvent, loading: eventsLoading } = useEvents()
   const [categories, setCategories] = useState<CategoryRow[]>([])
   const [rows, setRows] = useState<Row[]>([])
   const [count, setCount] = useState(0)
@@ -199,6 +199,7 @@ export function RegistrationsPage() {
                 <TableHead>Phone</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Jersey</TableHead>
+                {selectedEvent?.offers_shuttle && <TableHead>Transport</TableHead>}
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>TxID</TableHead>
@@ -219,6 +220,11 @@ export function RegistrationsPage() {
                   <TableCell className="font-mono text-[11.5px] text-muted-foreground">{r.phone}</TableCell>
                   <TableCell className="text-[12px] text-muted-foreground">{r.categories?.name ?? '—'}</TableCell>
                   <TableCell className="font-mono text-[11.5px]">{r.jersey_size}</TableCell>
+                  {selectedEvent?.offers_shuttle && (
+                    <TableCell className="text-[11.5px] text-muted-foreground">
+                      {r.transport_mode === 'shuttle_bus' ? `Bus · ${r.shuttle_point ?? ''}` : r.transport_mode === 'private_car' ? 'Car' : '—'}
+                    </TableCell>
+                  )}
                   <TableCell className="text-[11.5px] text-muted-foreground capitalize">{r.participant_role}</TableCell>
                   <TableCell>
                     <span className={STATUS_CHIP_CLASS[r.status]}>{r.status}</span>

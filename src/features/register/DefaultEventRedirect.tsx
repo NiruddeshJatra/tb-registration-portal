@@ -11,12 +11,17 @@ export function DefaultEventRedirect() {
     async function load() {
       const { data } = await supabase
         .from('events')
-        .select('slug, registration_open')
-        .order('created_at', { ascending: false })
+        .select('slug, registration_open, event_date')
+        .eq('is_archived', false)
+        .order('event_date')
 
       if (cancelled) return
-      const open = data?.find((e) => e.registration_open)
-      setSlug(open?.slug ?? data?.[0]?.slug ?? null)
+      // "/" belongs to the next race on the calendar that is taking entries, so
+      // a later event opening early doesn't take it over from the nearer one.
+      const today = new Date().toISOString().slice(0, 10)
+      const open = data?.filter((e) => e.registration_open) ?? []
+      const next = open.find((e) => e.event_date >= today) ?? open[open.length - 1]
+      setSlug(next?.slug ?? data?.[data.length - 1]?.slug ?? null)
     }
     load()
     return () => {
@@ -27,7 +32,7 @@ export function DefaultEventRedirect() {
   if (slug === undefined) {
     return (
       <div className="sl-paper flex min-h-screen items-center justify-center">
-        <DashLoader label="লোড হচ্ছে…" />
+        <DashLoader label="লোড হচ্ছে… / Loading…" />
       </div>
     )
   }

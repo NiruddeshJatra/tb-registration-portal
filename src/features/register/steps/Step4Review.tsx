@@ -1,5 +1,7 @@
 import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
+import { needsIdDocument } from '../formState'
+import { StepIntro } from './fields'
 import { formatTaka, toTitleCase } from '@/lib/format'
 
 interface Props {
@@ -9,13 +11,19 @@ interface Props {
   setField: <K extends keyof RegisterFormState>(key: K, value: RegisterFormState[K]) => void
 }
 
-const CONSENT_TEXT =
-  'I am physically and mentally fit. আমি সব শর্ত মেনে রেজিস্ট্রেশন করছি এবং এটাও মানছি যে আয়োজকদের সিদ্ধান্ত চূড়ান্ত।'
+const CONSENT_BN = 'আমি শারীরিক ও মানসিকভাবে সুস্থ। আমি সব শর্ত মেনে রেজিস্ট্রেশন করছি এবং এটাও মানছি যে আয়োজকদের সিদ্ধান্ত চূড়ান্ত।'
+const CONSENT_EN = 'I am physically and mentally fit. I am registering in agreement with all the terms, and I accept that the decision of the organisers is final.'
+// Added for athletes who uploaded an ID photo.
+const ID_PRIVACY_BN = 'আমার NID/পাসপোর্টের ছবি শুধু বয়স যাচাইয়ের জন্য আয়োজকরা ব্যবহার করবেন এবং ইভেন্টের সব কার্যক্রম শেষ হলে মুছে ফেলা হবে।'
+const ID_PRIVACY_EN = 'My NID/passport photo will be used by the organisers only to verify my age, and deleted once all event activities are complete.'
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Row({ label, gloss, value, mono }: { label: string; gloss: string; value: string; mono?: boolean }) {
   return (
     <div className="flex justify-between gap-4 border-b border-dashed border-foreground/25 py-[9px] last:border-0">
-      <span className="self-center font-heading text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">{label}</span>
+      <span className="self-center font-heading text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+        {label}
+        <span className="ml-1 font-sans text-[11px] font-normal tracking-normal normal-case" lang="bn">/ {gloss}</span>
+      </span>
       <span className={`text-right text-[13.5px] font-medium text-foreground ${mono ? 'font-mono' : ''}`}>{value}</span>
     </div>
   )
@@ -23,14 +31,22 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
 
 export function Step4Review({ event, category, form, setField }: Props) {
   const year = event.name.match(/\d{4}/)?.[0] ?? ''
+  const hasIdDocument = needsIdDocument(event, form.date_of_birth)
+  const shuttlePointBn = event.shuttle_points.find((p) => p.en === form.shuttle_point)?.bn
+  const transport =
+    form.transport_mode === 'shuttle_bus'
+      ? `Shuttle bus / শাটল বাস — ${form.shuttle_point}${shuttlePointBn ? ` / ${shuttlePointBn}` : ''}`
+      : form.transport_mode === 'private_car'
+        ? 'Private car / ব্যক্তিগত গাড়ি'
+        : '—'
   return (
     <>
-      <div>
-        <h2 className="font-heading text-2xl font-semibold tracking-[0.02em] uppercase">Review</h2>
-        <p className="mt-1.5 text-[13px] text-muted-foreground" lang="bn">
-          সব তথ্য মিলিয়ে দেখুন — সাবমিটের পর এটাই আপনার বিব হবে।
-        </p>
-      </div>
+      <StepIntro
+        title="Review"
+        gloss="যাচাই"
+        bn="সব তথ্য মিলিয়ে দেখুন — সাবমিটের পর এটাই আপনার বিব হবে।"
+        en="Check every detail — this becomes your bib once you submit."
+      />
 
       {/* draft bib preview */}
       <div className="border-[1.5px] border-border-strong">
@@ -39,18 +55,27 @@ export function Step4Review({ event, category, form, setField }: Props) {
           <p className="font-mono text-[10px] tracking-[0.1em] text-foreground">DRAFT</p>
         </div>
         <div className="px-[18px] py-1.5">
-          <Row label="Athlete" value={toTitleCase(form.full_name) || '—'} />
-          <Row label="Category" value={category?.name ?? '—'} />
-          <Row label="Phone" value={form.phone || '—'} mono />
-          <Row label="Emergency" value={form.emergency_phone || '—'} mono />
-          <Row label="Email" value={form.email || '—'} />
-          <Row label="Gender" value={form.gender ? form.gender[0].toUpperCase() + form.gender.slice(1) : '—'} />
-          <Row label="Address" value={form.address || '—'} />
-          <Row label="Blood group" value={form.blood_group || '—'} mono />
-          <Row label={event.is_virtual ? 'T-shirt' : 'Jersey'} value={form.jersey_size || '—'} />
-          <Row label="Payment" value={form.payment_method ? `${form.payment_method} · ${form.transaction_id}` : '—'} mono />
+          <Row label="Athlete" gloss="নাম" value={toTitleCase(form.full_name) || '—'} />
+          <Row label="Category" gloss="ক্যাটাগরি" value={category?.name ?? '—'} />
+          <Row label="Phone" gloss="ফোন" value={form.phone || '—'} mono />
+          <Row label="Emergency" gloss="জরুরি" value={form.emergency_phone || '—'} mono />
+          <Row label="Email" gloss="ইমেইল" value={form.email || '—'} />
+          <Row label="Gender" gloss="লিঙ্গ" value={form.gender === 'male' ? 'Male / পুরুষ' : form.gender === 'female' ? 'Female / নারী' : '—'} />
+          <Row label="Address" gloss="ঠিকানা" value={form.address || '—'} />
+          <Row label="Blood group" gloss="রক্তের গ্রুপ" value={form.blood_group || '—'} mono />
+          {event.requires_bike_type ? (
+            <Row label="Jersey" gloss="জার্সি" value={form.jersey_size || '—'} />
+          ) : (
+            <Row label="T-shirt" gloss="টি-শার্ট" value={form.jersey_size || '—'} />
+          )}
+          {event.offers_shuttle && <Row label="Transport" gloss="যাতায়াত" value={transport} />}
+          {hasIdDocument && <Row label="NID / passport" gloss="পরিচয়পত্র" value={form.id_document_path ? '✓ Uploaded / আপলোড হয়েছে' : '—'} />}
+          <Row label="Payment" gloss="পেমেন্ট" value={form.payment_method ? `${form.payment_method} · ${form.transaction_id}` : '—'} mono />
           <div className="flex justify-between gap-4 py-[11px]">
-            <span className="self-center font-heading text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">Fee</span>
+            <span className="self-center font-heading text-[10px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+              Fee
+              <span className="ml-1 font-sans text-[11px] font-normal tracking-normal normal-case" lang="bn">/ ফি</span>
+            </span>
             <span className="font-mono text-[17px] font-semibold">{category ? formatTaka(category.fee) : '—'}</span>
           </div>
         </div>
@@ -89,7 +114,10 @@ export function Step4Review({ event, category, form, setField }: Props) {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15180E" strokeWidth="3.5"><path d="M20 6L9 17l-5-5" /></svg>
           )}
         </span>
-        <span className="text-[13px] leading-[1.75] text-foreground" lang="bn">{CONSENT_TEXT}</span>
+        <span className="text-[13px] leading-[1.75] text-foreground">
+          <span lang="bn">{CONSENT_BN}{hasIdDocument && ` ${ID_PRIVACY_BN}`}</span>
+          <span className="mt-1.5 block text-[12.5px] text-muted-foreground">{CONSENT_EN}{hasIdDocument && ` ${ID_PRIVACY_EN}`}</span>
+        </span>
       </button>
     </>
   )

@@ -9,7 +9,7 @@ export function useEvents() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('events').select('*').order('created_at', { ascending: false })
+      const { data } = await supabase.from('events').select('*').eq('is_archived', false).order('created_at', { ascending: false })
       setEvents(data ?? [])
       if (data && data.length > 0) setSelectedEventId(data[0].id)
       setLoading(false)

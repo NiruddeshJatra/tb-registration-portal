@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthContext'
 import { formatTaka } from '@/lib/format'
+import { ID_DOCUMENT_BUCKET } from '@/lib/idDocument'
 import { STATUS_CHIP_CLASS } from '@/lib/statusChip'
 import { cn } from '@/lib/utils'
 import type { RegistrationRow, RegistrationStatus } from '@/lib/types'
@@ -68,6 +69,13 @@ export function RegistrationDetailDrawer({ registration, onClose, onUpdated }: P
     onUpdated()
   }
 
+  // The bucket is private: a short-lived signed URL is the only way to view a photo.
+  async function viewIdDocument() {
+    if (!r.id_document_path) return
+    const { data } = await supabase.storage.from(ID_DOCUMENT_BUCKET).createSignedUrl(r.id_document_path, 300)
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener')
+  }
+
   function handleStatusClick(status: RegistrationStatus) {
     if (status === r.status) return
     if (status === 'rejected' || status === 'cancelled') setPendingStatus(status)
@@ -111,6 +119,16 @@ export function RegistrationDetailDrawer({ registration, onClose, onUpdated }: P
               <Field label="Address" value={r.address} />
               <Field label="Bike type" value={r.bike_type} />
               <Field label="Strava link" value={r.strava_link} />
+              <Field label="Transport" value={r.transport_mode === 'shuttle_bus' ? 'Shuttle bus' : r.transport_mode === 'private_car' ? 'Private car' : null} />
+              <Field label="Shuttle point" value={r.shuttle_point} />
+              {r.id_document_path && (
+                <div className="flex justify-between gap-4 py-2">
+                  <span className="text-[11px] text-faint">NID / passport</span>
+                  <button type="button" onClick={viewIdDocument} className="font-mono text-[11px] font-semibold tracking-[0.08em] text-accent uppercase underline underline-offset-[3px]">
+                    View photo ↗
+                  </button>
+                </div>
+              )}
             </Section>
 
             <Section title="Race">

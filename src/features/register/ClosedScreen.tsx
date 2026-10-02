@@ -8,7 +8,7 @@ export function ClosedScreen({ message }: { message: string }) {
         <h2 className="mt-3 font-heading text-3xl font-semibold tracking-[0.02em] uppercase" lang="bn">
           রেজিস্ট্রেশন বন্ধ
         </h2>
-        <p className="mt-3 text-sm leading-[1.7] text-muted-foreground" lang="bn">
+        <p className="mt-3 text-sm leading-[1.7] whitespace-pre-line text-muted-foreground" lang="bn">
           {message}
         </p>
         <div className="sl-stripe mt-5 h-1" />

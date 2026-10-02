@@ -8,11 +8,12 @@ import { DateOfBirthPicker } from '@/components/brand/DateOfBirthPicker'
 import { DashLoader } from '@/components/brand/DashLoader'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { matchCategory } from '@/features/register/formState'
+import { matchCategory, needsIdDocument } from '@/features/register/formState'
 import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone } from '@/lib/format'
-import { REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
+import { GENERIC_ERROR_MESSAGE, REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
+import { ID_DOCUMENT_ACCEPT, ID_DOCUMENT_ERROR_MESSAGES, uploadIdDocument } from '@/lib/idDocument'
 import { cn } from '@/lib/utils'
-import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod, BikeType } from '@/lib/types'
+import type { CategoryRow, Gender, ParticipantRole, RegistrationType, EntrySource, JerseySize, BloodGroup, PaymentMethod, BikeType, TransportMode } from '@/lib/types'
 
 const ROLES: ParticipantRole[] = ['runner', 'organizer', 'crew', 'mentor', 'ambassador', 'guest', 'pacer', 'volunteer']
 const PAYMENT_METHODS: PaymentMethod[] = ['bKash', 'Nagad', 'Rocket', 'Upay']
@@ -53,6 +54,10 @@ export function ManualAddPage() {
   const [address, setAddress] = useState('')
   const [bikeType, setBikeType] = useState<BikeType | ''>('')
   const [stravaLink, setStravaLink] = useState('')
+  const [transportMode, setTransportMode] = useState<TransportMode | ''>('')
+  const [shuttlePoint, setShuttlePoint] = useState('')
+  const [idDocumentPath, setIdDocumentPath] = useState('')
+  const [idUploading, setIdUploading] = useState(false)
   const [comments, setComments] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('')
   const [paymentSender, setPaymentSender] = useState('')
@@ -86,6 +91,24 @@ export function ManualAddPage() {
   const autoCategory = gender && dob && selectedEvent ? matchCategory(categories, gender, dob, selectedEvent.event_date) : null
   const resolvedCategoryId = categoryChoice === AUTO ? autoCategory?.id ?? null : categoryChoice === NA ? null : categoryChoice
   const resolvedCategory = categories.find((c) => c.id === resolvedCategoryId) ?? null
+
+  // Same rule as the public form: anyone placed in a category at or over the
+  // event's ID threshold needs an NID/passport photo. Non-runners (no category) don't.
+  const idRequired = Boolean(selectedEvent && resolvedCategoryId && needsIdDocument(selectedEvent, dob))
+  const shuttleInvalid = transportMode === 'shuttle_bus' && shuttlePoint === ''
+
+  async function handleIdFile(file: File | undefined) {
+    if (!file || !selectedEvent) return
+    setMessage(null)
+    setIdUploading(true)
+    const res = await uploadIdDocument(selectedEvent.slug, file)
+    setIdUploading(false)
+    if ('error' in res) {
+      setMessage({ type: 'error', text: ID_DOCUMENT_ERROR_MESSAGES[res.error] })
+      return
+    }
+    setIdDocumentPath(res.path)
+  }
 
   function parseAmount(raw: string): number | '' {
     const trimmed = raw.trim()
@@ -125,6 +148,8 @@ export function ManualAddPage() {
     (paymentSender === '' || isValidBdPhone(paymentSender)) &&
     !amountInvalid &&
     !stravaInvalid &&
+    !shuttleInvalid &&
+    (!idRequired || idDocumentPath !== '') &&
     (registrationType !== 'discounted' || (amountPaid !== '' && amountPaid > 0))
 
   function validate(): string | null {
@@ -137,12 +162,14 @@ export function ManualAddPage() {
     if (registrationType === 'discounted' && (amountPaid === '' || amountPaid <= 0)) return 'ছাড়কৃত রেজিস্ট্রেশনের জন্য সঠিক Amount Paid দিন।'
     if (amountPaid !== '' && amountPaid < 0) return 'Amount Paid ঋণাত্মক হতে পারবে না।'
     if (stravaLink.trim() !== '' && !/^https?:\/\//i.test(stravaLink.trim())) return REGISTER_ERROR_MESSAGES.bad_strava_link
+    if (shuttleInvalid) return REGISTER_ERROR_MESSAGES.shuttle_point_required
+    if (idRequired && idDocumentPath === '') return REGISTER_ERROR_MESSAGES.id_document_required
     return null
   }
 
   function resetForm() {
     setFullName(''); setPhone(''); setEmergencyPhone(''); setEmail(''); setGender(''); setDob('')
-    setBloodGroup(''); setJerseySize(''); setAddress(''); setBikeType(''); setStravaLink(''); setComments(''); setPaymentMethod('')
+    setBloodGroup(''); setJerseySize(''); setAddress(''); setBikeType(''); setStravaLink(''); setTransportMode(''); setShuttlePoint(''); setIdDocumentPath(''); setComments(''); setPaymentMethod('')
     setPaymentSender(''); setTransactionId(''); setRole('runner'); setRegistrationType('paid')
     setDiscountReason(''); setComplimentaryReason(''); setGroupName(''); setAmountPaid(''); setCategoryChoice(AUTO); setTouched({})
   }
@@ -183,6 +210,9 @@ export function ManualAddPage() {
       p_amount_paid: registrationType === 'complimentary' ? null : amountPaid === '' ? null : amountPaid,
       p_bike_type: bikeType || null,
       p_strava_link: stravaLink.trim() || null,
+      p_transport_mode: transportMode || null,
+      p_shuttle_point: transportMode === 'shuttle_bus' ? shuttlePoint || null : null,
+      p_id_document_path: idDocumentPath || null,
     })
     setSubmitting(false)
     if (error) {
@@ -194,7 +224,7 @@ export function ManualAddPage() {
         : msg.includes('txid') || msg.includes('transaction')
           ? 'dup_txid'
           : null
-      setMessage({ type: 'error', text: (code && REGISTER_ERROR_MESSAGES[code]) ?? 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।' })
+      setMessage({ type: 'error', text: (code && REGISTER_ERROR_MESSAGES[code]) ?? GENERIC_ERROR_MESSAGE })
       return
     }
     const res = data as { ok: boolean; ref_code?: string; status?: string; error?: string }
@@ -203,7 +233,7 @@ export function ManualAddPage() {
       resetForm()
       window.scrollTo(0, 0)
     } else {
-      setMessage({ type: 'error', text: (res.error && REGISTER_ERROR_MESSAGES[res.error]) ?? 'একটি সমস্যা হয়েছে।' })
+      setMessage({ type: 'error', text: (res.error && REGISTER_ERROR_MESSAGES[res.error]) ?? GENERIC_ERROR_MESSAGE })
     }
   }
 
@@ -269,6 +299,7 @@ export function ManualAddPage() {
             <SelectContent>{['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
           </Select>
         </div>
+        {selectedEvent?.requires_bike_type && (
         <div className="flex flex-col gap-1.5">
           <AdminLabel>Bike type</AdminLabel>
           <Select value={bikeType} onValueChange={(v) => setBikeType((v ?? '') as BikeType)} items={BIKE_TYPES.map((b) => ({ value: b, label: b }))}>
@@ -276,11 +307,50 @@ export function ManualAddPage() {
             <SelectContent>{BIKE_TYPES.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
           </Select>
         </div>
+        )}
+        {selectedEvent?.collects_strava_link && (
         <div className="flex flex-col gap-1.5">
           <AdminLabel>Strava link</AdminLabel>
           <Input type="url" value={stravaLink} onChange={(e) => setStravaLink(e.target.value)} className={fieldCls(stravaInvalid)} placeholder="https://www.strava.com/activities/..." />
           {stravaInvalid && <p className="text-xs text-destructive" lang="bn">লিংক http:// বা https:// দিয়ে শুরু হতে হবে</p>}
         </div>
+        )}
+        {selectedEvent?.offers_shuttle && (
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel>Transport</AdminLabel>
+            <Select value={transportMode} onValueChange={(v) => setTransportMode((v ?? '') as TransportMode)} items={[{ value: 'private_car', label: 'Private car' }, { value: 'shuttle_bus', label: 'Shuttle bus' }]}>
+              <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent><SelectItem value="private_car">Private car</SelectItem><SelectItem value="shuttle_bus">Shuttle bus</SelectItem></SelectContent>
+            </Select>
+          </div>
+        )}
+        {selectedEvent?.offers_shuttle && transportMode === 'shuttle_bus' && (
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel>Shuttle pickup point</AdminLabel>
+            <Select value={shuttlePoint} onValueChange={(v) => setShuttlePoint(v ?? '')} items={selectedEvent.shuttle_points.map((p) => ({ value: p.en, label: p.en }))}>
+              <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent>{selectedEvent.shuttle_points.map((p) => <SelectItem key={p.en} value={p.en}>{p.en}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        )}
+        {selectedEvent && selectedEvent.id_doc_min_age !== null && (
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel>NID / passport photo{idRequired ? ` (required, ${selectedEvent.id_doc_min_age}+)` : ' (optional)'}</AdminLabel>
+            <Input
+              type="file"
+              accept={ID_DOCUMENT_ACCEPT}
+              disabled={idUploading}
+              onChange={(e) => {
+                handleIdFile(e.target.files?.[0])
+                e.target.value = ''
+              }}
+              className="h-10"
+            />
+            <p className="text-xs text-muted-foreground">
+              {idUploading ? 'Uploading…' : idDocumentPath ? '✓ Photo uploaded' : 'JPG, PNG or WebP'}
+            </p>
+          </div>
+        )}
         <div className="flex flex-col gap-1.5 sm:col-span-full">
           <AdminLabel>Address</AdminLabel>
           <Textarea rows={2} value={address} onChange={(e) => setAddress(e.target.value)} />
