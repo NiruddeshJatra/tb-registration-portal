@@ -4,6 +4,7 @@
 export const GENERIC_ERROR_MESSAGE = 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন। / Something went wrong. Please try again.'
 
 export const REGISTER_ERROR_MESSAGES: Record<string, string> = {
+  not_authorized: 'এই কাজের অনুমতি আপনার নেই। / You are not authorised to do this.',
   event_not_found: 'ইভেন্ট পাওয়া যায়নি। / Event not found.',
   registration_closed: 'এই ইভেন্টের জন্য রেজিস্ট্রেশন বন্ধ আছে। / Registration is closed for this event.',
   deadline_passed: 'রেজিস্ট্রেশনের সময়সীমা শেষ হয়ে গেছে। / The registration deadline has passed.',

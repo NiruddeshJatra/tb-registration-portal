@@ -133,6 +133,7 @@ export type RegisterParticipantError =
   | 'transport_required'
   | 'shuttle_point_required'
   | 'id_document_required'
+  | 'not_authorized'
   | 'no_category'
   | 'category_full'
   | 'dup_txid'
