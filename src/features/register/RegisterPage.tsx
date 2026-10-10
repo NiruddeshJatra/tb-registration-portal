@@ -43,7 +43,6 @@ export function RegisterPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [result, setResult] = useState<(RegisterParticipantResult & { ok: true }) | null>(null)
   const [showRestored, setShowRestored] = useState(false)
-  const [claimedApproved, setClaimedApproved] = useState<number | null>(null)
 
   const draftKey = eventSlug ? `tb-reg-draft:${eventSlug}` : null
 
@@ -103,13 +102,6 @@ export function RegisterPage() {
         .eq('event_id', event.id)
         .order('display_order')
       setLoad({ status: 'ready', event, categories: categories ?? [] })
-      // Real "slots claimed" = approved registrations, via a SECURITY DEFINER
-      // RPC (anon has no direct read on the registrations table).
-      supabase.rpc('public_event_slots', { p_event_slug: eventSlug }).then(({ data }) => {
-        if (cancelled || !data) return
-        const claimed = (data as { claimed?: number }).claimed
-        if (typeof claimed === 'number') setClaimedApproved(claimed)
-      })
     }
     fetchEvent()
     return () => {
@@ -272,8 +264,6 @@ export function RegisterPage() {
         { n: '5', unit: 'K', label: 'Run', hi: false },
       ]
 
-  const claimed = claimedApproved ?? event.reg_counter ?? 0
-  const cap = event.max_total_slots
   const canNext = stepValid[step]
 
   return (
@@ -362,21 +352,7 @@ export function RegisterPage() {
           </div>
 
           <div className="mt-auto pt-6">
-            {cap ? (
-              <>
-                <div className="mb-1.5 flex items-baseline justify-between">
-                  <span className="font-heading text-[10px] font-semibold tracking-[0.26em] text-faint uppercase">Slots claimed</span>
-                  <span className="font-mono text-[13px] font-semibold text-accent tabular-nums">
-                    {claimed}
-                    <span className="text-faint">/{cap}</span>
-                  </span>
-                </div>
-                <div className="h-[5px] bg-background/15">
-                  <div className="h-full bg-accent" style={{ width: `${Math.min(100, Math.round((claimed / cap) * 100))}%` }} />
-                </div>
-              </>
-            ) : null}
-            <p className="mt-3.5 text-[11px] text-faint">
+            <p className="text-[11px] text-faint">
               <a href={TRIATHLON_BANGLADESH_URL} target="_blank" rel="noopener noreferrer" className="text-faint underline underline-offset-[3px]">
                 triathlonbangladesh.com ↗
               </a>
