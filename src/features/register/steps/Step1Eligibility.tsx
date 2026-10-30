@@ -31,6 +31,8 @@ export function Step1Eligibility({ event, categories, form, setField, touched, m
   const dobError = Boolean(touched.dob) && !dobValid
   const age = category && form.date_of_birth ? calculateAge(form.date_of_birth, event.event_date) : null
   const needsId = needsIdDocument(event, form.date_of_birth)
+  // Distances split into General / Veteran rows by age (e.g. Mirsharai).
+  const ageBanded = categories.some((c) => c.min_age > 0 || c.max_age !== null)
 
   // The photo uploads the moment it is picked; the form only keeps its path.
   async function handleIdFile(file: File | undefined) {
@@ -110,7 +112,7 @@ export function Step1Eligibility({ event, categories, form, setField, touched, m
             </p>
             <p className="mt-0.5 font-heading text-[19px] font-semibold tracking-[0.02em] text-foreground uppercase">{category.name}</p>
             {/* Shown wherever age decides the category: auto-match events and age-banded distances. */}
-            {age !== null && (!manualSelect || event.id_doc_min_age !== null) && (
+            {age !== null && (!manualSelect || ageBanded) && (
               <p className="mt-0.5 text-[11.5px] text-foreground/75" lang="bn">
                 বয়স {age} · ইভেন্টের দিন অনুযায়ী / Age {age} on race day
               </p>
