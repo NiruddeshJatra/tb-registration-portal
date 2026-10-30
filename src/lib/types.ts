@@ -61,6 +61,7 @@ export interface EventRow {
   offers_shuttle: boolean
   shuttle_points: ShuttlePoint[]
   id_doc_min_age: number | null
+  requires_id_number: boolean
   reg_counter: number
   created_at: string
 }
@@ -96,6 +97,7 @@ export interface RegistrationRow {
   transport_mode: TransportMode | null
   shuttle_point: string | null
   id_document_path: string | null
+  id_number: string | null
   emergency_phone: string
   comments: string | null
   payment_method: PaymentMethod | null
@@ -133,6 +135,8 @@ export type RegisterParticipantError =
   | 'transport_required'
   | 'shuttle_point_required'
   | 'id_document_required'
+  | 'id_number_required'
+  | 'bad_id_number'
   | 'not_authorized'
   | 'no_category'
   | 'category_full'

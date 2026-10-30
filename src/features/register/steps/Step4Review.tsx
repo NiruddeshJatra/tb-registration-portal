@@ -2,7 +2,7 @@ import type { CategoryRow, EventRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import { needsIdDocument } from '../formState'
 import { StepIntro } from './fields'
-import { formatTaka, toTitleCase } from '@/lib/format'
+import { formatTaka, normalizeIdNumber, toTitleCase } from '@/lib/format'
 
 interface Props {
   event: EventRow
@@ -60,6 +60,7 @@ export function Step4Review({ event, category, form, setField }: Props) {
           <Row label="Phone" gloss="ফোন" value={form.phone || '—'} mono />
           <Row label="Emergency" gloss="জরুরি" value={form.emergency_phone || '—'} mono />
           <Row label="Email" gloss="ইমেইল" value={form.email || '—'} />
+          {event.requires_id_number && <Row label="NID / Birth reg." gloss="জন্ম নিবন্ধন" value={normalizeIdNumber(form.id_number) || '—'} mono />}
           <Row label="Gender" gloss="লিঙ্গ" value={form.gender === 'male' ? 'Male / পুরুষ' : form.gender === 'female' ? 'Female / নারী' : '—'} />
           <Row label="Address" gloss="ঠিকানা" value={form.address || '—'} />
           <Row label="Blood group" gloss="রক্তের গ্রুপ" value={form.blood_group || '—'} mono />

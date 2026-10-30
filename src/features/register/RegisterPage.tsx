@@ -10,7 +10,7 @@ import { Step2Personal } from './steps/Step2Personal'
 import { Step3Payment } from './steps/Step3Payment'
 import { Step4Review } from './steps/Step4Review'
 import { EMPTY_FORM, distinctCategoryNames, isFormDirty, needsIdDocument, resolveCategory, type RegisterFormState } from './formState'
-import { formatDate, isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone, toTitleCase } from '@/lib/format'
+import { formatDate, isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidIdNumber, isValidTransactionId, normalizeIdNumber, normalizePhone, toTitleCase } from '@/lib/format'
 import { GENERIC_ERROR_MESSAGE, REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import { TRIATHLON_BANGLADESH_URL } from '@/lib/constants'
 import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/types'
@@ -18,7 +18,7 @@ import type { CategoryRow, EventRow, RegisterParticipantResult } from '@/lib/typ
 const TOTAL_STEPS = 4
 
 export type TouchKey =
-  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'sender' | 'txid'
+  | 'dob' | 'name' | 'phone' | 'emergency' | 'email' | 'idnum' | 'sender' | 'txid'
 
 export interface StepFieldProps {
   touched: Partial<Record<TouchKey, boolean>>
@@ -167,6 +167,7 @@ export function RegisterPage() {
       isValidBdPhone(form.emergency_phone) &&
       !isSamePhone(form.phone, form.emergency_phone) &&
       isValidEmail(form.email) &&
+      (!event.requires_id_number || isValidIdNumber(form.id_number)) &&
       form.blood_group &&
       form.jersey_size &&
       // Bike type is mandatory wherever the event asks for it.
@@ -223,6 +224,7 @@ export function RegisterPage() {
       p_transport_mode: event.offers_shuttle ? form.transport_mode || null : null,
       p_shuttle_point: form.transport_mode === 'shuttle_bus' ? form.shuttle_point || null : null,
       p_id_document_path: needsId ? form.id_document_path || null : null,
+      p_id_number: event.requires_id_number ? normalizeIdNumber(form.id_number) : null,
     })
     setSubmitting(false)
 

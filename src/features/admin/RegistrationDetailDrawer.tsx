@@ -115,6 +115,7 @@ export function RegistrationDetailDrawer({ registration, onClose, onUpdated }: P
               <Field label="Email" value={r.email} />
               <Field label="Gender" value={r.gender} />
               <Field label="Date of birth" value={r.date_of_birth} mono />
+              <Field label="NID / Birth reg." value={r.id_number} mono />
               <Field label="Blood group" value={r.blood_group} mono />
               <Field label="Address" value={r.address} />
               <Field label="Bike type" value={r.bike_type} />

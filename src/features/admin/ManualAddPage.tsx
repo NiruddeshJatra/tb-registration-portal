@@ -9,7 +9,7 @@ import { DashLoader } from '@/components/brand/DashLoader'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { matchCategory, needsIdDocument } from '@/features/register/formState'
-import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidTransactionId, normalizePhone } from '@/lib/format'
+import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidIdNumber, isValidTransactionId, normalizeIdNumber, normalizePhone } from '@/lib/format'
 import { GENERIC_ERROR_MESSAGE, REGISTER_ERROR_MESSAGES } from '@/lib/errorMessages'
 import { ID_DOCUMENT_ACCEPT, ID_DOCUMENT_ERROR_MESSAGES, uploadIdDocument } from '@/lib/idDocument'
 import { cn } from '@/lib/utils'
@@ -57,6 +57,7 @@ export function ManualAddPage() {
   const [transportMode, setTransportMode] = useState<TransportMode | ''>('')
   const [shuttlePoint, setShuttlePoint] = useState('')
   const [idDocumentPath, setIdDocumentPath] = useState('')
+  const [idNumber, setIdNumber] = useState('')
   const [idUploading, setIdUploading] = useState(false)
   const [comments, setComments] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | ''>('')
@@ -134,6 +135,7 @@ export function ManualAddPage() {
   const senderErr = Boolean(touched.sender) && senderFilled && !isValidBdPhone(paymentSender)
   const amountInvalid = amountPaid !== '' && amountPaid < 0
   const stravaInvalid = stravaLink.trim() !== '' && !/^https?:\/\//i.test(stravaLink.trim())
+  const idNumberInvalid = idNumber.trim() !== '' && !isValidIdNumber(idNumber)
 
   const isFormValid =
     isValidFullName(fullName) &&
@@ -148,6 +150,7 @@ export function ManualAddPage() {
     (paymentSender === '' || isValidBdPhone(paymentSender)) &&
     !amountInvalid &&
     !stravaInvalid &&
+    !idNumberInvalid &&
     !shuttleInvalid &&
     (!idRequired || idDocumentPath !== '') &&
     (registrationType !== 'discounted' || (amountPaid !== '' && amountPaid > 0))
@@ -163,13 +166,14 @@ export function ManualAddPage() {
     if (amountPaid !== '' && amountPaid < 0) return 'Amount Paid ঋণাত্মক হতে পারবে না।'
     if (stravaLink.trim() !== '' && !/^https?:\/\//i.test(stravaLink.trim())) return REGISTER_ERROR_MESSAGES.bad_strava_link
     if (shuttleInvalid) return REGISTER_ERROR_MESSAGES.shuttle_point_required
+    if (idNumberInvalid) return REGISTER_ERROR_MESSAGES.bad_id_number
     if (idRequired && idDocumentPath === '') return REGISTER_ERROR_MESSAGES.id_document_required
     return null
   }
 
   function resetForm() {
     setFullName(''); setPhone(''); setEmergencyPhone(''); setEmail(''); setGender(''); setDob('')
-    setBloodGroup(''); setJerseySize(''); setAddress(''); setBikeType(''); setStravaLink(''); setTransportMode(''); setShuttlePoint(''); setIdDocumentPath(''); setComments(''); setPaymentMethod('')
+    setBloodGroup(''); setJerseySize(''); setAddress(''); setBikeType(''); setStravaLink(''); setTransportMode(''); setShuttlePoint(''); setIdDocumentPath(''); setIdNumber(''); setComments(''); setPaymentMethod('')
     setPaymentSender(''); setTransactionId(''); setRole('runner'); setRegistrationType('paid')
     setDiscountReason(''); setComplimentaryReason(''); setGroupName(''); setAmountPaid(''); setCategoryChoice(AUTO); setTouched({})
   }
@@ -213,6 +217,7 @@ export function ManualAddPage() {
       p_transport_mode: transportMode || null,
       p_shuttle_point: transportMode === 'shuttle_bus' ? shuttlePoint || null : null,
       p_id_document_path: idDocumentPath || null,
+      p_id_number: normalizeIdNumber(idNumber) || null,
     })
     setSubmitting(false)
     if (error) {
@@ -331,6 +336,13 @@ export function ManualAddPage() {
               <SelectTrigger className="h-10 w-full"><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>{selectedEvent.shuttle_points.map((p) => <SelectItem key={p.en} value={p.en}>{p.en}</SelectItem>)}</SelectContent>
             </Select>
+          </div>
+        )}
+        {selectedEvent?.requires_id_number && (
+          <div className="flex flex-col gap-1.5">
+            <AdminLabel>NID / Birth registration no. (optional)</AdminLabel>
+            <Input inputMode="numeric" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} className={fieldCls(idNumberInvalid)} placeholder="10–17 digits" />
+            {idNumberInvalid && <p className="text-xs text-destructive" lang="bn">সঠিক NID বা জন্ম নিবন্ধন নম্বর দিন (১০–১৭ সংখ্যা)</p>}
           </div>
         )}
         {selectedEvent && selectedEvent.id_doc_min_age !== null && (

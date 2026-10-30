@@ -58,6 +58,7 @@ export function EventConfigPage() {
   const [manualCategorySelect, setManualCategorySelect] = useState(false)
   const [isVirtual, setIsVirtual] = useState(false)
   const [offersShuttle, setOffersShuttle] = useState(false)
+  const [requiresIdNumber, setRequiresIdNumber] = useState(false)
   const [shuttlePointsText, setShuttlePointsText] = useState('')
   const [idDocMinAge, setIdDocMinAge] = useState<number | ''>('')
   const [savingEvent, setSavingEvent] = useState(false)
@@ -79,6 +80,7 @@ export function EventConfigPage() {
     setManualCategorySelect(selectedEvent.manual_category_select)
     setIsVirtual(selectedEvent.is_virtual)
     setOffersShuttle(selectedEvent.offers_shuttle)
+    setRequiresIdNumber(selectedEvent.requires_id_number)
     setShuttlePointsText(pointsToText(selectedEvent.shuttle_points))
     setIdDocMinAge(selectedEvent.id_doc_min_age ?? '')
   }, [selectedEvent])
@@ -110,6 +112,7 @@ export function EventConfigPage() {
         manual_category_select: manualCategorySelect,
         is_virtual: isVirtual,
         offers_shuttle: offersShuttle,
+        requires_id_number: requiresIdNumber,
         shuttle_points: textToPoints(shuttlePointsText),
         id_doc_min_age: idDocMinAge === '' ? null : idDocMinAge,
       })
@@ -223,6 +226,12 @@ export function EventConfigPage() {
                 <p className="text-[11px] text-faint">One per line: English | বাংলা. Renaming a point does not update existing registrations.</p>
               </div>
             )}
+            <ToggleRow
+              title="Require NID / birth reg. number"
+              hint="Every athlete must type their NID or birth registration number"
+              checked={requiresIdNumber}
+              onChange={setRequiresIdNumber}
+            />
             <div className="flex flex-col gap-1.5">
               <AdminLabel>ID photo from age</AdminLabel>
               <Input type="number" placeholder="not required" value={idDocMinAge} onChange={(e) => setIdDocMinAge(e.target.value === '' ? '' : Number(e.target.value))} className="h-10 font-mono" />

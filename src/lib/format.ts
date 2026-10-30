@@ -36,6 +36,16 @@ export function isValidTransactionId(input: string): boolean {
   return /^[A-Z0-9]{8,15}$/.test(input.trim().toUpperCase());
 }
 
+// NID / birth registration number: spaces and dashes dropped, then 10-17 digits
+// (10/13/17-digit NID, 17-digit birth certificate). Mirrors chk_id_number.
+export function normalizeIdNumber(input: string): string {
+  return input.replace(/[\s-]/g, '')
+}
+
+export function isValidIdNumber(input: string): boolean {
+  return /^[0-9]{10,17}$/.test(normalizeIdNumber(input))
+}
+
 // Emergency phone must differ from the main phone, compared post-normalization
 export function isSamePhone(phone: string, emergencyPhone: string): boolean {
   const a = normalizePhone(phone)

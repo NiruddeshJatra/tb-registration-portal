@@ -20,6 +20,8 @@ export const REGISTER_ERROR_MESSAGES: Record<string, string> = {
   transport_required: 'ব্যক্তিগত গাড়ি নাকি শাটল বাস — নির্বাচন করুন। / Choose private car or shuttle bus.',
   shuttle_point_required: 'শাটল বাসে ওঠার পয়েন্ট নির্বাচন করুন। / Choose your shuttle pickup point.',
   id_document_required: '৫০+ বয়সীদের NID/পাসপোর্টের ছবি আপলোড করা বাধ্যতামূলক। / An NID/passport photo is required for this age group.',
+  id_number_required: 'NID বা জন্ম নিবন্ধন নম্বর দেওয়া বাধ্যতামূলক। / Your NID or birth registration number is required.',
+  bad_id_number: 'সঠিক NID বা জন্ম নিবন্ধন নম্বর দিন (১০–১৭ সংখ্যা)। / Enter a valid NID or birth registration number (10–17 digits).',
   no_category: 'দুঃখিত, আপনার জন্য কোনো উপযুক্ত ক্যাটাগরি নেই। / Sorry, no category matches you.',
   category_full: 'দুঃখিত, এই ক্যাটাগরির স্লট শেষ হয়ে গেছে। / Sorry, this category is full.',
   dup_txid: 'এই Transaction ID দিয়ে আগে রেজিস্ট্রেশন হয়েছে। / This Transaction ID has already been used.',

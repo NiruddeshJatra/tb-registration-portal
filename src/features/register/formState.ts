@@ -20,6 +20,8 @@ export interface RegisterFormState {
   // Storage object path of the uploaded NID/passport photo; the file itself is
   // uploaded the moment it is picked, so the draft only has to remember this.
   id_document_path: string
+  // NID or birth registration number, on events with requires_id_number.
+  id_number: string
   payment_method: PaymentMethod | ''
   payment_sender: string
   transaction_id: string
@@ -43,6 +45,7 @@ export const EMPTY_FORM: RegisterFormState = {
   transport_mode: '',
   shuttle_point: '',
   id_document_path: '',
+  id_number: '',
   payment_method: '',
   payment_sender: '',
   transaction_id: '',

@@ -6,7 +6,7 @@ import { FieldError, FieldLabel, StepIntro, inputBorder } from './fields'
 import type { EventRow, JerseyChartRow } from '@/lib/types'
 import type { RegisterFormState } from '../formState'
 import type { StepFieldProps } from '../RegisterPage'
-import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, toTitleCase } from '@/lib/format'
+import { isSamePhone, isValidBdPhone, isValidEmail, isValidFullName, isValidIdNumber, toTitleCase } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
@@ -33,6 +33,8 @@ export function Step2Personal({ event, jerseyChart, form, setField, touched, mar
   const phoneErr = Boolean(touched.phone) && phoneFilled && !isValidBdPhone(form.phone)
   const emErr = Boolean(touched.emergency) && emFilled && (!isValidBdPhone(form.emergency_phone) || samePhone)
   const emailErr = Boolean(touched.email) && emailFilled && !isValidEmail(form.email)
+  const idNumFilled = form.id_number.length > 0
+  const idNumErr = Boolean(touched.idnum) && idNumFilled && !isValidIdNumber(form.id_number)
 
   // Only bike events hand out a fitted pro jersey; everyone else gets a T-shirt.
   const proJersey = event.requires_bike_type
@@ -115,6 +117,23 @@ export function Step2Personal({ event, jerseyChart, form, setField, touched, mar
         />
         <FieldError show={emailErr}>সঠিক ইমেইল ঠিকানা দিন / Enter a valid email address</FieldError>
       </div>
+
+      {event.requires_id_number && (
+        <div className="flex flex-col gap-2">
+          <FieldLabel htmlFor="id_number" gloss="NID / জন্ম নিবন্ধন নম্বর">NID / Birth registration no.</FieldLabel>
+          <Input
+            id="id_number"
+            inputMode="numeric"
+            value={form.id_number}
+            onChange={(e) => setField('id_number', e.target.value)}
+            onBlur={() => markTouched('idnum')}
+            onFocus={() => clearTouched('idnum')}
+            className={cn('h-[50px] font-mono', inputBorder(idNumErr, idNumFilled && !idNumErr))}
+            placeholder="10–17 digits"
+          />
+          <FieldError show={idNumErr}>সঠিক NID বা জন্ম নিবন্ধন নম্বর দিন (১০–১৭ সংখ্যা) / Enter a valid NID or birth registration number (10–17 digits)</FieldError>
+        </div>
+      )}
 
       <TapTileGroup
         name="blood_group"
